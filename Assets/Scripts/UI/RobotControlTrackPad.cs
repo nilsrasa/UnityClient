@@ -74,6 +74,8 @@ class RobotControlTrackPad : GazeObject {
             _text.text = "";
             _border.color = _borderActiveColor;
         }
+        if (!_isEnabled)
+            _text.text = "";
     }
 
     protected override void Activate() {
@@ -120,4 +122,5 @@ class RobotControlTrackPad : GazeObject {
     {
         _overlayContainer.gameObject.SetActive(isVisible);
     }
+
 }

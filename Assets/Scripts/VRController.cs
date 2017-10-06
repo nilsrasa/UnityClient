@@ -27,7 +27,7 @@ public class VRController : MonoBehaviour
 
     void Start()
     {
-        CenterHead();
+        //CenterHead();
     }
 
     //Gets point where user is looking every frame and interacts with any intersecting gazeobjects if possible
@@ -44,7 +44,8 @@ public class VRController : MonoBehaviour
 	        case StreamController.ControlType.Head:
 	            ray = new Ray(Head.position, Head.forward * 1000);
                 break;
-	        case StreamController.ControlType.Mouse:
+	        case StreamController.ControlType.Eyes_Mouse:
+            case StreamController.ControlType.Mouse:
 	            if (Input.GetMouseButtonDown(1)) {
 	            }
 	            if (Input.GetMouseButton(1)) {
@@ -53,7 +54,7 @@ public class VRController : MonoBehaviour
 	                Head.localRotation = Quaternion.Euler(Head.localEulerAngles.x, Head.localEulerAngles.y, 0);
 	            }
 
-	            if (Input.GetMouseButton(0)) ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+	            if (Input.GetMouseButton(0) || _selectedControlType == StreamController.ControlType.Eyes_Mouse) ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 	            else {
 	                ResetHoveredObject();
 	                return;

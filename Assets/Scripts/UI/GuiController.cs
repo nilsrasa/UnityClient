@@ -200,4 +200,10 @@ public class GuiController : MonoBehaviour {
         _viewportRearCanvas.gameObject.SetActive(isVisible);
         _viewportDownCanvas.gameObject.SetActive(isVisible);
     }
+
+    public void ToggleKeyboard()
+    {
+        _keyboardController.ToggleKeyboard();
+        _robotControlTrackPad.SetEnabled(_keyboardController.IsActive);
+    }
 }

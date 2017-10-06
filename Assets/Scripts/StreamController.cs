@@ -6,7 +6,7 @@ using UnityEngine;
 //Controls the player experience and camera input
 public class StreamController : MonoBehaviour
 {
-    public enum ControlType { Head, Mouse, Eyes }
+    public enum ControlType { Head, Mouse, Eyes, Eyes_Mouse }
     public static StreamController Instance { get; private set; }
 
     [SerializeField] private ControlType _selectedControlType = ControlType.Head;

@@ -17,6 +17,7 @@ public class GazeObject : MonoBehaviour {
     protected bool _locked;
     protected BoxCollider _collider;
     protected RectTransform _rect;
+    protected bool _isEnabled = true;
 
     public delegate void OnActivated(GazeObject button);
     public event GazeButton.OnActivated Activated;
@@ -84,6 +85,7 @@ public class GazeObject : MonoBehaviour {
 
     public virtual void SetEnabled(bool isEnabled) {
         _collider.enabled = isEnabled;
+        _isEnabled = isEnabled;
     }
 
     public virtual void SetSize(Vector2 sizeDelta)

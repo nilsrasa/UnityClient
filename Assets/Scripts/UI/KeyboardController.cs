@@ -33,11 +33,11 @@ public class KeyboardController : MonoBehaviour
     public event OnOpen Opened;
     public delegate void OnClose();
     public event OnClose Closed;
+    public bool IsActive { get; private set; }
     public string CurrentString { get; private set; }
-    
+
     private Image _textViewerBackground;
     private Image _textViewerTextBackground;
-    private bool _isActive;
     private bool _commandModeIsActive;
     private bool _caps = true;
     private Vector3 _openPosition;
@@ -63,7 +63,7 @@ public class KeyboardController : MonoBehaviour
 
     void Update()
     {
-        if (!_isActive) return;
+        if (!IsActive) return;
 
         HandleKeyboardInput();
         _textViewer.text = CurrentString;
@@ -95,7 +95,7 @@ public class KeyboardController : MonoBehaviour
         foreach (GazeKeyboardButton button in _keyboardButtons) {
             button.SetEnabled(shouldShow);
         }
-        _isActive = shouldShow;
+        IsActive = shouldShow;
     }
 
     /// <summary>
@@ -209,7 +209,7 @@ public class KeyboardController : MonoBehaviour
 
     public void ToggleKeyboard()
     {
-        if (_isActive) HideKeyboard();
+        if (IsActive) HideKeyboard();
         else ShowKeyboard();
     }
 
