@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Video;
 
 //Controls the player experience and camera input
 public class StreamController : MonoBehaviour
@@ -198,6 +199,10 @@ public class StreamController : MonoBehaviour
         }
 
         RobotInterface.Instance.DoneEnableDrivingMode();
+    }
+
+    private void StartVideoPlayer()
+    {
     }
 
     /// <summary>
