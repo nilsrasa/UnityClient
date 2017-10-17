@@ -338,7 +338,7 @@ public class pb_AboutWindow : EditorWindow
 	}
 #endregion
 
-#region Data Parsing
+#region Value Parsing
 
 	/* rich text ain't wuurkin' in unity 3.5 */
 	const string RemoveBraketsRegex = "(\\<.*?\\>)";

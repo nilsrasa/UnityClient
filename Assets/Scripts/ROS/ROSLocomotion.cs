@@ -50,8 +50,6 @@ public class ROSLocomotion
                 y = 0,
                 z = 0
             }
-
-            
         };
 
         _publisher.publish(twist);
