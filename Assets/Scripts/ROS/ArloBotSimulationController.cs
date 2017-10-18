@@ -3,7 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ArloBotSimulationController : MonoBehaviour {
+public class ArloBotSimulationController : MonoBehaviour
+{
+
+    public static ArloBotSimulationController Instance;
 
     [SerializeField] private Arlobot _simulatedRobot;
 
@@ -18,9 +21,13 @@ public class ArloBotSimulationController : MonoBehaviour {
     
     private float _sensorPollTimer;
 
+    void Awake()
+    {
+        Instance = this;
+    }
+
     void Update()
     {
-
         _sensorPollTimer += Time.deltaTime;
         if (_sensorPollTimer >= _sensorPollTimeMs/1000f)
         {
@@ -42,7 +49,7 @@ public class ArloBotSimulationController : MonoBehaviour {
         action();
     }
 
-    private void VisualizeSensors(SensorDataDTO data)
+    public void VisualizeSensors(SensorDataDTO data)
     {
         foreach (SensorData sensorData in data.Data)
         {

@@ -1,23 +1,44 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Messages;
 using Messages.geometry_msgs;
 using Messages.std_msgs;
 using Ros_CSharp;
+using SimpleJSON;
+using UnityEditor;
 using UnityEngine;
+using Vector3 = UnityEngine.Vector3;
 
-public class ROSUltrasound : MonoBehaviour {
+public class ROSUltrasound : ROSAgent
+{
+
+    public delegate void OnDataReceived(SensorDataDTO message);
+    public event OnDataReceived DataWasReceived;
 
     private const string TOPIC = "ultrasonic_data";
 
     private NodeHandle _nodeHandle;
     private Subscriber<String> _subscriber;
-    private Twist _dataToSend;
-    private float _messageInterval;
     private bool _isRunning;
 
     private void DataReceived(String data)
     {
+        
         Debug.Log(data.data);
+        var json = JSON.Parse(data.data);
+        SensorData[] sdata = new SensorData[json.Count];
+        int i = 0;
+
+        foreach (KeyValuePair<string, JSONNode> pair in json.AsObject)
+        {
+            sdata[i] = new SensorData(pair.Key, pair.Value, Vector3.zero, Vector3.zero);
+            i++;
+        }
+        
+        SensorDataDTO dto = new SensorDataDTO(sdata);
+        if (DataWasReceived != null)
+            DataWasReceived(dto);
+
     }
 
     ///<summary>

@@ -2,14 +2,12 @@
 using Ros_CSharp;
 using UnityEngine;
 
-public class ROSLocomotion
+public class ROSLocomotion : ROSAgent
 {
     private const string TOPIC = "/control/locomotion";
 
     private NodeHandle _nodeHandle;
     private Publisher<Twist> _publisher;
-    private Twist _dataToSend;
-    private float _messageInterval;
     private bool _isRunning;
 
     ///<summary>

@@ -17,7 +17,7 @@ public class RobotInterface : MonoBehaviour {
         ParkingBrakeDisengaged,
         StopRobot 
     }
-    public enum RobotType { Telerobot, LegoRobot }
+    public enum RobotType { Telerobot, LegoRobot, Arlobot }
     public static RobotInterface Instance { get; private set; }
     public bool Parked { get; private set; }
     
@@ -46,51 +46,30 @@ public class RobotInterface : MonoBehaviour {
         _portName += "COM" + _portNumber;
     }
 
-    void Update() {
-        if (Input.GetKeyDown(KeyCode.LeftArrow)) {
-            SendCommandToRobot(Vector2.left);
-            _left = true;
-        }
-        if (Input.GetKeyDown(KeyCode.RightArrow)) {
-            SendCommandToRobot(Vector2.right);
-            _right = true;
-        }
-        if (Input.GetKeyDown(KeyCode.UpArrow)) {
-            SendCommandToRobot(Vector2.down);
-            _forward = true;
-        }
-        if (Input.GetKeyDown(KeyCode.DownArrow)) {
-            SendCommandToRobot(Vector2.up);
-            _reverse = true;
-        }
-        if (Input.GetKeyUp(KeyCode.LeftArrow)) {
-            SendCommandToRobot(Vector2.zero);
-            _left = false;
-        }
-        if (Input.GetKeyUp(KeyCode.RightArrow)) {
-            SendCommandToRobot(Vector2.zero);
-            _right = false;
-        }
-        if (Input.GetKeyUp(KeyCode.UpArrow)) {
-            SendCommandToRobot(Vector2.zero);
-            _forward = false;
-        }
-        if (Input.GetKeyUp(KeyCode.DownArrow)) {
-            SendCommandToRobot(Vector2.zero);
-            _reverse = false;
-        }
-    }
-
     void Start() {
-        try {
-            Debug.Log("Trying to open port to robot control on port: " + _portName);
-            HWPort = new SerialPort(_portName, baudRate);
-            HWPort.Open();
-            Debug.Log("Success open serial port to robot control ");
+        switch (ControlledRobotType)
+        {
+            case RobotType.Telerobot:
+            case RobotType.LegoRobot:
+                try {
+                    Debug.Log("Trying to open port to robot control on port: " + _portName);
+                    HWPort = new SerialPort(_portName, baudRate);
+                    HWPort.Open();
+                    Debug.Log("Success open serial port to robot control ");
+                    Connect();
+                }
+                catch (Exception ex) {
+                    Debug.Log("Serial port to robot control error: " + ex.Message.ToString());
+                }
+                break;
+            case RobotType.Arlobot:
+                ROSController.Instance.StartROS();
+                Connect();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
-        catch (Exception ex) {
-            Debug.Log("Serial port to robot control error: " + ex.Message.ToString());
-        }
+        
     }
 
     void OnApplicationQuit() {
@@ -106,49 +85,62 @@ public class RobotInterface : MonoBehaviour {
     }
 
     private void SendCommandToRobot(Vector2 controlOutput) {
-        int leftMotorDrive, rightMotorDrive;
-        leftMotorDrive = rightMotorDrive = 1;
-        float leftMotorSpeed, rightMotorSpeed;
-        leftMotorSpeed = rightMotorSpeed = 0;
+        switch (ControlledRobotType)
+        {
+            case RobotType.Telerobot:
+            case RobotType.LegoRobot:
+                int leftMotorDrive, rightMotorDrive;
+                leftMotorDrive = rightMotorDrive = 1;
+                float leftMotorSpeed, rightMotorSpeed;
+                leftMotorSpeed = rightMotorSpeed = 0;
 
-        string commandString = "DK00";
-        if (controlOutput == Vector2.zero)
-            leftMotorDrive = rightMotorDrive = 2;
-        else if (controlOutput.x == 0) {
-            if (controlOutput.y > 0)
-                leftMotorDrive = rightMotorDrive = 2;
-            else
-                leftMotorDrive = rightMotorDrive = 0;
-            leftMotorSpeed = rightMotorSpeed = controlOutput.y;
-        }
-        else if (controlOutput.y == 0) {
-            if (controlOutput.x > 0) {
-                leftMotorDrive = 0;
-                rightMotorDrive = 2;
-            }
-            else {
-                leftMotorDrive = 2;
-                rightMotorDrive = 0;
-            }
-            leftMotorSpeed = rightMotorSpeed = controlOutput.x;
-        }
-        else {
-            if (controlOutput.x < 0) {
-                leftMotorSpeed = controlOutput.y * 0.75f;
-                rightMotorSpeed = (Mathf.Abs(controlOutput.x) + 1) / 2;
-            }
-            else if (controlOutput.x > 0) {
-                rightMotorSpeed = controlOutput.y * 0.75f;
-                leftMotorSpeed = (Mathf.Abs(controlOutput.x) + 1) / 2;
-            }
-            leftMotorDrive = rightMotorDrive = controlOutput.y > 0 ? 2 : 0;
-        }
+                string commandString = "DK00";
+                if (controlOutput == Vector2.zero)
+                    leftMotorDrive = rightMotorDrive = 2;
+                else if (controlOutput.x == 0) {
+                    if (controlOutput.y > 0)
+                        leftMotorDrive = rightMotorDrive = 2;
+                    else
+                        leftMotorDrive = rightMotorDrive = 0;
+                    leftMotorSpeed = rightMotorSpeed = controlOutput.y;
+                }
+                else if (controlOutput.y == 0) {
+                    if (controlOutput.x > 0) {
+                        leftMotorDrive = 0;
+                        rightMotorDrive = 2;
+                    }
+                    else {
+                        leftMotorDrive = 2;
+                        rightMotorDrive = 0;
+                    }
+                    leftMotorSpeed = rightMotorSpeed = controlOutput.x;
+                }
+                else {
+                    if (controlOutput.x < 0) {
+                        leftMotorSpeed = controlOutput.y * 0.75f;
+                        rightMotorSpeed = (Mathf.Abs(controlOutput.x) + 1) / 2;
+                    }
+                    else if (controlOutput.x > 0) {
+                        rightMotorSpeed = controlOutput.y * 0.75f;
+                        leftMotorSpeed = (Mathf.Abs(controlOutput.x) + 1) / 2;
+                    }
+                    leftMotorDrive = rightMotorDrive = controlOutput.y > 0 ? 2 : 0;
+                }
 
-        commandString += "" + leftMotorDrive + GetMotorSpeedString(leftMotorSpeed) + rightMotorDrive +
-                         GetMotorSpeedString(rightMotorSpeed);
+                commandString += "" + leftMotorDrive + GetMotorSpeedString(leftMotorSpeed) + rightMotorDrive +
+                                 GetMotorSpeedString(rightMotorSpeed);
 
-        if (HWPort.IsOpen)
-            HWPort.Write(commandString);
+                if (HWPort.IsOpen)
+                    HWPort.Write(commandString);
+                break;
+            case RobotType.Arlobot:
+                Vector2 movement = new Vector2(-controlOutput.x, -controlOutput.y);
+                ROSController.Instance.Move(movement);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
     }
 
     public void SendCommand(Vector2 controlOutput) {

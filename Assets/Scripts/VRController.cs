@@ -54,8 +54,11 @@ public class VRController : MonoBehaviour
 	                Head.localRotation = Quaternion.Euler(Head.localEulerAngles.x, Head.localEulerAngles.y, 0);
 	            }
 
-	            if (Input.GetMouseButton(0) || _selectedControlType == StreamController.ControlType.Eyes_Mouse) ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-	            else {
+	            if (Input.GetMouseButton(0) || _selectedControlType == StreamController.ControlType.Eyes_Mouse)
+	            {
+	                ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                }
+                else {
 	                ResetHoveredObject();
 	                return;
 	            }

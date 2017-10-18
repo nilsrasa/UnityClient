@@ -9,32 +9,29 @@ public class ROSController : MonoBehaviour
     public const string NAMESPACE_VRClient = "/vrclient";
     public const string NAMESPACE_ARLOBOT = "/arlobot";
 
-    public static ROSController Instance { get; private set; }
+    public static ROSController Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                GameObject go = new GameObject();
+                go.name = "ROSController";
+                _instance = go.AddComponent<ROSController>();
+            }
+            return _instance;
+
+        }
+        private set
+        {
+            _instance = value;
+        }
+    }
+
+    private static ROSController _instance;
 
     private ROSLocomotion _rosLocomotion;
     private ROSUltrasound _rosUltrasound;
-
-    void Awake()
-    {
-        Instance = this;
-    }
-
-    void Start()
-    {
-        StartROS();
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-            _rosLocomotion.PublishData(Vector2.up);
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-            _rosLocomotion.PublishData(Vector2.down);
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-            _rosLocomotion.PublishData(Vector2.left);
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-            _rosLocomotion.PublishData(Vector2.right);
-    }
 
     void OnApplicationQuit()
     {
@@ -50,8 +47,8 @@ public class ROSController : MonoBehaviour
         XmlRpcUtil.SetLogLevel(XmlRpcUtil.XMLRPC_LOG_LEVEL.ERROR);
         _rosLocomotion = new ROSLocomotion();
         _rosLocomotion.Start(0);
-        //_rosUltrasound = new ROSUltrasound();
-        //_rosUltrasound.StartSubscriber();
+        _rosUltrasound = new ROSUltrasound();
+        _rosUltrasound.StartSubscriber();
     }
 
     public void StopROS()
@@ -59,5 +56,10 @@ public class ROSController : MonoBehaviour
         Debug.Log("---Stopping ROS---");
         ROS.shutdown();
         //ROS.waitForShutdown(); Do we need this? 
+    }
+
+    public void Move(Vector2 movement)
+    {
+        _rosLocomotion.PublishData(movement);
     }
 }
