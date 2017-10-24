@@ -12,6 +12,7 @@ Unity version 2017.x
 * Run Unity software
 * Open Unity ROSSimulator or VideoProjectionTheta_USB scene
 * Select "CockpitStructure" gameobject in scene hierarchy and change "ROS_MASTER_URI" value in Robot Interface script to match IP and port of ROS server
+* Change "Controlled Robot Type" in same script to "Arlobot"
 * Click play
 
 ### Running Unity
