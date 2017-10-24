@@ -1,8 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using Messages;
 using Ros_CSharp;
 using UnityEngine;
 using XmlRpc_Wrapper;
+using String = Messages.std_msgs.String;
 
 public class ROSController : MonoBehaviour
 {
@@ -38,7 +41,15 @@ public class ROSController : MonoBehaviour
         if (ROS.ok || ROS.isStarted())
             StopROS();
     }
-        
+
+    public void StartROS(string ros_master_uri)
+    {
+        if (!ros_master_uri.Contains("http://"))
+            ros_master_uri = "http://" + ros_master_uri;
+        ROS.ROS_MASTER_URI = ros_master_uri;
+        StartROS();
+    }
+
     public void StartROS()
     {
         Debug.Log("---Starting ROS---");
@@ -46,9 +57,9 @@ public class ROSController : MonoBehaviour
         ROS.Init(new string[0], "VRClient");
         XmlRpcUtil.SetLogLevel(XmlRpcUtil.XMLRPC_LOG_LEVEL.ERROR);
         _rosLocomotion = new ROSLocomotion();
-        _rosLocomotion.Start(0);
+        _rosLocomotion.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosUltrasound = new ROSUltrasound();
-        _rosUltrasound.StartSubscriber();
+        _rosUltrasound.StartAgent(ROSAgent.AgentJob.Subscriber);
     }
 
     public void StopROS()
@@ -62,4 +73,5 @@ public class ROSController : MonoBehaviour
     {
         _rosLocomotion.PublishData(movement);
     }
+
 }

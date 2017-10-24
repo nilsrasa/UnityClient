@@ -1,47 +1,56 @@
-﻿using System.CodeDom;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SensorBusController : MonoBehaviour {
+public class SensorBusController
+{
 
-	public static SensorBusController Instance { get; private set; }
-
-    private Dictionary<string, ISensorBus> SensorBusDict;
-    private List<ISensorBus> SensorBusses;
-
-    void Awake()
+    public static SensorBusController Instance
     {
-        Instance = this;
-        SensorBusses = new List<ISensorBus>();
-        SensorBusDict = new Dictionary<string, ISensorBus>();
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new SensorBusController();
+            }
+            return _instance;
+        }
+    }
+    private static SensorBusController _instance;
+
+    public List<SensorBus> SensorBusses { get; private set; }
+
+    public SensorBusController()
+    {
+        SensorBusses = new List<SensorBus>();
     }
 
-    public ISensorBus GetSensorBus<T>()
+    public SensorBus GetSensorBus<T>()
     {
-        foreach (ISensorBus bus in SensorBusses)
+        foreach (SensorBus bus in SensorBusses)
         {
             if (bus.GetType().ToString().Contains(typeof(T).ToString()))
                 return bus;
         }
         return null;
     }
-
-    public void Register<T>(UnitySensor sensor) where T : UnitySensor
+    
+    public void Register<T>(UnitySensor sensor) where T : SensorBus
     {
         for (int i = 0; i < SensorBusses.Count; i++)
         {
-            ISensorBus b = SensorBusses[i];
+            SensorBus b = SensorBusses[i];
             if (b.GetType().ToString().Contains(typeof(T).ToString())) {
-                SensorBus<T> buss = (SensorBus<T>)b;
-                buss.Register(sensor);
+                b.Register(sensor);
                 SensorBusses.Remove(b);
-                SensorBusses.Add(buss);
+                SensorBusses.Add(b);
                 return;
             }
         }
-        SensorBus<T> bus = new SensorBus<T>();
-        bus.Register(sensor);
-        SensorBusses.Add(bus);
+        T sensorBus = (T)Activator.CreateInstance(typeof(T), new object[]{});
+        sensorBus.Register(sensor);
+        SensorBusses.Add(sensorBus);
+        SimulatedROSRobot.Instance.StartAgent(sensorBus.ROSAgentType);
     }
+    
 }

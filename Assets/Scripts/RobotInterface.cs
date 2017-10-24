@@ -30,9 +30,14 @@ public class RobotInterface : MonoBehaviour {
     [SerializeField] private int _motorMaxSpeed = 255;
     [SerializeField] private int _motorMinSpeed = 60;
     [SerializeField] private float _commandTimer = 50;
+
+    [Header("Serialport Parameters")]
     [SerializeField] private int _portNumber;
     [SerializeField] private int baudRate = 9600;
     [SerializeField] private int dataBits = 8;
+
+    [Header("ROS Parameters")]
+    [SerializeField] private string _ROS_MASTER_URI = "127.0.0.1:11311";
 
     private float _timer = 0;
     private string _portName;
@@ -63,7 +68,10 @@ public class RobotInterface : MonoBehaviour {
                 }
                 break;
             case RobotType.Arlobot:
-                ROSController.Instance.StartROS();
+                if (!string.IsNullOrEmpty(_ROS_MASTER_URI))
+                    ROSController.Instance.StartROS(_ROS_MASTER_URI);
+                else
+                    ROSController.Instance.StartROS();
                 Connect();
                 break;
             default:

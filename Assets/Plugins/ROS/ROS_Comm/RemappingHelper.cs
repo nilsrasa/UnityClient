@@ -16,6 +16,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 #endregion
 
@@ -32,6 +33,7 @@ namespace Ros_CSharp
                 {
                     if (args[i].Contains(":="))
                     {
+                        Debug.Log("ASJDASKLDJ");
                         string[] chunks = args[i].Split(new[] {':'}, 2); // Handles master URIs with semi-columns such as http://IP
                         chunks[1] = chunks[1].TrimStart('=').Trim();
                         chunks[0] = chunks[0].Trim();

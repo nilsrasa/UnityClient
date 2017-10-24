@@ -24,9 +24,6 @@ using Debug = System.Diagnostics.Debug;
 
 namespace Ros_CSharp
 {
-#if !TRACE
-    [DebuggerStepThrough]
-#endif
     public static class master
     {
         public static int port;
