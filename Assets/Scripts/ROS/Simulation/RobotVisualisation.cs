@@ -10,8 +10,8 @@ public class RobotVisualisation : MonoBehaviour
     [SerializeField] private bool _runConjoinedWithSim;
     [SerializeField] private float _dataSendRateMs = 50;
     [SerializeField] private string _ROS_MASTER_URI = "127.0.0.1:11311";
+    [SerializeField] private static string _topicNamespace = "/vrclient";
 
-    public const string NAMESPACE_VRClient = "/vrclient";
     public const string NAMESPACE_ARLOBOT = "/arlobot";
 
     private float _dataSendTimer;
@@ -80,7 +80,7 @@ public class RobotVisualisation : MonoBehaviour
             return;
         }
         ROSAgent agent = (ROSAgent)Activator.CreateInstance(agentType);
-        agent.StartAgent(ROSAgent.AgentJob.Subscriber);
+        agent.StartAgent(ROSAgent.AgentJob.Subscriber, _topicNamespace);
         _rosAgents.Add(agentType, agent);
         agent.DataWasReceived += DataReceived;
     }

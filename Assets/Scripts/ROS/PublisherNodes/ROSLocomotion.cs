@@ -17,15 +17,15 @@ public class ROSLocomotion : ROSAgent
     ///<summary>
     ///Starts advertising loop
     ///</summary>
-    public override void StartAgent(AgentJob job)
+    public override void StartAgent(AgentJob job, string rosNamespace)
     {
-        base.StartAgent(job);
+        base.StartAgent(job, rosNamespace);
         if (_isRunning) return;
         _nodeHandle = new NodeHandle();
         if (job == AgentJob.Publisher)
-            _publisher = _nodeHandle.advertise<Twist>(ROSController.NAMESPACE_VRClient + TOPIC, 1, false);
+            _publisher = _nodeHandle.advertise<Twist>(rosNamespace + TOPIC, 1, false);
         else if (job == AgentJob.Subscriber)
-            _subscriber = _nodeHandle.subscribe<Twist>(ROSController.NAMESPACE_VRClient + TOPIC, 1, ReceivedData);
+            _subscriber = _nodeHandle.subscribe<Twist>(rosNamespace + TOPIC, 1, ReceivedData);
         _job = job;
         _isRunning = true;
     }

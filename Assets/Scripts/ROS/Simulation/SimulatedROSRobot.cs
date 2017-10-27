@@ -1,47 +1,50 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml;
 using Messages;
 using Ros_CSharp;
+using UnityEditor;
 using UnityEngine;
+using UrdfToUnity.IO;
+using UrdfToUnity.Parse;
+using UrdfToUnity.Parse.Xml;
+using UrdfToUnity.Urdf.Models;
+using UrdfToUnity.Urdf.Models.Links;
 using XmlRpc_Wrapper;
 
 public class SimulatedROSRobot : MonoBehaviour
 {
-
     [SerializeField] private float _dataSendRateMs = 50;
     [SerializeField] private string _ROS_MASTER_URI = "127.0.0.1:11311";
-
-    public const string NAMESPACE_VRClient = "/vrclient";
-    public const string NAMESPACE_ARLOBOT = "/arlobot";
+    [SerializeField] private static string _topicNamespace = "/vrclient";
+    [SerializeField] private static string _robotNamespace = "/arlobot";
 
     private float _dataSendTimer;
     private SensorBusController _sensorBusController;
     private Dictionary<Type, ROSAgent> _rosAgents;
     private List<Type> _agentsWaitingToStart;
+    private bool _robotInitialised;
+
+    internal string _robotDescription = "";
 
     public static SimulatedROSRobot Instance
     {
         get
         {
-            if (_instance == null) {
+            if (_instance == null)
+            {
                 GameObject go = new GameObject();
-                go.name = "ROSController";
+                go.name = "SimulatedROSRobot";
                 _instance = go.AddComponent<SimulatedROSRobot>();
             }
             return _instance;
 
         }
-        private set
-        {
-            _instance = value;
-        }
+        private set { _instance = value; }
     }
 
     private static SimulatedROSRobot _instance;
-
-    private ROSLocomotion _rosLocomotion;
-    private ROSUltrasound _rosUltrasound;
 
     void Awake()
     {
@@ -50,9 +53,14 @@ public class SimulatedROSRobot : MonoBehaviour
         _agentsWaitingToStart = new List<Type>();
     }
 
-    void Start() {
+    void Start()
+    {
         _sensorBusController = SensorBusController.Instance;
-        ROS.ROS_MASTER_URI = _ROS_MASTER_URI;
+        if (!string.IsNullOrEmpty(_ROS_MASTER_URI)) {
+            if (!_ROS_MASTER_URI.Contains("http://"))
+                _ROS_MASTER_URI = "http://" + _ROS_MASTER_URI;
+            ROS.ROS_MASTER_URI = _ROS_MASTER_URI;
+        }
         StartROS();
     }
 
@@ -60,21 +68,32 @@ public class SimulatedROSRobot : MonoBehaviour
     {
         if (!(ROS.ok || ROS.isStarted()))
             return;
-        if (_agentsWaitingToStart.Count > 0) {
-            foreach (Type type in _agentsWaitingToStart) {
+        if (!_robotInitialised)
+            InitialiseRobot();
+        if (_agentsWaitingToStart.Count > 0)
+        {
+            foreach (Type type in _agentsWaitingToStart)
+            {
                 StartAgent(type);
             }
             _agentsWaitingToStart = new List<Type>();
         }
         _dataSendTimer += Time.deltaTime;
-        if (_dataSendTimer >= _dataSendRateMs/1000f)
+        if (_dataSendTimer >= _dataSendRateMs / 1000f)
             TransmitSensorData();
-        
     }
 
-    void OnApplicationQuit() {
+    void OnApplicationQuit()
+    {
         if (ROS.ok || ROS.isStarted())
             StopROS();
+    }
+
+    private void InitialiseRobot()
+    {
+        Param.get("robot_description", ref _robotDescription);
+        _robotInitialised = true;
+        GenerateRobot(_robotDescription);
     }
 
     private void TransmitSensorData()
@@ -83,10 +102,14 @@ public class SimulatedROSRobot : MonoBehaviour
         foreach (SensorBus sensorBus in _sensorBusController.SensorBusses)
         {
             if (!_rosAgents.ContainsKey(sensorBus.ROSAgentType)) continue;
-            IRosMessage message = sensorBus.GetSensorData();
             _rosAgents[sensorBus.ROSAgentType].PublishData(sensorBus.GetSensorData());
         }
 
+    }
+
+    private void GenerateRobot(string robotDescription)
+    {
+        GameObject robot = RobotUrdfUtility.GenerateRobotGameObjectFromDescription(robotDescription);
     }
 
     public void StartAgent(Type agentType)
@@ -97,20 +120,23 @@ public class SimulatedROSRobot : MonoBehaviour
             return;
         }
         ROSAgent agent = (ROSAgent) Activator.CreateInstance(agentType);
-        agent.StartAgent(ROSAgent.AgentJob.Publisher);
+        agent.StartAgent(ROSAgent.AgentJob.Publisher, _topicNamespace);
         _rosAgents.Add(agentType, agent);
     }
 
-    public void StartROS() {
+    public void StartROS()
+    {
         Debug.Log("---Starting ROS---");
         if (ROS.isStarted()) return;
-        ROS.Init(new string[0], "VRClient");
+        ROS.Init(new string[0], gameObject.name);
         XmlRpcUtil.SetLogLevel(XmlRpcUtil.XMLRPC_LOG_LEVEL.ERROR);
     }
 
-    public void StopROS() {
+    public void StopROS()
+    {
         Debug.Log("---Stopping ROS---");
         ROS.shutdown();
         //ROS.waitForShutdown(); Do we need this? 
     }
+
 }

@@ -57,9 +57,9 @@ public class ROSController : MonoBehaviour
         ROS.Init(new string[0], "VRClient");
         XmlRpcUtil.SetLogLevel(XmlRpcUtil.XMLRPC_LOG_LEVEL.ERROR);
         _rosLocomotion = new ROSLocomotion();
-        _rosLocomotion.StartAgent(ROSAgent.AgentJob.Publisher);
+        _rosLocomotion.StartAgent(ROSAgent.AgentJob.Publisher, NAMESPACE_VRClient);
         _rosUltrasound = new ROSUltrasound();
-        _rosUltrasound.StartAgent(ROSAgent.AgentJob.Subscriber);
+        _rosUltrasound.StartAgent(ROSAgent.AgentJob.Subscriber, NAMESPACE_VRClient);
     }
 
     public void StopROS()

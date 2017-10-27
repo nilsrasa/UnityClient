@@ -8,7 +8,7 @@ public class ROSAgent
     public delegate void DataReceived(ROSAgent sender, IRosMessage message);
     public event DataReceived DataWasReceived;
 
-    public virtual void StartAgent(AgentJob job)
+    public virtual void StartAgent(AgentJob job, string rosNamespace)
     {
         Debug.Log("Starting Agent " + this.GetType() +" with job " + job);
     }

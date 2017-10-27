@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO.Ports;
+//using System.IO.Ports;
 using UnityEngine;
 
 //The control interface to the robot
@@ -41,7 +41,7 @@ public class RobotInterface : MonoBehaviour {
 
     private float _timer = 0;
     private string _portName;
-    private SerialPort HWPort;
+   // private SerialPort HWPort;
     private bool _left, _right, _forward, _reverse;
 
     void Awake() {
@@ -58,8 +58,8 @@ public class RobotInterface : MonoBehaviour {
             case RobotType.LegoRobot:
                 try {
                     Debug.Log("Trying to open port to robot control on port: " + _portName);
-                    HWPort = new SerialPort(_portName, baudRate);
-                    HWPort.Open();
+                    //HWPort = new SerialPort(_portName, baudRate);
+                    //HWPort.Open();
                     Debug.Log("Success open serial port to robot control ");
                     Connect();
                 }
@@ -138,8 +138,8 @@ public class RobotInterface : MonoBehaviour {
                 commandString += "" + leftMotorDrive + GetMotorSpeedString(leftMotorSpeed) + rightMotorDrive +
                                  GetMotorSpeedString(rightMotorSpeed);
 
-                if (HWPort.IsOpen)
-                    HWPort.Write(commandString);
+               // if (HWPort.IsOpen)
+                 //   HWPort.Write(commandString);
                 break;
             case RobotType.Arlobot:
                 Vector2 movement = new Vector2(-controlOutput.x, -controlOutput.y);
