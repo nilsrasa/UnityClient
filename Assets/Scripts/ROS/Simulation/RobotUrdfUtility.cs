@@ -21,8 +21,9 @@ public class RobotUrdfUtility {
     /// Handles putting together a robot GameObject.
     /// </summary>
     /// <param name="robotDescription">Contents of URDF robot description from robot or file</param>    
+    /// <param name="overrideExisting">Overwrite previously generated robot prefab with same robot name</param> 
     /// /// <returns>Gameobject representation of robot generated from description</returns>
-    public static GameObject GenerateRobotGameObjectFromDescription(string robotDescription)
+    public static GameObject GenerateRobotGameObjectFromDescription(string robotDescription, bool overrideExisting)
     {
         XmlDocument xmlDoc = new XmlDocument();
         RobotParser parser = new RobotParser();
@@ -30,6 +31,11 @@ public class RobotUrdfUtility {
         xmlDoc.Load(XmlReader.Create(new StringReader(robotDescription)));
         Robot robot = parser.Parse(xmlDoc.DocumentElement);
 
+        GameObject robotGo = Resources.Load<GameObject>(string.Format(prefabResourcesFolderPath + "/{0}", robot.Name));
+        if (robotGo != null && !overrideExisting) {
+            Debug.Log("----- Instantiating previousl generated robot model -----");
+            return GameObject.Instantiate(robotGo, Vector3.zero, Quaternion.identity);
+        }
         if (robot != null)
             return GenerateRobotGameObject(robot);
         else return null;
@@ -42,15 +48,10 @@ public class RobotUrdfUtility {
     /// <returns>Gameobject representation of robot generated from description</returns>
     /// Code from https://github.com/MangoMangoDevelopment/neptune
     public static GameObject GenerateRobotGameObject(Robot robot) {
-
+        Debug.Log("----- Generating robot from description ------");
         Directory.CreateDirectory(assetFolderPath);
         Directory.CreateDirectory(prefabFolderPath);
         string roboName = robot.Name;
-        Debug.Log(string.Format(prefabResourcesFolderPath + "/{0}.prefab", roboName));
-        GameObject robotGo = Resources.Load<GameObject>(string.Format(prefabResourcesFolderPath + "/{0}", roboName));
-        if (robotGo != null) {
-            return GameObject.Instantiate(robotGo, Vector3.zero, Quaternion.identity);
-        }
 
         GameObject parent = new GameObject(robot.Name);
         ROSRobotModel rosRobotModel = parent.AddComponent<ROSRobotModel>();

@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Messages;
-using Messages.std_msgs;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class UltrasoundRepresentation : SensorRepresentation

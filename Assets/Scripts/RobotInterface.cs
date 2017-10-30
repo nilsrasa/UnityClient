@@ -69,9 +69,9 @@ public class RobotInterface : MonoBehaviour {
                 break;
             case RobotType.Arlobot:
                 if (!string.IsNullOrEmpty(_ROS_MASTER_URI))
-                    ROSController.Instance.StartROS(_ROS_MASTER_URI);
+                    ArlobotROSController.Instance.StartROS(_ROS_MASTER_URI);
                 else
-                    ROSController.Instance.StartROS();
+                    ArlobotROSController.Instance.StartROS();
                 Connect();
                 break;
             default:
@@ -143,7 +143,7 @@ public class RobotInterface : MonoBehaviour {
                 break;
             case RobotType.Arlobot:
                 Vector2 movement = new Vector2(-controlOutput.x, -controlOutput.y);
-                ROSController.Instance.Move(movement);
+                ArlobotROSController.Instance.Move(movement);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

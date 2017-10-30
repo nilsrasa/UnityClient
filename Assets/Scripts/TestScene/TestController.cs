@@ -42,7 +42,7 @@ public class TestController : MonoBehaviour {
                 Vector2 controlResult = robotControl.GetControlResult(hit.point);
                 if (robotControl.IsActivated && _timer >= pollingRate / 1000f)
                 {
-                    ROSController.Instance.Move(controlResult);
+                    ArlobotROSController.Instance.Move(controlResult);
                     _timer = 0;
                 }
             }
@@ -53,7 +53,7 @@ public class TestController : MonoBehaviour {
             if (_robotControl == null) return;
             _robotControl.OnUnhover();
             if (_timer >= pollingRate / 1000f)
-                ROSController.Instance.Move(Vector2.zero);
+                ArlobotROSController.Instance.Move(Vector2.zero);
 
         }
     }
@@ -63,10 +63,10 @@ public class TestController : MonoBehaviour {
         if (!string.IsNullOrEmpty(_rosmasteruri.text))
         {
             string hostname = _rosmasteruri.text.Contains("http://") ? _rosmasteruri.text + ":" + _rosmasterport.text : "http://" + _rosmasteruri.text + ":" +_rosmasterport.text;
-            ROSController.Instance.StartROS(hostname);
+            ArlobotROSController.Instance.StartROS(hostname);
         }
         else
-            ROSController.Instance.StartROS();
+            ArlobotROSController.Instance.StartROS();
         
         _canvas.gameObject.SetActive(false);
         _trackpad.gameObject.SetActive(true);

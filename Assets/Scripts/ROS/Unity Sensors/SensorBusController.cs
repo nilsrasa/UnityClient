@@ -50,7 +50,7 @@ public class SensorBusController
         T sensorBus = (T)Activator.CreateInstance(typeof(T), new object[]{});
         sensorBus.Register(sensor);
         SensorBusses.Add(sensorBus);
-        SimulatedROSRobot.Instance.StartAgent(sensorBus.ROSAgentType);
+        SimulatedROSRobotController.Instance.StartAgent(sensorBus.ROSAgentType);
     }
     
 }

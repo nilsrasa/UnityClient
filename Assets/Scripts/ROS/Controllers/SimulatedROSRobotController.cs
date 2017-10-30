@@ -1,54 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Xml;
-using Messages;
 using Ros_CSharp;
-using UnityEditor;
 using UnityEngine;
-using UrdfToUnity.IO;
-using UrdfToUnity.Parse;
-using UrdfToUnity.Parse.Xml;
-using UrdfToUnity.Urdf.Models;
-using UrdfToUnity.Urdf.Models.Links;
-using XmlRpc_Wrapper;
 
-public class SimulatedROSRobot : MonoBehaviour
+public class SimulatedROSRobotController : ROSController 
 {
     [SerializeField] private float _dataSendRateMs = 50;
     [SerializeField] private string _ROS_MASTER_URI = "127.0.0.1:11311";
-    [SerializeField] private static string _topicNamespace = "/vrclient";
-    [SerializeField] private static string _robotNamespace = "/arlobot";
+    [SerializeField] private bool _alwaysGenerateRobot;
 
     private float _dataSendTimer;
     private SensorBusController _sensorBusController;
     private Dictionary<Type, ROSAgent> _rosAgents;
     private List<Type> _agentsWaitingToStart;
     private bool _robotInitialised;
+    private Transform _robot;
 
     internal string _robotDescription = "";
 
-    public static SimulatedROSRobot Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                GameObject go = new GameObject();
-                go.name = "SimulatedROSRobot";
-                _instance = go.AddComponent<SimulatedROSRobot>();
-            }
-            return _instance;
-
-        }
-        private set { _instance = value; }
-    }
-
-    private static SimulatedROSRobot _instance;
+    public static SimulatedROSRobotController Instance { get; private set; }
 
     void Awake()
     {
-        _instance = this;
+        Instance = this;
         _rosAgents = new Dictionary<Type, ROSAgent>();
         _agentsWaitingToStart = new List<Type>();
     }
@@ -82,18 +56,18 @@ public class SimulatedROSRobot : MonoBehaviour
         if (_dataSendTimer >= _dataSendRateMs / 1000f)
             TransmitSensorData();
     }
-
-    void OnApplicationQuit()
-    {
-        if (ROS.ok || ROS.isStarted())
-            StopROS();
-    }
-
+    
     private void InitialiseRobot()
     {
-        Param.get("robot_description", ref _robotDescription);
+        if (Param.has("robot_description"))
+        {
+            Debug.Log("Generating robot from robot description");
+            Param.get("robot_description", ref _robotDescription);
+            GenerateRobot(_robotDescription);
+        }
+        else 
+            Debug.Log("---No robot description available - could not automatically generate robot---");
         _robotInitialised = true;
-        GenerateRobot(_robotDescription);
     }
 
     private void TransmitSensorData()
@@ -104,12 +78,11 @@ public class SimulatedROSRobot : MonoBehaviour
             if (!_rosAgents.ContainsKey(sensorBus.ROSAgentType)) continue;
             _rosAgents[sensorBus.ROSAgentType].PublishData(sensorBus.GetSensorData());
         }
-
     }
 
     private void GenerateRobot(string robotDescription)
     {
-        GameObject robot = RobotUrdfUtility.GenerateRobotGameObjectFromDescription(robotDescription);
+        _robot = RobotUrdfUtility.GenerateRobotGameObjectFromDescription(robotDescription, _alwaysGenerateRobot).transform;
     }
 
     public void StartAgent(Type agentType)
@@ -120,23 +93,8 @@ public class SimulatedROSRobot : MonoBehaviour
             return;
         }
         ROSAgent agent = (ROSAgent) Activator.CreateInstance(agentType);
-        agent.StartAgent(ROSAgent.AgentJob.Publisher, _topicNamespace);
+        agent.StartAgent(ROSAgent.AgentJob.Publisher, _clientNamespace);
         _rosAgents.Add(agentType, agent);
     }
-
-    public void StartROS()
-    {
-        Debug.Log("---Starting ROS---");
-        if (ROS.isStarted()) return;
-        ROS.Init(new string[0], gameObject.name);
-        XmlRpcUtil.SetLogLevel(XmlRpcUtil.XMLRPC_LOG_LEVEL.ERROR);
-    }
-
-    public void StopROS()
-    {
-        Debug.Log("---Stopping ROS---");
-        ROS.shutdown();
-        //ROS.waitForShutdown(); Do we need this? 
-    }
-
+    
 }

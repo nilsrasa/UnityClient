@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Messages;
-using Messages.geometry_msgs;
-using Ros_CSharp;
-using SimpleJSON;
+﻿using Ros_CSharp;
 using UnityEngine;
 using String = Messages.std_msgs.String;
-using Vector3 = UnityEngine.Vector3;
 
+/// <summary>
+/// Ultrasound agent that sends or receives ultrasound data
+/// </summary>
 public class ROSUltrasound : ROSAgent
 {
     private const string TOPIC = "ultrasonic_data";
@@ -21,6 +17,8 @@ public class ROSUltrasound : ROSAgent
     
     ///<summary>
     ///Starts advertising loop
+    /// <param name="job">Defines behaviour of agent</param>
+    /// <param name="rosNamespace">Namespace the agent listens or writes to + topic</param>
     ///</summary>
     public override void StartAgent(AgentJob job, string rosNamespace) {
         base.StartAgent(job, rosNamespace);
@@ -32,7 +30,7 @@ public class ROSUltrasound : ROSAgent
             _publisher = _nodeHandle.advertise<String>(rosNamespace + TOPIC, 1, false);
         _isRunning = true;
         _job = job;
-        Application.logMessageReceived += test;
+        Application.logMessageReceived += LogMessage;
     }
 
     public override void PublishData(object data)
@@ -51,12 +49,5 @@ public class ROSUltrasound : ROSAgent
         _subscriber = null;
         _nodeHandle = null;
         
-    }
-
-    private void test(string condition, string stack, LogType type)
-    {
-        Debug.Log(condition);
-        Debug.Log(stack);
-        Debug.Log(type);
     }
 }

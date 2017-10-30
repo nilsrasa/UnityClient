@@ -1,6 +1,9 @@
 ﻿using Messages;
 using UnityEngine;
 
+/// <summary>
+/// Base class of any Nodehandler agent
+/// </summary>
 public class ROSAgent
 {
     public enum AgentJob { None, Subscriber, Publisher}
@@ -22,5 +25,11 @@ public class ROSAgent
     public virtual void PublishData(object data)
     {
         
+    }
+
+    protected virtual void LogMessage(string condition, string stack, LogType type) {
+        Debug.Log(condition);
+        Debug.Log(stack);
+        Debug.Log(type);
     }
 }

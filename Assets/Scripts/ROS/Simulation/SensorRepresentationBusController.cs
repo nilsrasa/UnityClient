@@ -1,9 +1,10 @@
-﻿
-using System;
-using System.CodeDom;
+﻿using System;
 using System.Collections.Generic;
 using Messages;
 
+/// <summary>
+/// Handles collecting and managing visual sensor representations
+/// </summary>
 class SensorRepresentationBusController {
     public static SensorRepresentationBusController Instance
     {
@@ -23,6 +24,9 @@ class SensorRepresentationBusController {
         SensorRepresentationsBusses = new List<SensorRepresentationBus>();
     }
 
+    /// <summary>
+    /// Distributes ROS messages to relevant sensor representation busses
+    /// </summary>
     public void HandleData(ROSAgent sender, IRosMessage data)
     {
         foreach (SensorRepresentationBus bus in SensorRepresentationsBusses)
