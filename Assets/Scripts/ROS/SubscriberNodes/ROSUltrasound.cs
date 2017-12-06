@@ -7,7 +7,7 @@ using String = Messages.std_msgs.String;
 /// </summary>
 public class ROSUltrasound : ROSAgent
 {
-    private const string TOPIC = "ultrasonic_data";
+    private const string TOPIC = "/ultrasonic_data";
 
     private NodeHandle _nodeHandle;
     private Subscriber<String> _subscriber;

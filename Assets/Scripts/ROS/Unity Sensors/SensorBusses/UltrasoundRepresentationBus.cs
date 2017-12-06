@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Messages;
 using Messages.std_msgs;
-using SimpleJSON;
 using UnityEngine;
 
 public class UltrasoundRepresentationBus : SensorRepresentationBus {
@@ -15,13 +14,15 @@ public class UltrasoundRepresentationBus : SensorRepresentationBus {
     public override void HandleData(IRosMessage data)
     {
         String dataString = (String) data;
-        foreach (KeyValuePair<string, JSONNode> pair in JSON.Parse(dataString.data).AsObject)
+        JSONObject root = new JSONObject(dataString.data);
+        foreach (string key in root.keys)
         {
-            foreach (SensorRepresentation sensor in _sensorRepresentations)
-            {
-                if (sensor.SensorId == pair.Key)
+            foreach (SensorRepresentation sensor in _sensorRepresentations) {
+                if (sensor.SensorId == key)
                 {
-                    sensor.HandleData(float.Parse(pair.Value));
+                    string dat = "";
+                    root.GetField(out dat, key, "");
+                    sensor.HandleData(float.Parse(dat));
                 }
             }
         }

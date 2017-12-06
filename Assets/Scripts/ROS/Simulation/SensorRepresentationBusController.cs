@@ -37,6 +37,7 @@ class SensorRepresentationBusController {
         }
     }
 
+
     public void Register<T>(SensorRepresentation sensorRepresentation) where T : SensorRepresentationBus {
         for (int i = 0; i < SensorRepresentationsBusses.Count; i++) {
             SensorRepresentationBus b = SensorRepresentationsBusses[i];

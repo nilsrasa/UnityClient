@@ -9,6 +9,10 @@ public class VRController : MonoBehaviour
 
     [SerializeField] private Transform _optimalHeadPosition;
 
+    [Header("Cursor")]
+    [SerializeField] private Transform _cursorCanvas;
+    [SerializeField] private float _cursorDistance = 0.4f;
+
     [Header("Mouse Controls")]
     [SerializeField] private float _mouseRotationSpeed = 2;
     
@@ -28,6 +32,7 @@ public class VRController : MonoBehaviour
     void Start()
     {
         //CenterHead();
+        _cursorCanvas.position = Head.position + transform.forward * _cursorDistance;
     }
 
     //Gets point where user is looking every frame and interacts with any intersecting gazeobjects if possible
@@ -81,6 +86,9 @@ public class VRController : MonoBehaviour
                 ray = new Ray(Head.transform.position, direction * 1000);
                 break;
 	    }
+
+        //Positioning of the cursor
+	    _cursorCanvas.position = Head.position + ray.direction * _cursorDistance;
 
         Debug.DrawRay(ray.origin, ray.direction);
 	    RaycastHit hit;

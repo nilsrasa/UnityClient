@@ -7,6 +7,7 @@ public class ThetaWebcamStream : MonoBehaviour
     [SerializeField] private MeshRenderer _icoSphere;
     [SerializeField] private bool _useDummyImage;
     [SerializeField] private Texture _dummyImage;
+    [SerializeField] private Texture _text;
 
     public void StartStream() {
         if (_useDummyImage)
@@ -18,7 +19,7 @@ public class ThetaWebcamStream : MonoBehaviour
         string camName = "THETA UVC FullHD Blender";
         mycam.deviceName = camName;
         _primarySphere.sharedMaterial.mainTexture = mycam;
-
+        _text = mycam;
         mycam.Play();
     }
 }

@@ -21,6 +21,5 @@ public class SensorRepresentationBus {
 
     public virtual void HandleData(IRosMessage data)
     {
-        
     }
 }

@@ -142,7 +142,7 @@ public class RobotInterface : MonoBehaviour {
                  //   HWPort.Write(commandString);
                 break;
             case RobotType.Arlobot:
-                Vector2 movement = new Vector2(-controlOutput.x, -controlOutput.y);
+                Vector2 movement = new Vector2(-controlOutput.x, controlOutput.y);
                 ArlobotROSController.Instance.Move(movement);
                 break;
             default:
