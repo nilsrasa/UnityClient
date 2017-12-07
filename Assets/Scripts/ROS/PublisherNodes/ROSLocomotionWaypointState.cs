@@ -1,16 +1,17 @@
 ﻿using System;
 using Messages;
 using Messages.geometry_msgs;
+using Messages.sensor_msgs;
 using Ros_CSharp;
 using UnityEngine;
 
-public class ROSLocomotion : ROSAgent
+public class ROSLocomotionWaypoint : ROSAgent
 {
-    private const string TOPIC = "/control/locomotion";
+    private const string TOPIC = "/waypoint";
 
     private NodeHandle _nodeHandle;
-    private Publisher<Twist> _publisher;
-    private Subscriber<Twist> _subscriber;
+    private Publisher<NavSatFix> _publisher;
+    private Subscriber<NavSatFix> _subscriber;
     private bool _isRunning;
     private AgentJob _job;
 
@@ -23,9 +24,9 @@ public class ROSLocomotion : ROSAgent
         if (_isRunning) return;
         _nodeHandle = new NodeHandle();
         if (job == AgentJob.Publisher)
-            _publisher = _nodeHandle.advertise<Twist>(rosNamespace + TOPIC, 1, false);
+            _publisher = _nodeHandle.advertise<NavSatFix>(TOPIC, 1, false);
         else if (job == AgentJob.Subscriber)
-            _subscriber = _nodeHandle.subscribe<Twist>(rosNamespace + TOPIC, 1, ReceivedData);
+            _subscriber = _nodeHandle.subscribe<NavSatFix>(TOPIC, 1, ReceivedData);
         _job = job;
         _isRunning = true;
     }
@@ -43,29 +44,21 @@ public class ROSLocomotion : ROSAgent
     public override void PublishData(object data)
     {
         if (_job != AgentJob.Publisher) return;
-        Vector2 vector = (Vector2) data;
-        Twist twist = new Twist
+        GeoPointWGS84 navToPoint = (GeoPointWGS84) data;
+        NavSatFix nav = new NavSatFix
         {
-            angular = new Messages.geometry_msgs.Vector3
-            {
-                x = 0,
-                y = 0,
-                z = vector.x
-            },
-            linear = new Messages.geometry_msgs.Vector3 {
-                x = vector.y,
-                y = 0,
-                z = 0
-            }
+            latitude = navToPoint.latitude,
+            longitude = navToPoint.longitude,
+            altitude = navToPoint.altitude,
         };
 
-        _publisher.publish(twist);
+        _publisher.publish(nav);
     }
 
     protected override void ReceivedData(IRosMessage data)
     {
-        Twist twist = (Twist) data;
-        Debug.Log("ROSLocomotion: Receieved data - " + twist);
+        NavSatFix nav = (NavSatFix) data;
+        Debug.Log("ROSLocomotionWaypoint: Receieved data - " + nav);
     }
 
 }

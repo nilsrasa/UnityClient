@@ -1,10 +1,13 @@
-﻿class Floor
+﻿using UnityEngine;
+
+class Floor
 {
     public int Id;
     public string Name;
     public int AccessLevel;
     public int Z;
     public int FloorOutlineId;
+    public Transform RenderedModel;
 
     public override string ToString()
     {

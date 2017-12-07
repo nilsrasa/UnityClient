@@ -15,13 +15,13 @@ public class CoordinateTester : MonoBehaviour
     [SerializeField] private Transform _testDistancePointA;
     [SerializeField] private Transform _testDistancePointB;
     [SerializeField] private bool _testDistance;
+
+    private int i = 10;
     // Update is called once per frame
     void Update () {
 	    if (Input.GetKeyDown(KeyCode.Space))
 	    {
-	        GeoPointMercator coordinates = transform.position.ToMercator();
-	        Debug.Log("Zero - Mercator: " + coordinates);
-	        Debug.Log("Zero - WGS84: " + coordinates.ToWGS84());
+            ArlobotROSController.Instance.Move(transform.position);
         }
 
 	    if (_test)
@@ -49,5 +49,6 @@ public class CoordinateTester : MonoBehaviour
             Debug.Log(Vector3.Distance(_testDistancePointA.position, _testDistancePointB.position) + "meters");
             _testDistance = false;
         }
+
     }
 }

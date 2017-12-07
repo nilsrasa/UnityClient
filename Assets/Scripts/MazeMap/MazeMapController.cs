@@ -2,16 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Assets.Scripts;
-using ProjNet.CoordinateSystems;
-using ProjNet.CoordinateSystems.Transformations;
 using UnityEngine;
 
 public class MazeMapController : MonoBehaviour
 {
     [Header("Building Generation")]
-    [SerializeField] private float _floorHeight = 3;
+    public float FloorHeight = 5;
     [SerializeField] private Material _lineMaterial;
 
     [Header("Data Collection")]
@@ -25,23 +22,21 @@ public class MazeMapController : MonoBehaviour
     private const string REST_FLOOROUTLINE_MERCATOR = "https://api.mazemap.com/api/flooroutlines/?floorid={0}&srid=900913";
     private const string REST_POI_SEARCH = "http://api.mazemap.com/api/pois/{0}/?srid=4326";
     private const string REST_POI_SEARCH_MERCATOR = "http://api.mazemap.com/api/pois/{0}/?srid=900913";
-    //Key: FloorId, Value: Floor Geometry
-    private Dictionary<int, Transform> _generatedFloors;
     //Key: BuildingId, Value: Building data
     private Dictionary<int, Building> _buildings;
+    //Key: Floor Z, Value: Floor Transform
+    private Dictionary<int, List<Transform>> _floorsByZ;
+    //Key: Floor Z, Value: If layer is currently shown
+    private Dictionary<int, bool> _zLayerActive;
 
     private bool _mercatorOriginSet = false;
 
     void Awake()
     {
         Instance = this;
-    }
-
-    void Start()
-    {
         _buildings = new Dictionary<int, Building>();
-        _generatedFloors = new Dictionary<int, Transform>();
-        
+        _floorsByZ = new Dictionary<int, List<Transform>>();
+        _zLayerActive = new Dictionary<int, bool>();
     }
 
     // Update is called once per frame
@@ -55,7 +50,7 @@ public class MazeMapController : MonoBehaviour
             DrawAllBuildings();
         if (Input.GetKeyDown(KeyCode.F))
             foreach (int point in _poiIds)
-                StartCoroutine(DrawFloorIndoorOutline(point));
+                StartCoroutine(DrawPoiOutline(point));
     }
 
     private Building GetBuildingByName(string name)
@@ -99,12 +94,11 @@ public class MazeMapController : MonoBehaviour
             }
             buildings.Add(b);
         }
-
         foreach (Building building in buildings)
         {
             _buildings.Add(building.Id, building);
         }
-        
+
         Debug.Log("----Done getting buildings----");
     }
 
@@ -127,15 +121,22 @@ public class MazeMapController : MonoBehaviour
             GameObject floorObject = DrawFloorOutlines(www.text);
             floorObject.name = floor.Name;
             floorObjects.Add(floorObject.transform);
-            floorObject.transform.position = floorObject.transform.position + new Vector3(0, floor.Z * _floorHeight, 0);
-            _generatedFloors.Add(floor.Id, floorObject.transform);
-        }
+            floorObject.transform.position = floorObject.transform.position + new Vector3(0, floor.Z * FloorHeight, 0);
+            floor.RenderedModel = floorObject.transform;
+
+            if (!_floorsByZ.ContainsKey(floor.Z))
+            {
+                _floorsByZ.Add(floor.Z, new List<Transform>());
+                _zLayerActive.Add(floor.Z, true);
+            }
+            _floorsByZ[floor.Z].Add(floorObject.transform);
+        }   
         Vector3 avrg = Vector3.zero;
         foreach (Transform t in floorObjects)
             avrg += t.position;
        // buildingObject.transform.position = avrg / floorObjects.Count;
         foreach (Transform t in floorObjects)
-            t.parent = buildingObject.transform;
+            t.SetParent(buildingObject.transform, true);
 
         RenderBuilding(buildingObject);
     }
@@ -167,13 +168,13 @@ public class MazeMapController : MonoBehaviour
                             avrgPos += t.position;
                        // multiPolygon.transform.position = avrgPos / mpPoints.Count;
                         foreach (Transform t in mpPoints)
-                            t.parent = multiPolygon.transform;
+                            t.SetParent(multiPolygon.transform, true);
                         points.Add(multiPolygon.transform);
                     }
                     else
                     {
                         GameObject pointObject = InstantiatePoint(coord, _useMazemapMercator);
-                        pointObject.transform.parent = floor.transform;
+                        pointObject.transform.SetParent(floor.transform, true);
                         points.Add(pointObject.transform);
                     }
                 }
@@ -184,9 +185,9 @@ public class MazeMapController : MonoBehaviour
         Vector3 avrg = Vector3.zero;
         foreach (Transform t in points)
             avrg += t.position;
-        //floor.transform.position = avrg / points.Count;
+        //room.transform.position = avrg / points.Count;
         foreach (Transform t in points)
-            t.parent = floor.transform;
+            t.SetParent(floor.transform, true);
         return floor;
     }
     
@@ -257,37 +258,73 @@ public class MazeMapController : MonoBehaviour
         }
     }
 
-    private void RenderFloorIndoorOutline(GameObject floor)
+    private void RenderPoiOutline(GameObject room)
     {
-        LineRenderer lineRenderer = floor.AddComponent<LineRenderer>();
-        lineRenderer.material = _lineMaterial;
-        lineRenderer.startWidth = lineRenderer.endWidth = 0.3f;
-        lineRenderer.positionCount = floor.transform.childCount;
-        int i = 0;
-        foreach (Transform t in floor.transform)
+        foreach (Transform pointContainer in room.transform)
         {
-            lineRenderer.SetPosition(i, t.position);
-            i++;
+            LineRenderer lineRenderer = pointContainer.gameObject.AddComponent<LineRenderer>();
+            lineRenderer.material = _lineMaterial;
+            lineRenderer.startWidth = lineRenderer.endWidth = 0.3f;
+            lineRenderer.positionCount = pointContainer.childCount;
+            int i = 0;
+            foreach (Transform point in pointContainer)
+            {
+                lineRenderer.SetPosition(i, point.position);
+                i++;
+            }
         }
-
     }
 
-    private IEnumerator DrawFloorIndoorOutline(int poi)
+    private IEnumerator DrawPoiOutline(int poi)
     {
         WWW www = new WWW(string.Format(_useMazemapMercator ? REST_POI_SEARCH_MERCATOR : REST_POI_SEARCH, poi));
         yield return www;
         JSONObject feature = new JSONObject(www.text);
+        int z = (int)feature["z"].f;
+        if (z > 0) z--;
+        string name = feature["infos"][0]["name"].str;
+        string buildingName = feature["buildingName"].str;
+        GameObject room = new GameObject("room " + name);
+
         foreach (JSONObject pos in feature["geometry"]["coordinates"]) {
-            GameObject container = new GameObject("floor");
-            //container.transform.position = parent.position;
-            //container.transform.parent = parent;
+            GameObject roomContainer = new GameObject("points");
             foreach (JSONObject coord in pos)
             {
                 GameObject pointObject = InstantiatePoint(coord, _useMazemapMercator);
-                pointObject.transform.parent = container.transform;
+                pointObject.transform.position = pointObject.transform.position + new Vector3(0, z * FloorHeight, 0);
+                pointObject.transform.SetParent(roomContainer.transform, true);
             }
+            roomContainer.transform.SetParent(room.transform, true);
+        }
+        room.transform.SetParent(GetBuildingByName(buildingName).GetFloorByZ(z).RenderedModel, true);
+        RenderPoiOutline(room);
+    }
 
-            RenderFloorIndoorOutline(container);
+    private void SetLayerVisibility(int z, bool isVisible)
+    {
+        foreach (Transform t in _floorsByZ[z])
+        {
+            t.gameObject.SetActive(isVisible);
+        }
+        _zLayerActive[z] = isVisible;
+    }
+
+    public void SetActiveLayer(int z)
+    {
+        //Set all layers above active layer to not render
+        for (int i = z + 1; _floorsByZ.ContainsKey(i); i++)
+        {
+            if (_zLayerActive[i])
+                SetLayerVisibility(i, false);
+        }
+        
+        //Set all layers below active layer to render
+        for (int i = z; _floorsByZ.ContainsKey(i); i--)
+        {
+            if (!_zLayerActive[i])
+                SetLayerVisibility(i, true);
         }
     }
+
+
 }

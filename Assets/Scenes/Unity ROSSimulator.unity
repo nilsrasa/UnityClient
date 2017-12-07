@@ -998,6 +998,66 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 318843904}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &319214509
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 319214512}
+  - component: {fileID: 319214511}
+  - component: {fileID: 319214510}
+  m_Layer: 0
+  m_Name: ArlobotController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &319214510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 319214509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cbcd9a32b91c484fb5d14881b09dd54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _robotNamespace: /arlobot
+  _clientNamespace: /vrclient
+  _ROS_MASTER_URI: 192.168.137.232:11311
+--- !u!114 &319214511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 319214509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5971f27d0def82d49b2079651fb1ae33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _robotNamespace: /arlobot
+  _clientNamespace: /vrclient
+  _dataSendRateMs: 50
+  _ROS_MASTER_URI: 192.168.137.232:11311
+  _alwaysGenerateRobot: 1
+--- !u!4 &319214512
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 319214509}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -12.413, y: 0.188, z: 11.057}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &324765033
 GameObject:
   m_ObjectHideFlags: 0
@@ -1436,8 +1496,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb508d4071b79b84295d229b607f256e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _mouseMovementSpeed: 2
-  _mouseScrollSpeed: 3
+  _mouseMovementSpeed: 5
+  _mouseScrollSpeed: 10
 --- !u!4 &530113880
 Transform:
   m_ObjectHideFlags: 0
@@ -3144,7 +3204,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ec4bf062d7220640b89c4a6000f7195, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _floorHeight: 5
+  FloorHeight: 5
   _lineMaterial: {fileID: 2100000, guid: bea050dbd79ce8944b949244b4a81e87, type: 2}
   _useMazemapMercator: 0
   _poiIds: f51f0400e01f0400f01f0400e31f0400f61f0400e41f0400f71f0400e51f0400f81f0400df1f0400f91f0400e61f0400fa1f0400e71f0400fb1f0400e81f0400e91f0400fc1f0400ea1f0400eb1f0400dc1f0400ec1f0400dd1f0400ed1f0400ee1f0400de1f0400

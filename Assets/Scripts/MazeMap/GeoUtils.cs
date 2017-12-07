@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace Assets.Scripts {
     public static class GeoUtils {
+        public static bool MercatorOriginSet;
 
         static GeoPointMercator _mercatorOrigin;
-        static bool _mercatorOriginSet;
         static readonly ICoordinateTransformation _transformationFromWGS84ToMercator;
         static readonly ICoordinateTransformation _transformationFromMercatorToWGS84;
 

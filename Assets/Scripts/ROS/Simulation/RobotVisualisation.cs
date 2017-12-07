@@ -39,7 +39,7 @@ public class RobotVisualisation : MonoBehaviour
 
     private static RobotVisualisation _instance;
 
-    private ROSLocomotion _rosLocomotion;
+    private ROSLocomotionDirect _rosLocomotionDirect;
 
     void Awake() {
         _instance = this;
@@ -111,7 +111,7 @@ public class RobotVisualisation : MonoBehaviour
     }
 
     public void Move(Vector2 movement) {
-        _rosLocomotion.PublishData(movement);
+        _rosLocomotionDirect.PublishData(movement);
     }
 
 }
