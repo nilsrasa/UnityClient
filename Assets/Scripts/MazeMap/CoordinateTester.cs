@@ -27,9 +27,11 @@ public class CoordinateTester : MonoBehaviour
 	    if (_test)
 	    {
 	        GeoPointMercator coordinatesMercator = _testPoint.transform.position.ToMercator();
-	        Debug.Log("Zero - Mercator: " + coordinatesMercator);
+	        Debug.Log("Test point - Mercator: " + coordinatesMercator);
 	        GeoPointWGS84 wgs84 = coordinatesMercator.ToWGS84();
-            Debug.Log("Zero - WGS84: " + wgs84);
+            Debug.Log("Test point - WGS84: " + wgs84);
+	        GeoPointUTM utm = wgs84.ToUTM();
+            Debug.Log("Test point - UTM: " + utm);
 
             _test = false;
 	    }
@@ -49,6 +51,6 @@ public class CoordinateTester : MonoBehaviour
             Debug.Log(Vector3.Distance(_testDistancePointA.position, _testDistancePointB.position) + "meters");
             _testDistance = false;
         }
-
+        Debug.DrawRay(transform.position, Vector3.forward * 100);
     }
 }

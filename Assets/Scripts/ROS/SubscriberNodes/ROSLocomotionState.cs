@@ -1,18 +1,19 @@
 ﻿using Messages;
 using Messages.sensor_msgs;
+using Messages.std_msgs;
 using Ros_CSharp;
 using UnityEngine;
 
 /// <summary>
 /// Ultrasound agent that sends or receives ultrasound data
 /// </summary>
-public class ROSTransformPosition : ROSAgent
+public class ROSLocomotionState : ROSAgent
 {
-    private const string TOPIC = "/robot_gps_pose";
+    private const string TOPIC = "/waypoint/robot_state";
 
     private NodeHandle _nodeHandle;
-    private Subscriber<NavSatFix> _subscriber;
-    private Publisher<NavSatFix> _publisher;
+    private Subscriber<String> _subscriber;
+    private Publisher<String> _publisher;
     private bool _isRunning;
     private AgentJob _job;
     
@@ -26,9 +27,9 @@ public class ROSTransformPosition : ROSAgent
         if (_isRunning) return;
         _nodeHandle = new NodeHandle();
         if(job == AgentJob.Subscriber)
-            _subscriber = _nodeHandle.subscribe<NavSatFix>(TOPIC, 1, ReceivedData);
+            _subscriber = _nodeHandle.subscribe<String>(TOPIC, 1, ReceivedData);
         else if (job == AgentJob.Publisher)
-            _publisher = _nodeHandle.advertise<NavSatFix>(TOPIC, 1, false);
+            _publisher = _nodeHandle.advertise<String>(TOPIC, 1, false);
         _isRunning = true;
         _job = job;
         Application.logMessageReceived += LogMessage;
@@ -37,7 +38,7 @@ public class ROSTransformPosition : ROSAgent
     public override void PublishData(object data)
     {
         if (_job != AgentJob.Publisher) return;
-        NavSatFix dataString = (NavSatFix) data;
+        String dataString = (String) data;
         _publisher.publish(dataString);
     }
 

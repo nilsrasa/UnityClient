@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class ROSLocomotionDirect : ROSAgent
 {
-    private const string TOPIC = "/control/locomotion";
+    private const string TOPIC = "/cmd_vel";
 
     private NodeHandle _nodeHandle;
     private Publisher<Twist> _publisher;
@@ -23,9 +23,9 @@ public class ROSLocomotionDirect : ROSAgent
         if (_isRunning) return;
         _nodeHandle = new NodeHandle();
         if (job == AgentJob.Publisher)
-            _publisher = _nodeHandle.advertise<Twist>(rosNamespace + TOPIC, 1, false);
+            _publisher = _nodeHandle.advertise<Twist>(TOPIC, 1, false);
         else if (job == AgentJob.Subscriber)
-            _subscriber = _nodeHandle.subscribe<Twist>(rosNamespace + TOPIC, 1, ReceivedData);
+            _subscriber = _nodeHandle.subscribe<Twist>(TOPIC, 1, ReceivedData);
         _job = job;
         _isRunning = true;
     }
@@ -58,7 +58,6 @@ public class ROSLocomotionDirect : ROSAgent
                 z = 0
             }
         };
-
         _publisher.publish(twist);
     }
 

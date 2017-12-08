@@ -1,13 +1,13 @@
-﻿using Messages;
+﻿using System;
+using Messages;
 using Ros_CSharp;
 using UnityEngine;
 using String = Messages.std_msgs.String;
 
 public class ROSLocomotionWaypointState : ROSAgent
 {
-    public enum WaypointState { RUNNING, STOP}
-
     private const string TOPIC = "/waypoint/state";
+    public enum RobotWaypointState { RUNNING, STOP, PARK }
 
     private NodeHandle _nodeHandle;
     private Publisher<String> _publisher;
@@ -44,7 +44,7 @@ public class ROSLocomotionWaypointState : ROSAgent
     public override void PublishData(object data)
     {
         if (_job != AgentJob.Publisher) return;
-        WaypointState state = (WaypointState) data;
+        RobotWaypointState state = (RobotWaypointState) (int)data;
         String msg = new String(state.ToString());
         _publisher.publish(msg);
     }

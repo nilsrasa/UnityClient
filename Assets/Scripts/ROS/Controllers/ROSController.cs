@@ -34,7 +34,7 @@ public class ROSController : MonoBehaviour
     {
         Debug.Log("---Stopping ROS---");
         ROS.shutdown();
-        //ROS.waitForShutdown(); Do we need this? 
+        ROS.waitForShutdown(); 
     }
 
     public virtual void Move(Vector2 movementCommand)
