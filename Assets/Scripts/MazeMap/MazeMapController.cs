@@ -9,6 +9,7 @@ public class MazeMapController : MonoBehaviour
 {
     [Header("Building Generation")]
     public float FloorHeight = 5;
+    [SerializeField] private float _lineWidth = 0.1f;
     [SerializeField] private Material _lineMaterial;
 
     [Header("Data Collection")]
@@ -19,9 +20,8 @@ public class MazeMapController : MonoBehaviour
 
     private const string REST_FLOOROUTLINES = "https://api.mazemap.com/api/flooroutlines/?campusid={0}&srid=4326";
     private const string REST_FLOOROUTLINE = "https://api.mazemap.com/api/flooroutlines/?floorid={0}&srid=4326";
-    private const string REST_FLOOROUTLINE_MERCATOR = "https://api.mazemap.com/api/flooroutlines/?floorid={0}&srid=900913";
     private const string REST_POI_SEARCH = "http://api.mazemap.com/api/pois/{0}/?srid=4326";
-    private const string REST_POI_SEARCH_MERCATOR = "http://api.mazemap.com/api/pois/{0}/?srid=900913";
+    private const string REST_POI_SEARCH_BY_FLOORID = "https://api.mazemap.com/api/pois/?floorid={0}&srid=4326";
     //Key: BuildingId, Value: Building data
     private Dictionary<int, Building> _buildings;
     //Key: Floor Z, Value: Floor Transform
@@ -51,6 +51,8 @@ public class MazeMapController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F))
             foreach (int point in _poiIds)
                 StartCoroutine(DrawPoiOutline(point));
+        if (Input.GetKeyDown(KeyCode.L))
+            StartCoroutine(DrawAllRooms());
     }
 
     private Building GetBuildingByName(string name)
@@ -116,7 +118,7 @@ public class MazeMapController : MonoBehaviour
         List<Transform> floorObjects = new List<Transform>();
         foreach (Floor floor in building.Floors)
         {
-            WWW www = new WWW(string.Format(_useMazemapMercator ? REST_FLOOROUTLINE_MERCATOR : REST_FLOOROUTLINE, floor.Id));
+            WWW www = new WWW(string.Format(REST_FLOOROUTLINE, floor.Id));
             yield return www;
             GameObject floorObject = DrawFloorOutlines(www.text);
             floorObject.name = floor.Name;
@@ -238,7 +240,7 @@ public class MazeMapController : MonoBehaviour
                     LineRenderer lr = floorPoint.gameObject.AddComponent<LineRenderer>();
                     lr.positionCount = floorPoint.childCount;
                     lr.material = _lineMaterial;
-                    lr.startWidth = lr.endWidth = 0.4f;
+                    lr.startWidth = lr.endWidth = _lineWidth;
                     for (int j = 0; j < floorPoint.childCount; j++) {
                         lr.SetPosition(j, floorPoint.GetChild(j).position);
                     }
@@ -252,7 +254,7 @@ public class MazeMapController : MonoBehaviour
                 LineRenderer lr = floor.gameObject.AddComponent<LineRenderer>();
                 lr.positionCount = points.Count;
                 lr.material = _lineMaterial;
-                lr.startWidth = lr.endWidth = 0.4f;
+                lr.startWidth = lr.endWidth = _lineWidth;
                 lr.SetPositions(points.ToArray());
             }
         }
@@ -264,7 +266,7 @@ public class MazeMapController : MonoBehaviour
         {
             LineRenderer lineRenderer = pointContainer.gameObject.AddComponent<LineRenderer>();
             lineRenderer.material = _lineMaterial;
-            lineRenderer.startWidth = lineRenderer.endWidth = 0.3f;
+            lineRenderer.startWidth = lineRenderer.endWidth = _lineWidth;
             lineRenderer.positionCount = pointContainer.childCount;
             int i = 0;
             foreach (Transform point in pointContainer)
@@ -275,18 +277,42 @@ public class MazeMapController : MonoBehaviour
         }
     }
 
-    private IEnumerator DrawPoiOutline(int poi)
+    private IEnumerator DrawAllRooms()
     {
-        WWW www = new WWW(string.Format(_useMazemapMercator ? REST_POI_SEARCH_MERCATOR : REST_POI_SEARCH, poi));
+        foreach (Building building in _buildings.Values)      {
+            foreach (Floor floor in building.Floors)
+            {
+                WWW www = new WWW(string.Format(REST_POI_SEARCH_BY_FLOORID, floor.Id));
+                yield return www;
+                JSONObject pois = new JSONObject(www.text)["pois"];
+                if (pois == null)
+                    continue;
+                foreach (JSONObject poi in pois)
+                {
+                    DrawPoiOutline(poi);
+                }
+            }
+        }
+    }
+
+    private IEnumerator DrawPoiOutline(int poiId)
+    {
+        WWW www = new WWW(string.Format(REST_POI_SEARCH, poiId));
         yield return www;
-        JSONObject feature = new JSONObject(www.text);
-        int z = (int)feature["z"].f;
+        JSONObject poi = new JSONObject(www.text);
+        DrawPoiOutline(poi);
+    }
+
+    private void DrawPoiOutline(JSONObject poi)
+    {
+        
+        int z = (int)poi["z"].f;
         if (z > 0) z--;
-        string name = feature["infos"][0]["name"].str;
-        string buildingName = feature["buildingName"].str;
+        string name = poi["infos"][0]["name"].str;
+        string buildingName = poi["buildingName"].str;
         GameObject room = new GameObject("room " + name);
 
-        foreach (JSONObject pos in feature["geometry"]["coordinates"]) {
+        foreach (JSONObject pos in poi["geometry"]["coordinates"]) {
             GameObject roomContainer = new GameObject("points");
             foreach (JSONObject coord in pos)
             {
