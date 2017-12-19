@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-class Floor
+public class Floor
 {
     public int Id;
     public string Name;

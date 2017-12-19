@@ -16,10 +16,6 @@ public class Sim_UltrasoundSensor : UnitySensor {
         SensorId = _sensorId;
     }
 
-    void Start() {
-        SensorBusController.Instance.Register<UltrasoundBus>(this);
-    }
-
     public float GetSensorData()
     {
         if (!IsRunning) return -1;

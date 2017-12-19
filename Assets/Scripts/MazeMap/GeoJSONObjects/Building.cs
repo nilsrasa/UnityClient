@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-class Building
+public class Building
 {
     public int Id;
     public int BuildingId;

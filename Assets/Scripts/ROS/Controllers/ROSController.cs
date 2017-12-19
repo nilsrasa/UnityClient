@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Ros_CSharp;
 using UnityEngine;
 using XmlRpc_Wrapper;
@@ -7,6 +8,8 @@ public class ROSController : MonoBehaviour
 {
     [SerializeField] protected string _robotNamespace;
     [SerializeField] protected string _clientNamespace;
+
+    protected bool _robotModelInitialised;
 
     protected virtual void OnApplicationQuit()
     {
@@ -37,9 +40,50 @@ public class ROSController : MonoBehaviour
         ROS.waitForShutdown(); 
     }
 
-    public virtual void Move(Vector2 movementCommand)
+    public virtual void MoveDirect(Vector2 movementCommand)
     {
         throw new NotImplementedException("Override this function");
     }
-    
+
+    public virtual void MoveToPoint(GeoPointWGS84 point) 
+    {
+        throw new NotImplementedException("Override this function");
+    }
+
+    public virtual void MovePath(List<GeoPointWGS84> waypoints) 
+    {
+        throw new NotImplementedException("Override this function");
+    }
+
+    public virtual void PausePath() 
+    {
+        throw new NotImplementedException("Override this function");
+    }
+
+    public virtual void ResumePath() 
+    {
+        throw new NotImplementedException("Override this function");
+    }
+
+    public virtual void StopPath() 
+    {
+        throw new NotImplementedException("Override this function");
+    }
+
+    protected virtual void InitialiseRobot() {
+        if (Param.has("robot_description"))
+        {
+            string robotDescription = "";
+            Debug.Log("Generating robot from robot description");
+            Param.get("robot_description", ref robotDescription);
+            GenerateRobot(robotDescription);
+        }
+        else
+            Debug.Log("---No robot description available - could not automatically generate robot---");
+        _robotModelInitialised = true;
+    }
+
+    private void GenerateRobot(string robotDescription) {
+        //_robot = RobotUrdfUtility.GenerateRobotGameObjectFromDescription(robotDescription, _alwaysGenerateRobot).transform;
+    }
 }

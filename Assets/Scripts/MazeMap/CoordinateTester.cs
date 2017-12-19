@@ -23,7 +23,7 @@ public class CoordinateTester : MonoBehaviour
     void Update () {
 	    if (Input.GetKeyDown(KeyCode.Space))
 	    {
-            ArlobotROSController.Instance.Move(transform.position);
+            ArlobotROSController.Instance.MoveToPoint(transform.position.ToMercator().ToWGS84());
         }
 
 	    if (_test)

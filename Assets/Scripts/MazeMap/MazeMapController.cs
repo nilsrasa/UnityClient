@@ -18,12 +18,13 @@ public class MazeMapController : MonoBehaviour
 
     public static MazeMapController Instance;
 
+    private const string REST_BUILDING_SEARCH = "https://api.mazemap.com/api/buildings/?campusid={0}&srid=4326";
     private const string REST_FLOOROUTLINES = "https://api.mazemap.com/api/flooroutlines/?campusid={0}&srid=4326";
     private const string REST_FLOOROUTLINE = "https://api.mazemap.com/api/flooroutlines/?floorid={0}&srid=4326";
     private const string REST_POI_SEARCH = "http://api.mazemap.com/api/pois/{0}/?srid=4326";
     private const string REST_POI_SEARCH_BY_FLOORID = "https://api.mazemap.com/api/pois/?floorid={0}&srid=4326";
     //Key: BuildingId, Value: Building data
-    private Dictionary<int, Building> _buildings;
+    public Dictionary<int, Building> Buildings;
     //Key: Floor Z, Value: Floor Transform
     private Dictionary<int, List<Transform>> _floorsByZ;
     //Key: Floor Z, Value: If layer is currently shown
@@ -34,7 +35,7 @@ public class MazeMapController : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        _buildings = new Dictionary<int, Building>();
+        Buildings = new Dictionary<int, Building>();
         _floorsByZ = new Dictionary<int, List<Transform>>();
         _zLayerActive = new Dictionary<int, bool>();
     }
@@ -42,25 +43,11 @@ public class MazeMapController : MonoBehaviour
     // Update is called once per frame
     void Update ()
     {
-        if (Input.GetKeyDown(KeyCode.G))
-            StartCoroutine(GetWWW("https://api.mazemap.com/api/buildings/?campusid=89&srid=4326", GetBuildings));
-        if (Input.GetKeyDown(KeyCode.B))
-            StartCoroutine(DrawBuilding(GetBuildingByName("371")));
-        if (Input.GetKeyDown(KeyCode.N))
-            DrawAllBuildings();
         if (Input.GetKeyDown(KeyCode.F))
             foreach (int point in _poiIds)
                 StartCoroutine(DrawPoiOutline(point));
         if (Input.GetKeyDown(KeyCode.L))
             StartCoroutine(DrawAllRooms());
-    }
-
-    private Building GetBuildingByName(string name)
-    {
-        foreach (KeyValuePair<int, Building> pair in _buildings)
-            if (pair.Value.Name == name)
-                return pair.Value;
-        return null;
     }
 
     private IEnumerator GetWWW(string url, Action<string> whenDone)
@@ -98,15 +85,15 @@ public class MazeMapController : MonoBehaviour
         }
         foreach (Building building in buildings)
         {
-            _buildings.Add(building.Id, building);
+            Buildings.Add(building.Id, building);
         }
 
-        Debug.Log("----Done getting buildings----");
+        DrawAllBuildings();
     }
 
     private void DrawAllBuildings()
     {
-        foreach (KeyValuePair<int, Building> pair in _buildings)
+        foreach (KeyValuePair<int, Building> pair in Buildings)
         {
             StartCoroutine(DrawBuilding(pair.Value));
         }
@@ -279,7 +266,7 @@ public class MazeMapController : MonoBehaviour
 
     private IEnumerator DrawAllRooms()
     {
-        foreach (Building building in _buildings.Values)      {
+        foreach (Building building in Buildings.Values)      {
             foreach (Floor floor in building.Floors)
             {
                 WWW www = new WWW(string.Format(REST_POI_SEARCH_BY_FLOORID, floor.Id));
@@ -305,7 +292,6 @@ public class MazeMapController : MonoBehaviour
 
     private void DrawPoiOutline(JSONObject poi)
     {
-        
         int z = (int)poi["z"].f;
         if (z > 0) z--;
         string name = poi["infos"][0]["name"].str;
@@ -352,5 +338,16 @@ public class MazeMapController : MonoBehaviour
         }
     }
 
+    public void GenerateCampus(int id)
+    {
+        StartCoroutine(GetWWW(string.Format(REST_BUILDING_SEARCH, id), GetBuildings));
+    }
+
+    public Building GetBuildingByName(string name) {
+        foreach (KeyValuePair<int, Building> pair in Buildings)
+            if (pair.Value.Name == name)
+                return pair.Value;
+        return null;
+    }
 
 }

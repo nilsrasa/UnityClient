@@ -1,56 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using Messages;
+using Messages.geometry_msgs;
 using Ros_CSharp;
 using UnityEngine;
-using XmlRpc_Wrapper;
+using Vector3 = UnityEngine.Vector3;
 
-public class RobotVisualisation : MonoBehaviour
+public class RobotVisualisation : ROSController
 {
     [SerializeField] private bool _runConjoinedWithSim;
-    [SerializeField] private float _dataSendRateMs = 50;
     [SerializeField] private string _ROS_MASTER_URI = "127.0.0.1:11311";
-    [SerializeField] private static string _topicNamespace = "/vrclient";
 
-    public const string NAMESPACE_ARLOBOT = "/arlobot";
-
-    private float _dataSendTimer;
     private SensorRepresentationBusController _sensorRepresentationBusController;
     private Dictionary<Type, ROSAgent> _rosAgents;
     private List<Type> _agentsWaitingToStart;
+    private Rigidbody _rigidbody;
 
-    public static RobotVisualisation Instance
-    {
-        get
-        {
-            if (_instance == null) {
-                GameObject go = new GameObject();
-                go.name = "ROSController";
-                _instance = go.AddComponent<RobotVisualisation>();
-            }
-            return _instance;
-
-        }
-        private set
-        {
-            _instance = value;
-        }
-    }
-
-    private static RobotVisualisation _instance;
+    public static RobotVisualisation Instance { get; private set; }
 
     private ROSLocomotionDirect _rosLocomotionDirect;
+    private ROSJoystick _rosJoystick;
+    private bool _hasJoystickDataToConsume;
+    private Twist _joystickDataToConsume;
 
     void Awake() {
-        _instance = this;
+        Instance = this;
         _rosAgents = new Dictionary<Type, ROSAgent>();
         _agentsWaitingToStart = new List<Type>();
+        _rigidbody = GetComponent<Rigidbody>();
     }
 
     void Start() {
         _sensorRepresentationBusController = SensorRepresentationBusController.Instance;
         if (!_runConjoinedWithSim)
-            StartROS();
+            StartROS(_ROS_MASTER_URI);
     }
 
     void Update() {
@@ -62,16 +45,24 @@ public class RobotVisualisation : MonoBehaviour
             }
             _agentsWaitingToStart = new List<Type>();
         }
-    }
 
-    void OnApplicationQuit() {
-        if (ROS.ok || ROS.isStarted() && !_runConjoinedWithSim)
-            StopROS();
+        if (_hasJoystickDataToConsume)
+        {
+            _rigidbody.velocity = transform.forward * (float) _joystickDataToConsume.linear.x;
+            _rigidbody.angularVelocity = new Vector3(0, (float)-_joystickDataToConsume.angular.z, 0);
+            _hasJoystickDataToConsume = false;
+        }
     }
 
     void DataReceived(ROSAgent sender, IRosMessage data)
     {
         _sensorRepresentationBusController.HandleData(sender, data);
+    }
+
+    private void ReceivedJoystickUpdate(ROSAgent sender, IRosMessage data)
+    {
+        _joystickDataToConsume = (Twist) data;
+        _hasJoystickDataToConsume = true;
     }
 
     public void StartAgent(Type agentType) {
@@ -80,38 +71,31 @@ public class RobotVisualisation : MonoBehaviour
             return;
         }
         ROSAgent agent = (ROSAgent)Activator.CreateInstance(agentType);
-        agent.StartAgent(ROSAgent.AgentJob.Subscriber, _topicNamespace);
+        agent.StartAgent(ROSAgent.AgentJob.Subscriber, "");
         _rosAgents.Add(agentType, agent);
         agent.DataWasReceived += DataReceived;
     }
 
-    public void StartROS()
+    public override void StartROS(string uri)
     {
-        if (!_runConjoinedWithSim)
-            return;
-        Debug.Log("---Starting ROS---");
-        if (!string.IsNullOrEmpty(_ROS_MASTER_URI))
-        {
-            if (!_ROS_MASTER_URI.Contains("http://"))
-                _ROS_MASTER_URI = "http://" + _ROS_MASTER_URI;
-        }
-        if (ROS.isStarted()) return;
-        ROS.Init(new string[0], "VRClient");
-        XmlRpcUtil.SetLogLevel(XmlRpcUtil.XMLRPC_LOG_LEVEL.ERROR);
+        base.StartROS(uri);
+
+        _rosJoystick = new ROSJoystick();
+        _rosJoystick.StartAgent(ROSAgent.AgentJob.Subscriber, "");
+        _rosJoystick.DataWasReceived += ReceivedJoystickUpdate;
     }
 
-    public void StopROS()
-    {
-        if (!_runConjoinedWithSim)
-            return;
-
-        Debug.Log("---Stopping ROS---");
-        ROS.shutdown();
-        //ROS.waitForShutdown(); Do we need this? 
+    public override void MoveToPoint(GeoPointWGS84 point) {
     }
 
-    public void Move(Vector2 movement) {
-        _rosLocomotionDirect.PublishData(movement);
+    public override void MovePath(List<GeoPointWGS84> waypoints) {
     }
+
+    public override void PausePath() {
+    }
+
+    public override void ResumePath() {
+    }
+
 
 }

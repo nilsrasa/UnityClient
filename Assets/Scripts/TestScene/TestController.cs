@@ -42,7 +42,7 @@ public class TestController : MonoBehaviour {
                 Vector2 controlResult = robotControl.GetControlResult(hit.point);
                 if (robotControl.IsActivated && _timer >= pollingRate / 1000f)
                 {
-                    ArlobotROSController.Instance.Move(controlResult);
+                    ArlobotROSController.Instance.MoveDirect(controlResult);
                     _timer = 0;
                 }
             }
@@ -53,7 +53,7 @@ public class TestController : MonoBehaviour {
             if (_robotControl == null) return;
             _robotControl.OnUnhover();
             if (_timer >= pollingRate / 1000f)
-                ArlobotROSController.Instance.Move(Vector2.zero);
+                ArlobotROSController.Instance.MoveDirect(Vector2.zero);
 
         }
     }

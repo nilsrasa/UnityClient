@@ -4,25 +4,14 @@ using UnityEngine;
 
 public class SensorBusController
 {
-
-    public static SensorBusController Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = new SensorBusController();
-            }
-            return _instance;
-        }
-    }
-    private static SensorBusController _instance;
-
     public List<SensorBus> SensorBusses { get; private set; }
 
-    public SensorBusController()
+    private VirtualRobot _controller;
+
+    public SensorBusController(VirtualRobot controller)
     {
         SensorBusses = new List<SensorBus>();
+        _controller = controller;
     }
 
     public SensorBus GetSensorBus<T>()
@@ -50,7 +39,7 @@ public class SensorBusController
         T sensorBus = (T)Activator.CreateInstance(typeof(T), new object[]{});
         sensorBus.Register(sensor);
         SensorBusses.Add(sensorBus);
-        SimulatedROSRobotController.Instance.StartAgent(sensorBus.ROSAgentType);
+        _controller.StartAgent(sensorBus.ROSAgentType);
     }
     
 }
