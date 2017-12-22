@@ -11,10 +11,10 @@ For tutorials and documentation on installing and running Unity see [Unity Manua
 ### Project contents
 The Unity projects contain two projects regarding ROS controlled robots, one being a client for a remote presence robots, one being a client and/or simulator.
 Unity is scene based, which means each project is placed in a separate scene.
-    * MazeMapModel: Client and simulator using mazemap for generating floor plan of robot's environment
-    * RobotControlTest: To test direct locomotion control with a ROS controlled robot.
-    * Telerobot_ThetaS_Normal: Direct control of robot through VR interface using Theta S 360 camera for navigation.
-    * Telerobot_ThetaS_Limited: Same as above but with a limited interface for use with only eyes. (Either on a screen or with a VR HMD)
+* MazeMapModel: Client and simulator using mazemap for generating floor plan of robot's environment
+* RobotControlTest: To test direct locomotion control with a ROS controlled robot.
+* Telerobot_ThetaS_Normal: Direct control of robot through VR interface using Theta S 360 camera for navigation.
+* Telerobot_ThetaS_Limited: Same as above but with a limited interface for use with only eyes. (Either on a screen or with a VR HMD)
 
 ### Setup Guide
 * Connect Unity and ROS machine through LAN/Wifi
