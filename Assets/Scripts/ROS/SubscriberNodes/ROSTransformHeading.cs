@@ -30,7 +30,7 @@ public class ROSTransformHeading : ROSAgent
             _publisher = _nodeHandle.advertise<Float32>(TOPIC, 1, false);
         _isRunning = true;
         _job = job;
-        Application.logMessageReceived += LogMessage;
+        //Application.logMessageReceived += LogMessage;
     }
 
     public override void PublishData(object data)

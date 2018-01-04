@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-//Button that can be activated through gaze. 
-//Extended from GazeObject and brings functionality such as coloring, button text and tooltips.
+/// <summary>
+/// Button that can be activated through gaze interaction.
+/// Extended from GazeObject and brings functionality such as coloring, button text and tooltips.
+/// </summary>
 public class GazeButton : GazeObject
 {
     [SerializeField] protected Image _background;
@@ -24,6 +26,7 @@ public class GazeButton : GazeObject
         _buttonText = GetComponentInChildren<Text>();
         _orgText = _buttonText.text;
 
+        //TODO: Find better solution
         //As unity's inspector encapsulates strings, they don't allow newline character
         //and they are therefore replaced with '#'
         if (_activatedTextOverride.Length > 0)

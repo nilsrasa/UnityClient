@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Video;
 
 //Controls the player experience and camera input
 public class StreamController : MonoBehaviour
@@ -70,9 +69,9 @@ public class StreamController : MonoBehaviour
     }
 
     /// <summary>
-    /// Starts animation of ascending the chair into the cockpit to start
+    /// Starts animation of ascending the chair into the cockpit to start.
+    /// Loops the chair so that the tube feels endless until a connection has been established.
     /// </summary>
-    /// Loops the seat so that the tube feels endless until a connection has been established
     private IEnumerator AscendChair()
     {
         while (_currentChairState != ChairState.Stopped)
@@ -111,6 +110,9 @@ public class StreamController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Turn on and off lights around the chair
+    /// </summary>
     private void ManageShaftLights()
     {
         List<Light> lightsToTurnOn = new List<Light>();

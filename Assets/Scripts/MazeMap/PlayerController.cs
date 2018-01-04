@@ -13,12 +13,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _mouseMovementSpeed = 5;
     [SerializeField] private float _mouseScrollSpeed = 10;
     [SerializeField] private float _mouseClickSpeed = 0.2f;
-    [SerializeField] private Transform _floor;
+    [SerializeField] private Transform _triggerFloor;
 
     public WaypointController WaypointController { get; private set; }
 
     private Camera _camera;
-    private int _currentActiveLevel = 0;
     private Vector3 _currentSelectedWaypoint;
     private Coroutine _mouseClickCheck;
     private bool _isMouseClick;
@@ -68,15 +67,13 @@ public class PlayerController : MonoBehaviour
 	    {
 	        transform.Translate(_camera.transform.forward * Input.GetAxis("Mouse ScrollWheel") * _mouseScrollSpeed);
 	        int level = GetCurrentActiveLevel();
-	        if (level != _currentActiveLevel)
+	        if (level != MazeMapController.Instance.CurrentActiveLevel)
 	        {
-	            _currentActiveLevel = level;
                 MazeMapController.Instance.SetActiveLayer(level);
-                _floor.position = new Vector3(_floor.position.x, level * MazeMapController.Instance.FloorHeight, _floor.position.z);
 	        }
 	    }
 
-        _floor.position = new Vector3(transform.position.x, _floor.position.y, transform.position.z);
+        _triggerFloor.position = new Vector3(transform.position.x, _triggerFloor.position.y, transform.position.z);
 
     }
 
@@ -132,7 +129,8 @@ public class PlayerController : MonoBehaviour
 
     public void FocusCameraOn(Transform target)
     {
-        
+        Vector3 pos = target.position - _camera.transform.forward * target.position.y;
+        transform.position = new Vector3(pos.x, transform.position.y, pos.z);
     }
 
 }

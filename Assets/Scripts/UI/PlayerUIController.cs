@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public class PlayerUIController : MonoBehaviour
 {
+    public static PlayerUIController Instance { get; private set; }
+
     private enum WaypointMode { Point, Route }
 
     [SerializeField] private Button _generateCampus;
@@ -29,6 +31,12 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Color _resumeColorNormal;
     [SerializeField] private Color _resumeColorHovered;
     [SerializeField] private Color _resumeColorDown;
+    [SerializeField] private Text _layerNumberText;
+    [SerializeField] private Button _layerUp;
+    [SerializeField] private Button _layerDown;
+    [SerializeField] private GameObject _loadingPanel;
+    [SerializeField] private Image _loadingFill;
+    [SerializeField] private Button _cancelLoad;
 
     [SerializeField] private InputField _campusId;
     [SerializeField] private InputField _buildingName;
@@ -69,6 +77,7 @@ public class PlayerUIController : MonoBehaviour
 
     void Awake()
     {
+        Instance = this;
         _generateCampus.onClick.AddListener(GenerateCampusButtonOnClick);
         _goToBuilding.onClick.AddListener(GoToBuildingOnClick);
         _nextRobot.onClick.AddListener(NextRobotOnClick);
@@ -97,16 +106,22 @@ public class PlayerUIController : MonoBehaviour
         _resumeRobotColorBlock.normalColor = _resumeColorNormal;
         _resumeRobotColorBlock.highlightedColor = _resumeColorHovered;
         _resumeRobotColorBlock.pressedColor = _resumeColorDown;
+
+        _layerUp.onClick.AddListener(() => { LayerChangeClick(true); });
+        _layerDown.onClick.AddListener(() => { LayerChangeClick(false); });
     }
 
     void Start()
     {
         _waypointController = PlayerController.Instance.WaypointController;
+        _layerNumberText.text = MazeMapController.Instance.CurrentActiveLevel.ToString();
     }
 
     private void GenerateCampusButtonOnClick()
     {
         int id = -1;
+        _loadingFill.fillAmount = 0;
+        _loadingPanel.SetActive(true);
         if (int.TryParse(_campusId.text, out id))
         {
             MazeMapController.Instance.GenerateCampus(id);
@@ -124,7 +139,9 @@ public class PlayerUIController : MonoBehaviour
 
         //Needs to be improved
         if (building != null)
+        {
             PlayerController.Instance.FocusCameraOn(building.Floors[0].RenderedModel);
+        }
     }
 
     private void NextRobotOnClick()
@@ -175,6 +192,17 @@ public class PlayerUIController : MonoBehaviour
         }
     }
 
+    private void LayerChangeClick(bool up)
+    {
+        MazeMapController.Instance.ChangeActiveLayer(up);
+        _layerNumberText.text = MazeMapController.Instance.CurrentActiveLevel.ToString();
+    }
+
+    private void SetLoadingVisible(bool isVisible)
+    {
+        _loadingPanel.SetActive(isVisible);
+    }
+
     public void SetDriveMode(bool isDriving)
     {
         _driveRobot.colors = isDriving ? _driveRobotStopColorBlock : _driveRobotColorBlock;
@@ -195,5 +223,16 @@ public class PlayerUIController : MonoBehaviour
             _selectedRobot.ResumePath();
         
         IsPaused = isPaused;
+    }
+
+    /// <summary>
+    /// Updates loading bar
+    /// </summary>
+    /// <param name="percentDone">Value 0..1</param>
+    public void UpdateLoadingProgress(float percentDone)
+    {
+        _loadingFill.fillAmount = percentDone;
+        if (percentDone >= 1)
+            _loadingPanel.SetActive(false);
     }
 }

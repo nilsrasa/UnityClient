@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-//Base clase of all gaze-interacted objects. 
+//Base class of all gaze-interacted objects. 
 public class GazeObject : MonoBehaviour {
 
     [SerializeField] protected float _dwellTime;
@@ -20,24 +20,23 @@ public class GazeObject : MonoBehaviour {
     protected bool _isEnabled = true;
 
     public delegate void OnActivated(GazeObject button);
-    public event GazeButton.OnActivated Activated;
+    public event OnActivated Activated;
     public delegate void OnHovered(GazeObject button);
-    public event GazeButton.OnHovered Hovered;
+    public event OnHovered Hovered;
     public delegate void OnUnhovered(GazeObject button);
-    public event GazeButton.OnUnhovered Unhovered;
+    public event OnUnhovered Unhovered;
     public bool Gazed { get; protected set; }
     public bool IsActivated { get; protected set; }
 
     protected virtual void Awake() {
         _collider = GetComponent<BoxCollider>();
-        _dwellTime = _dwellTime / 1000f;
         IsActivated = _startStatus;
         _rect = GetComponent<RectTransform>();
     }
 
     protected virtual void Start()
     {
-        //Not implemented
+        _dwellTime = _dwellTime / 1000f;
     }
 
     protected virtual void Update() {
@@ -62,22 +61,20 @@ public class GazeObject : MonoBehaviour {
             IsActivated = !IsActivated;
         else IsActivated = true;
 
-        if (Activated != null)
-            Activated(this);
+        Activated?.Invoke(this);
     }
 
     public virtual void OnHover() {
         Gazed = true;
-        if (Hovered != null)
-            Hovered(this);
+        Hovered?.Invoke(this);
     }
 
     public virtual void OnUnhover() {
         if (IsActivated && _oneTimeUse) return;
         Gazed = false;
         _locked = false;
-        if (Unhovered != null)
-            Unhovered(this);
+        Unhovered?.Invoke(this);
+
         if (!_retainAccumulatedDwell) _dwellTimer = 0;
         if (!_useToggle)
             IsActivated = false;

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class Floor
 {
@@ -8,6 +9,7 @@ public class Floor
     public int Z;
     public int FloorOutlineId;
     public Transform RenderedModel;
+    public Dictionary<int, Room> Rooms = new Dictionary<int, Room>();
 
     public override string ToString()
     {

@@ -30,7 +30,7 @@ public class ROSJoystick : ROSAgent {
             _publisher = _nodeHandle.advertise<Twist>(TOPIC, 1, false);
         _isRunning = true;
         _job = job;
-        Application.logMessageReceived += LogMessage;
+        //Application.logMessageReceived += LogMessage;
     }
 
     public override void PublishData(object data) {
