@@ -19,14 +19,15 @@ public class Locomotion_Keyboard : ROSAgent {
     /// <param name="job">Defines behaviour of agent</param>
     /// <param name="rosNamespace">Namespace the agent listens or writes to + topic</param>
     ///</summary>
-    public override void StartAgent(AgentJob job, string rosNamespace) {
-        base.StartAgent(job, rosNamespace);
+    public override void StartAgent(AgentJob job) 
+    {
+        base.StartAgent(job);
         if (_isRunning) return;
         _nodeHandle = new NodeHandle();
         if (job == AgentJob.Subscriber)
-            _subscriber = _nodeHandle.subscribe<String>(rosNamespace + TOPIC, 1, ReceivedData);
+            _subscriber = _nodeHandle.subscribe<String>(TOPIC, 1, ReceivedData);
         else if (job == AgentJob.Publisher)
-            _publisher = _nodeHandle.advertise<String>(rosNamespace + TOPIC, 1, false);
+            _publisher = _nodeHandle.advertise<String>(TOPIC, 1, false);
         _isRunning = true;
         _job = job;
         //Application.logMessageReceived += LogMessage;

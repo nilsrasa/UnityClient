@@ -5,26 +5,32 @@ using UnityEngine;
 
 namespace Assets.Scripts {
     public static class GeoUtils {
-        public static bool MercatorOriginSet;
+        public static bool UtmOriginSet;
 
-        static GeoPointMercator _mercatorOrigin;
+        static GeoPointUTM _utmOrigin;
         private static readonly ICoordinateTransformation _transformationFromWGS84ToMercator;
         private static readonly ICoordinateTransformation _transformationFromMercatorToWGS84;
         private static readonly ICoordinateTransformation _transformationFromWGS84ToUTM;
         private static readonly ICoordinateTransformation _transformationFromUTMToUGS84;
+        private static readonly ICoordinateTransformation _transformationFromUTMToMercator;
+        private static readonly ICoordinateTransformation _transformationFromMercatorToUTM;
 
-        private const int UTM_ZONE = 34;
-        private const bool UTM_NORTH = true;
+        private static int _utmZone;
+        private static bool _utmNorth;
 
         static GeoUtils()
         {
+            _utmZone = ConfigManager.ConfigFile.UtmZone;
+            _utmNorth = ConfigManager.ConfigFile.IsUtmNorth;
             CoordinateTransformationFactory _ctf = new CoordinateTransformationFactory();
+            _transformationFromWGS84ToUTM = _ctf.CreateFromCoordinateSystems(GeographicCoordinateSystem.WGS84, ProjectedCoordinateSystem.WGS84_UTM(_utmZone, _utmNorth));
             _transformationFromWGS84ToMercator = _ctf.CreateFromCoordinateSystems(GeographicCoordinateSystem.WGS84, ProjectedCoordinateSystem.WebMercator);
             _transformationFromMercatorToWGS84 = _ctf.CreateFromCoordinateSystems(ProjectedCoordinateSystem.WebMercator, GeographicCoordinateSystem.WGS84);
-            _transformationFromWGS84ToUTM = _ctf.CreateFromCoordinateSystems(GeographicCoordinateSystem.WGS84, ProjectedCoordinateSystem.WGS84_UTM(UTM_ZONE, UTM_NORTH));
-            _transformationFromUTMToUGS84 = _ctf.CreateFromCoordinateSystems(ProjectedCoordinateSystem.WGS84_UTM(UTM_ZONE, UTM_NORTH), GeographicCoordinateSystem.WGS84);
+            _transformationFromUTMToUGS84 = _ctf.CreateFromCoordinateSystems(ProjectedCoordinateSystem.WGS84_UTM(_utmZone, _utmNorth), GeographicCoordinateSystem.WGS84);
+            _transformationFromUTMToMercator = _ctf.CreateFromCoordinateSystems(ProjectedCoordinateSystem.WGS84_UTM(_utmZone, _utmNorth), ProjectedCoordinateSystem.WebMercator);
+            _transformationFromMercatorToUTM = _ctf.CreateFromCoordinateSystems(ProjectedCoordinateSystem.WebMercator, ProjectedCoordinateSystem.WGS84_UTM(_utmZone, _utmNorth));
 
-            _mercatorOrigin = default(GeoPointMercator);
+            _utmOrigin = default(GeoPointUTM);
         }
 
         public static GeoPointWGS84 ToWGS84(this GeoPointMercator geoPoint) 
@@ -42,33 +48,43 @@ namespace Assets.Scripts {
             return new GeoPointUTM(_transformationFromWGS84ToUTM.MathTransform.Transform(geoPoint.ToArray()));
         }
 
+        public static GeoPointUTM ToUTM(this GeoPointMercator geoPoint)
+        {
+            return new GeoPointUTM(_transformationFromMercatorToUTM.MathTransform.Transform(geoPoint.ToArray()));
+        }
+
+        public static GeoPointMercator ToMercator(this GeoPointUTM geoPoint)
+        {
+            return new GeoPointMercator(_transformationFromUTMToMercator.MathTransform.Transform(geoPoint.ToArray()));
+        }
+
         public static GeoPointMercator ToMercator(this GeoPointWGS84 geoPoint)
         {
             return new GeoPointMercator(_transformationFromWGS84ToMercator.MathTransform.Transform(geoPoint.ToArray()));
         }
 
-        public static GeoPointMercator MercatorOrigin
+        public static GeoPointUTM UtmOrigin
         {
-            get { return _mercatorOrigin; }
+            get { return _utmOrigin; }
             set
             {
-                _mercatorOrigin = value;
-                MercatorOriginSet = true;
+                _utmOrigin = value;
+                UtmOriginSet = true;
             }
         }
 
-        public static GeoPointMercator ToMercator(this Vector3 position)
+        public static GeoPointUTM ToUTM(this Vector3 position)
         {
-            return _mercatorOrigin + new GeoPointMercator {
+            return _utmOrigin + new GeoPointUTM {
                 latitude = position.z,
                 longitude = position.x,
                 altitude = position.y,
             };
         }
 
-        public static Vector3 ToUnity(this GeoPointMercator geoPoint)
+        public static Vector3 ToUnity(this GeoPointUTM geoPoint)
         {
-            GeoPointMercator ucs = geoPoint - _mercatorOrigin;
+            GeoPointUTM ucs = geoPoint - _utmOrigin;
             return new Vector3(x: (float)ucs.longitude, y: (float)ucs.altitude, z: (float)ucs.latitude);
         }
     }

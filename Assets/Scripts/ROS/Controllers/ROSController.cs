@@ -6,9 +6,6 @@ using XmlRpc_Wrapper;
 
 public class ROSController : MonoBehaviour
 {
-    [SerializeField] protected string _robotNamespace;
-    [SerializeField] protected string _clientNamespace;
-
     protected bool _robotModelInitialised;
 
     protected virtual void OnApplicationQuit()

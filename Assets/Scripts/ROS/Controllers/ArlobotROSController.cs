@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Assets.Scripts;
 using Messages;
-using Messages.geometry_msgs;
 using Messages.sensor_msgs;
 using Messages.std_msgs;
 using UnityEngine;
+using UnityEngine.UI;
 using Quaternion = UnityEngine.Quaternion;
 using String = Messages.std_msgs.String;
 using Vector3 = UnityEngine.Vector3;
 
 public class ArlobotROSController : ROSController {
 
-    [SerializeField] private string _ROS_MASTER_URI = "127.0.0.1:11311";
-    [SerializeField] private float _waypointDistanceThreshhold = 0.1f;
-    [SerializeField] private float _maxLinearSpeed = 3;
-    [SerializeField] private float _linearSpeedParam = 3;
-    [SerializeField] private float _angularSpeedParam = 1;
     [SerializeField] private int _waypointStartIndex = 0;
+    [SerializeField] private RawImage _cameraImage;
 
     private enum RobotLocomotionState { MOVING, STOPPED }
     private enum RobotLocomotionType { WAYPOINT, DIRECT }
@@ -36,6 +30,7 @@ public class ArlobotROSController : ROSController {
     private ROSLocomotionSpeedParams _rosLocomotionSpeedParams;
     private RobotLocomotionState _currentRobotLocomotionState;
     private RobotLocomotionType _currenLocomotionType = RobotLocomotionType.DIRECT;
+    private ROSCamera _rosCamera;
 
     private List<GeoPointWGS84> _waypoints;
 
@@ -46,19 +41,30 @@ public class ArlobotROSController : ROSController {
     private float _oldMaxLinearSpeed;
     private float _oldLinearSpeedParam;
     private float _oldAngularSpeedParam;
+    private CompressedImage _cameraDataToConsume;
+    private CameraInfo _cameraInfoToConsume;
+    private bool _hasCameraDataToConsume;
 
     //Navigation
     private Vector3 _currentWaypoint;
-    private int _waypointIndex = 0;
+    private int _waypointIndex;
+    private float _waypointDistanceThreshhold = 0.1f;
+    private float _maxLinearSpeed = 3;
+    private float _linearSpeedParam = 3;
+    private float _angularSpeedParam = 1;
 
     void Awake()
     {
         Instance = this;
+        _waypointDistanceThreshhold = ConfigManager.ConfigFile.WaypointDistanceThreshold;
+        _maxLinearSpeed = ConfigManager.ConfigFile.MaxLinearSpeed;
+        _linearSpeedParam = ConfigManager.ConfigFile.LinearSpeedParameter;
+        _angularSpeedParam = ConfigManager.ConfigFile.AngularSpeedParameter;
     }
 
     void Start()
     {
-        StartROS(_ROS_MASTER_URI);
+        StartROS(ConfigManager.ConfigFile.RosMasterUri);
     }
 
     void Update()
@@ -97,6 +103,7 @@ public class ArlobotROSController : ROSController {
             //Waypoint reached
             if (Vector3.Distance(transform.position, _currentWaypoint) < _waypointDistanceThreshhold)
             {
+                Debug.Log("STOP");
                 if (_waypointIndex < _waypoints.Count - 1)
                     MoveToNextWaypoint();
                 else
@@ -115,6 +122,14 @@ public class ArlobotROSController : ROSController {
         {
             transform.position = _positionDataToConsume;
             _hasPositionDataToConsume = false;
+        }
+        if (_hasCameraDataToConsume)
+        {
+            lock (_cameraDataToConsume)
+            {
+                _cameraImage.texture = ROSCamera.ConvertToTexture2D(_cameraDataToConsume, _cameraInfoToConsume);
+                _hasCameraDataToConsume = false;
+            }
         }
 
         if (_maxLinearSpeed != _oldMaxLinearSpeed)
@@ -144,15 +159,25 @@ public class ArlobotROSController : ROSController {
     {
         _waypointIndex = _waypointStartIndex;
         _currenLocomotionType = RobotLocomotionType.WAYPOINT;
-        _currentWaypoint = new Vector3(0, 10, 0) + _waypoints[_waypointIndex].ToMercator().ToUnity();
+        _currentWaypoint = new Vector3(0, 10, 0) + _waypoints[_waypointIndex].ToUTM().ToUnity();
         Move(_currentWaypoint);
     }
 
     private void MoveToNextWaypoint()
     {
         _waypointIndex++;
-        _currentWaypoint = new Vector3(0, 10, 0) + _waypoints[_waypointIndex].ToMercator().ToUnity();
+        _currentWaypoint = new Vector3(0, 10, 0) + _waypoints[_waypointIndex].ToUTM().ToUnity();
         Move(_currentWaypoint);
+    }
+
+    private void HandleImage(ROSAgent sender, CompressedImage compressedImage, CameraInfo info)
+    {
+        lock (_cameraDataToConsume) 
+        {
+            _cameraInfoToConsume = info;
+            _cameraDataToConsume = compressedImage;
+            _hasCameraDataToConsume = true;
+        }
     }
 
     public override void StopPath()
@@ -165,31 +190,34 @@ public class ArlobotROSController : ROSController {
     public override void StartROS(string uri) {
         base.StartROS(uri);
         _rosLocomotionDirect = new ROSLocomotionDirect();
-        _rosLocomotionDirect.StartAgent(ROSAgent.AgentJob.Publisher, _clientNamespace);
+        _rosLocomotionDirect.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosLocomotionWaypoint = new ROSLocomotionWaypoint();
-        _rosLocomotionWaypoint.StartAgent(ROSAgent.AgentJob.Publisher, _clientNamespace);
+        _rosLocomotionWaypoint.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosLocomotionWaypointState = new ROSLocomotionWaypointState();
-        _rosLocomotionWaypointState.StartAgent(ROSAgent.AgentJob.Publisher, _clientNamespace);
+        _rosLocomotionWaypointState.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosLocomotionSpeedParams = new ROSLocomotionSpeedParams();
-        _rosLocomotionSpeedParams.StartAgent(ROSAgent.AgentJob.Publisher, _clientNamespace);
+        _rosLocomotionSpeedParams.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosLocomotionLinear = new ROSLocomotionLinearSpeed();
-        _rosLocomotionLinear.StartAgent(ROSAgent.AgentJob.Publisher, _clientNamespace);
+        _rosLocomotionLinear.StartAgent(ROSAgent.AgentJob.Publisher);
         //_rosUltrasound = new ROSUltrasound();
        //_rosUltrasound.StartAgent(ROSAgent.AgentJob.Subscriber, _clientNamespace);
         _rosTransformPosition = new ROSTransformPosition();
-        _rosTransformPosition.StartAgent(ROSAgent.AgentJob.Subscriber, _clientNamespace);
+        _rosTransformPosition.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosTransformPosition.DataWasReceived += ReceivedPositionUpdate;
         _rosTransformHeading = new ROSTransformHeading();
-        _rosTransformHeading.StartAgent(ROSAgent.AgentJob.Subscriber, _clientNamespace);
+        _rosTransformHeading.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosTransformHeading.DataWasReceived += ReceivedHeadingUpdate;
         _rosLocomotionState = new ROSLocomotionState();
-        _rosLocomotionState.StartAgent(ROSAgent.AgentJob.Subscriber, _clientNamespace);
+        _rosLocomotionState.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosLocomotionState.DataWasReceived += ReceivedLocomotionStateUpdata;
+        //_rosCamera = new ROSCamera();
+        //_rosCamera.StartAgent(ROSAgent.AgentJob.Subscriber);
+        //_rosCamera.DataWasReceived += HandleImage;
     }
 
     private void Move(Vector3 position)
     {
-        GeoPointWGS84 point = position.ToMercator().ToWGS84();
+        GeoPointWGS84 point = position.ToUTM().ToWGS84();
         _rosLocomotionWaypoint.PublishData(point);
         _currentWaypoint = position;
         _currenLocomotionType = RobotLocomotionType.WAYPOINT;
@@ -230,9 +258,9 @@ public class ArlobotROSController : ROSController {
             longitude = nav.longitude,
             altitude = nav.altitude,
         };
-        if (GeoUtils.MercatorOriginSet)
+        if (GeoUtils.UtmOriginSet)
         {
-            _positionDataToConsume = geoPoint.ToMercator().ToUnity() + new Vector3(0, 10, 0);
+            _positionDataToConsume = geoPoint.ToUTM().ToUnity() + new Vector3(0, 10, 0);
 
             _hasPositionDataToConsume = true;
             

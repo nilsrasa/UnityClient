@@ -8,6 +8,7 @@ using UnityEngine;
 public class WaypointController : MonoBehaviour {
 
 	public enum WaypointMode { Single, Route }
+    public static WaypointController Instance { get; private set; }
 
     [SerializeField] private GameObject _waypointMarkerPrefab;
 
@@ -19,74 +20,27 @@ public class WaypointController : MonoBehaviour {
     private WaypointMode _currentWaypointMode = WaypointMode.Single;
     private List<WaypointMarker> _waypointMarkers;
     private LineRenderer _lineRenderer;
-
-    //Testing
-    [Header("Testing Parameters")]
-    [SerializeField] private string _saveRouteName = "route";
-    [SerializeField] private bool _saveRoute;
-    [SerializeField] private bool _loadRoute;
-    private string _routePath;
+    private readonly Dictionary<string, List<GeoPointWGS84>> _savedRoutes = new Dictionary<string, List<GeoPointWGS84>>();
 
     void Awake()
     {
-        _routePath = Application.persistentDataPath + "/routes";
-        if (!Directory.Exists(_routePath))
-            Directory.CreateDirectory(_routePath);
+        Instance = this;
         _waypointMarkers = new List<WaypointMarker>();
         _lineRenderer = GetComponent<LineRenderer>();
     }
 
-    void Update()
+    void Start()
     {
-        if (_saveRoute)
+        LoadInPathsFromConfig();
+    }
+
+    private void LoadInPathsFromConfig()
+    {
+        List<ConfigFile.WaypointRoute> jsonRoutes = ConfigManager.ConfigFile.Routes;
+        foreach (ConfigFile.WaypointRoute route in jsonRoutes)
         {
-            _saveRoute = false;
-
-            string route = "";
-            foreach (WaypointMarker marker in _waypointMarkers)
-            {
-                GeoPointWGS84 point = marker.transform.position.ToMercator().ToWGS84();
-                route += string.Format("{0}/{1}/{2}&", point.longitude, marker.transform.position.y, point.latitude);
-            }
-            StreamWriter writer = new StreamWriter(_routePath+"/"+_saveRouteName+".txt", false);
-            writer.WriteLine(route);
-            writer.Close();
-
+            _savedRoutes.Add(route.Name, route.Points);
         }
-        if (_loadRoute)
-        {
-            _loadRoute = false;
-            StreamReader reader;
-            try {
-                reader = new StreamReader(_routePath + "/" + _saveRouteName + ".txt");
-            }
-            catch (FileNotFoundException e)
-            {
-                Console.WriteLine(e);
-                return;
-            }
-
-            if (_currentWaypointMode != WaypointMode.Route) ToggleWaypointMode();
-            string[] points = reader.ReadToEnd().Split('&');
-            foreach (string point in points) {
-
-                string[] axis = point.Split('/');
-                if (axis.Length <= 1)
-                    continue;
-                GeoPointWGS84 coord = new GeoPointWGS84
-                {
-                    longitude = double.Parse(axis[0]),
-                    altitude = double.Parse(axis[1]),
-                    latitude = double.Parse(axis[2]),
-                };
-                Vector3 v = coord.ToMercator().ToUnity();
-                v += new Vector3(0, (float)coord.altitude, 0);
-                CreateWaypoint(v);
-            }
-            
-            reader.Close();
-        }
-
     }
 
     public void CreateWaypoint(Vector3 waypointPosition)
@@ -140,5 +94,32 @@ public class WaypointController : MonoBehaviour {
             Destroy(marker.gameObject);
         _waypointMarkers = new List<WaypointMarker>();
         _lineRenderer.positionCount = 0;
+    }
+
+    public void LoadRoute(string routeName)
+    {
+        if (!MazeMapController.Instance.CampusLoaded) return;
+        if (_savedRoutes.ContainsKey(routeName))
+        {
+            ClearAllWaypoints();
+            List<GeoPointWGS84> routePoints = _savedRoutes[routeName];
+            foreach (GeoPointWGS84 point in routePoints)
+            {
+                CreateWaypoint(point.ToUTM().ToUnity());
+            }
+        }
+    }
+
+    public void SaveRoute(string routeName)
+    {
+        if (_waypointMarkers.Count == 0) return;
+        List<GeoPointWGS84> route = GetPath().Select(point => point.ToUTM().ToWGS84()).ToList();
+        if (_savedRoutes.ContainsKey(routeName))
+            _savedRoutes[routeName] = route;
+        else
+        {
+            _savedRoutes.Add(routeName, route);
+        }
+        ConfigManager.SaveRoute(routeName, route);
     }
 }

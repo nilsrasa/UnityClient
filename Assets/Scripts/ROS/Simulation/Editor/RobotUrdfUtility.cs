@@ -156,7 +156,7 @@ public class RobotUrdfUtility {
                 child.transform.localPosition = new Vector3((float)joint.Value.Origin.Xyz.X, (float)joint.Value.Origin.Xyz.Y, (float)joint.Value.Origin.Xyz.Z);
             }
             else {
-                // URDF considers going up as the Z-axis where as unity consider going up is Y-axis
+                // URDF considers going up as the FloorIndex-axis where as unity consider going up is Y-axis
                 child.transform.localPosition = new Vector3((float)joint.Value.Origin.Xyz.X, (float)joint.Value.Origin.Xyz.Z, (float)joint.Value.Origin.Xyz.Y);
             }
 

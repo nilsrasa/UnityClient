@@ -71,7 +71,7 @@ public class RobotVisualisation : ROSController
             return;
         }
         ROSAgent agent = (ROSAgent)Activator.CreateInstance(agentType);
-        agent.StartAgent(ROSAgent.AgentJob.Subscriber, "");
+        agent.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosAgents.Add(agentType, agent);
         agent.DataWasReceived += DataReceived;
     }
@@ -81,7 +81,7 @@ public class RobotVisualisation : ROSController
         base.StartROS(uri);
 
         _rosJoystick = new ROSJoystick();
-        _rosJoystick.StartAgent(ROSAgent.AgentJob.Subscriber, "");
+        _rosJoystick.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosJoystick.DataWasReceived += ReceivedJoystickUpdate;
     }
 

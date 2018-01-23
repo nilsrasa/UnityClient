@@ -22,6 +22,8 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Color _routeColorDown;
     [SerializeField] private Button _clearAllWaypoints;
     [SerializeField] private Button _driveRobot;
+    [SerializeField] private Button _loadRoute;
+    [SerializeField] private Button _saveRoute;
     //[SerializeField] private Color _driveRobotStopColorNormal;
     //[SerializeField] private Color _driveRobotStopColorHovered;
     //[SerializeField] private Color _driveRobotStopColorDown;
@@ -36,10 +38,10 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Button _layerDown;
     [SerializeField] private GameObject _loadingPanel;
     [SerializeField] private Image _loadingFill;
-    [SerializeField] private Button _cancelLoad;
 
     [SerializeField] private InputField _campusId;
     [SerializeField] private InputField _buildingName;
+    [SerializeField] private InputField _routeName;
 
     private WaypointMode CurrentWaypointMode
     {
@@ -84,6 +86,8 @@ public class PlayerUIController : MonoBehaviour
         _toggleWaypointMode.onClick.AddListener(ToggleWaypointModeOnClick);
         _clearAllWaypoints.onClick.AddListener(ClearAllWaypointsOnClick);
         _driveRobot.onClick.AddListener(DriveRobotOnClick);
+        _loadRoute.onClick.AddListener(LoadRouteClick);
+        _saveRoute.onClick.AddListener(SaveRouteClick);
         _pauseRobot.onClick.AddListener(PauseRobotOnClick);
 
         _toggleWaypointPointColorBlock = _toggleWaypointMode.colors;
@@ -107,6 +111,7 @@ public class PlayerUIController : MonoBehaviour
         _resumeRobotColorBlock.highlightedColor = _resumeColorHovered;
         _resumeRobotColorBlock.pressedColor = _resumeColorDown;
 
+
         _layerUp.onClick.AddListener(() => { LayerChangeClick(true); });
         _layerDown.onClick.AddListener(() => { LayerChangeClick(false); });
     }
@@ -119,6 +124,7 @@ public class PlayerUIController : MonoBehaviour
 
     private void GenerateCampusButtonOnClick()
     {
+        MazeMapController.Instance.ClearAll();
         int id = -1;
         _loadingFill.fillAmount = 0;
         _loadingPanel.SetActive(true);
@@ -140,13 +146,15 @@ public class PlayerUIController : MonoBehaviour
         //Needs to be improved
         if (building != null)
         {
-            PlayerController.Instance.FocusCameraOn(building.Floors[0].RenderedModel);
+            PlayerController.Instance.FocusCameraOn(building.Floors.First().Value.RenderedModel);
         }
     }
 
     private void NextRobotOnClick()
     {
         _selectedRobot = RobotMasterController.Instance.GetNextRobot();
+        if (_selectedRobot == null) return;
+
         PlayerController.Instance.FocusCameraOn(_selectedRobot.transform);
         _driveRobot.interactable = true;
     }
@@ -172,7 +180,7 @@ public class PlayerUIController : MonoBehaviour
         }
         else
         {
-            List<GeoPointWGS84> path = _waypointController.GetPath().Select(point => point.ToMercator().ToWGS84()).ToList();
+            List<GeoPointWGS84> path = _waypointController.GetPath().Select(point => point.ToUTM().ToWGS84()).ToList();
             _selectedRobot.MovePath(path);
             SetPauseMode(true);
             SetDriveMode(true);
@@ -198,9 +206,14 @@ public class PlayerUIController : MonoBehaviour
         _layerNumberText.text = MazeMapController.Instance.CurrentActiveLevel.ToString();
     }
 
-    private void SetLoadingVisible(bool isVisible)
+    private void LoadRouteClick()
     {
-        _loadingPanel.SetActive(isVisible);
+        WaypointController.Instance.LoadRoute(_routeName.text);
+    }
+
+    private void SaveRouteClick()
+    {
+        WaypointController.Instance.SaveRoute(_routeName.text);
     }
 
     public void SetDriveMode(bool isDriving)

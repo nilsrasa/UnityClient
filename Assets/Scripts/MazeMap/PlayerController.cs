@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Assets.Scripts;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -30,9 +26,10 @@ public class PlayerController : MonoBehaviour
     }
 
 	void Update () {
+	    if (!MazeMapController.Instance.CampusLoaded) return;
         //Input events
 
-	    //Check if left mouse button was clicked or held
+        //Check if left mouse button was clicked or held
         if (Input.GetMouseButtonDown(0))
 	    {
 	        _mouseClickCheck = StartCoroutine(CheckForClick(_mouseClickSpeed));
@@ -66,20 +63,10 @@ public class PlayerController : MonoBehaviour
 	    if (Input.GetAxis("Mouse ScrollWheel") != 0)
 	    {
 	        transform.Translate(_camera.transform.forward * Input.GetAxis("Mouse ScrollWheel") * _mouseScrollSpeed);
-	        int level = GetCurrentActiveLevel();
-	        if (level != MazeMapController.Instance.CurrentActiveLevel)
-	        {
-                MazeMapController.Instance.SetActiveLayer(level);
-	        }
 	    }
 
         _triggerFloor.position = new Vector3(transform.position.x, _triggerFloor.position.y, transform.position.z);
 
-    }
-
-    private int GetCurrentActiveLevel()
-    {
-        return Mathf.FloorToInt((transform.position.y - MazeMapController.Instance.FloorHeight *3) / MazeMapController.Instance.FloorHeight);
     }
 
     private IEnumerator CheckForClick(float time)
@@ -113,18 +100,6 @@ public class PlayerController : MonoBehaviour
 
             WaypointController.CreateWaypoint(hit.point);
         }
-    }
-
-    private void ToggleWaypointModeButtonClicked()
-    {
-        WaypointController.ToggleWaypointMode();
-    }
-
-    private void StartPathButtonClicked()
-    {
-        List<Vector3> pathInUnity = WaypointController.GetPath();
-        List<GeoPointWGS84> pathInWgs84 = pathInUnity.Select(point => point.ToMercator().ToWGS84()).ToList();
-        ArlobotROSController.Instance.MovePath(pathInWgs84);
     }
 
     public void FocusCameraOn(Transform target)

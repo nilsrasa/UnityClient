@@ -11,7 +11,7 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: DefaultCompany
+  companyName: DTU-R3
   productName: Telerobots-VR-Client
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
@@ -566,7 +566,7 @@ PlayerSettings:
   additionalIl2CppArgs: 
   scriptingRuntimeVersion: 1
   apiCompatibilityLevelPerPlatform:
-    Standalone: 1
+    Standalone: 3
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: Telerobots-VR-Client
@@ -645,7 +645,7 @@ PlayerSettings:
     Collab: 1
     UNet: 1
   facebookSdkVersion: 7.9.1
-  apiCompatibilityLevel: 2
+  apiCompatibilityLevel: 3
   cloudProjectId: 78e08d68-a7b9-434d-b480-eb3de0c95739
   projectName: Telerobots-VR-Client
   organizationId: telerobots

@@ -1,0 +1,50 @@
+{
+	"RosMasterUri": "raspi-ros00:11311",
+	"WaypointDistanceThreshold": 0.44999998807907107,
+	"MaxLinearSpeed": 3.0,
+	"LinearSpeedParameter": 2.0,
+	"AngularSpeedParameter": 1.0,
+	"FloorHeight": 5.0,
+	"FloorLineWidth": 0.10000000149011612,
+	"UtmZone": 34,
+	"IsUtmNorth": true,
+	"ZeroFiducial": {
+		"FiducialId": 100,
+		"Position": {
+			"longitude": 12.514173060177,
+			"latitude": 55.7827023805766,
+			"altitude": 2.253
+		},
+		"Rotation": {
+			"x": 0.0,
+			"y": -83.5,
+			"z": 180.0
+		}
+	},
+	"Routes": [{
+			"Name": "a",
+			"Points": [{
+					"longitude": 12.514643661070544,
+					"latitude": 55.781518945328738,
+					"altitude": 0.0
+				}, {
+					"longitude": 12.514585393757772,
+					"latitude": 55.781558167547299,
+					"altitude": 0.0
+				}, {
+					"longitude": 12.514756961405248,
+					"latitude": 55.78165645212543,
+					"altitude": 0.0
+				}, {
+					"longitude": 12.514809541486296,
+					"latitude": 55.78177777925179,
+					"altitude": 0.0
+				}, {
+					"longitude": 12.514496512795532,
+					"latitude": 55.78179048264947,
+					"altitude": 0.0
+				}
+			]
+		}
+	]
+}

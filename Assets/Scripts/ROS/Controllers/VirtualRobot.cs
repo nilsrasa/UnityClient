@@ -6,16 +6,13 @@ using Messages;
 using Messages.geometry_msgs;
 using Messages.sensor_msgs;
 using Messages.std_msgs;
-using NUnit.Framework.Constraints;
 using Ros_CSharp;
 using UnityEngine;
-using Quaternion = UnityEngine.Quaternion;
-using String = Messages.std_msgs.String;
 using Vector3 = UnityEngine.Vector3;
 
 public class VirtualRobot : ROSController {
 
-    [SerializeField] private string _ROS_MASTER_URI = "127.0.0.1:11311";
+    private string _rosMasterUri = "127.0.0.1:11311";
 
     private SensorBusController _sensorBusController;
     private Dictionary<Type, ROSAgent> _rosAgents;
@@ -39,11 +36,12 @@ public class VirtualRobot : ROSController {
         _rosAgents = new Dictionary<Type, ROSAgent>();
         _agentsWaitingToStart = new List<Type>();
         _rigidbody = GetComponent<Rigidbody>();
+        _rosMasterUri = ConfigManager.ConfigFile.RosMasterUri;
     }
 
     void Start() {
         _sensorBusController = new SensorBusController(this);
-        StartROS(_ROS_MASTER_URI);
+        StartROS(_rosMasterUri);
     }
 
     void Update() {
@@ -84,7 +82,7 @@ public class VirtualRobot : ROSController {
     {
         while (true)
         {
-            GeoPointWGS84 wgs = transform.position.ToMercator().ToWGS84();
+            GeoPointWGS84 wgs = transform.position.ToUTM().ToWGS84();
             NavSatFix pos = new NavSatFix
             {
                 altitude = wgs.altitude,
@@ -121,7 +119,7 @@ public class VirtualRobot : ROSController {
             return;
         }
         ROSAgent agent = (ROSAgent) Activator.CreateInstance(agentType);
-        agent.StartAgent(ROSAgent.AgentJob.Publisher, _clientNamespace);
+        agent.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosAgents.Add(agentType, agent);
     }
 
@@ -129,16 +127,16 @@ public class VirtualRobot : ROSController {
         base.StartROS(uri);
 
         _rosLocomotionDirect = new ROSLocomotionDirect();
-        _rosLocomotionDirect.StartAgent(ROSAgent.AgentJob.Subscriber, _clientNamespace);
+        _rosLocomotionDirect.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosLocomotionDirect.DataWasReceived += ReceivedLocomotionDirectUpdate;
         _rosJoystick = new ROSJoystick();
-        _rosJoystick.StartAgent(ROSAgent.AgentJob.Subscriber, _clientNamespace);
+        _rosJoystick.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosJoystick.DataWasReceived += ReceivedJoystickUpdate;
 
         _rosTransformPosition = new ROSTransformPosition();
-        _rosTransformPosition.StartAgent(ROSAgent.AgentJob.Publisher, _clientNamespace);
+        _rosTransformPosition.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosTransformHeading = new ROSTransformHeading();
-        _rosTransformHeading.StartAgent(ROSAgent.AgentJob.Publisher, _clientNamespace);
+        _rosTransformHeading.StartAgent(ROSAgent.AgentJob.Publisher);
         _transformUpdateCoroutine = StartCoroutine(SendTransformUpdate());
     }
 
