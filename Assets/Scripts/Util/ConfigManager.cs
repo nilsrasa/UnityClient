@@ -41,7 +41,7 @@ public class ConfigManager
         if (def.MaxLinearSpeed != userConfigFile.MaxLinearSpeed) ConfigFile.MaxLinearSpeed = userConfigFile.MaxLinearSpeed;
         if (def.LinearSpeedParameter != userConfigFile.LinearSpeedParameter) ConfigFile.LinearSpeedParameter = userConfigFile.LinearSpeedParameter;
         if (def.AngularSpeedParameter != userConfigFile.AngularSpeedParameter) ConfigFile.AngularSpeedParameter = userConfigFile.AngularSpeedParameter;
-        if (def.FloorHeight != userConfigFile.FloorHeight) ConfigFile.FloorHeight = userConfigFile.FloorHeight;
+        if (def.FloorHeightAboveGround != userConfigFile.FloorHeightAboveGround) ConfigFile.FloorHeightAboveGround = userConfigFile.FloorHeightAboveGround;
         if (def.FloorLineWidth != userConfigFile.FloorLineWidth) ConfigFile.FloorLineWidth = userConfigFile.FloorLineWidth;
         if (def.UtmZone != userConfigFile.UtmZone) ConfigFile.UtmZone = userConfigFile.UtmZone;
         if (def.IsUtmNorth != userConfigFile.IsUtmNorth) ConfigFile.IsUtmNorth = userConfigFile.IsUtmNorth;

@@ -1,8 +1,6 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.Scripts;
-using Messages.std_msgs;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +9,8 @@ public class PlayerUIController : MonoBehaviour
     public static PlayerUIController Instance { get; private set; }
 
     private enum WaypointMode { Point, Route }
-
+    //Right Panel
+    [SerializeField] private GameObject _rightPanel;
     [SerializeField] private Button _generateCampus;
     [SerializeField] private Button _goToBuilding;
     [SerializeField] private Button _nextRobot;
@@ -33,15 +32,26 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Color _resumeColorNormal;
     [SerializeField] private Color _resumeColorHovered;
     [SerializeField] private Color _resumeColorDown;
-    [SerializeField] private Text _layerNumberText;
-    [SerializeField] private Button _layerUp;
-    [SerializeField] private Button _layerDown;
-    [SerializeField] private GameObject _loadingPanel;
-    [SerializeField] private Image _loadingFill;
-
     [SerializeField] private InputField _campusId;
     [SerializeField] private InputField _buildingName;
     [SerializeField] private InputField _routeName;
+
+    //Loading Panel
+    [SerializeField] private GameObject _loadingPanel;
+    [SerializeField] private Image _loadingFill;
+
+    //Floor indicators
+    [SerializeField] private GameObject _layerPanel;
+    [SerializeField] private Text _layerNumberText;
+    [SerializeField] private Button _layerUp;
+    [SerializeField] private Button _layerDown;
+
+    //Sorround Photo UI
+    [SerializeField] private Button _backFromSorroundPhoto;
+    [SerializeField] private GameObject _sorroundPhotoPanel;
+    [SerializeField] private Slider _timeSlider;
+    [SerializeField] private GameObject _timeSliderPositionPrefab;
+    [SerializeField] private Text _timeSliderDateText;
 
     private WaypointMode CurrentWaypointMode
     {
@@ -74,8 +84,11 @@ public class PlayerUIController : MonoBehaviour
     private ColorBlock _resumeRobotColorBlock;
     private WaypointController _waypointController;
     private ROSController _selectedRobot;
+    private RectTransform _sliderTransform;
     private bool _isDriving;
     private bool _isPaused;
+    private Dictionary<float, TimeSliderPosition> _timeSliderPositions;
+    private float _highlightedTimeSliderPosition;
 
     void Awake()
     {
@@ -89,6 +102,8 @@ public class PlayerUIController : MonoBehaviour
         _loadRoute.onClick.AddListener(LoadRouteClick);
         _saveRoute.onClick.AddListener(SaveRouteClick);
         _pauseRobot.onClick.AddListener(PauseRobotOnClick);
+        _backFromSorroundPhoto.onClick.AddListener(BackFromSorroundPhotoClick);
+        _timeSlider.onValueChanged.AddListener(OnTimeSliderValueChanged);
 
         _toggleWaypointPointColorBlock = _toggleWaypointMode.colors;
 
@@ -111,9 +126,10 @@ public class PlayerUIController : MonoBehaviour
         _resumeRobotColorBlock.highlightedColor = _resumeColorHovered;
         _resumeRobotColorBlock.pressedColor = _resumeColorDown;
 
-
         _layerUp.onClick.AddListener(() => { LayerChangeClick(true); });
         _layerDown.onClick.AddListener(() => { LayerChangeClick(false); });
+
+        _sliderTransform = _timeSlider.GetComponent<RectTransform>();
     }
 
     void Start()
@@ -175,7 +191,7 @@ public class PlayerUIController : MonoBehaviour
         if (_selectedRobot == null) return;
         if (_isDriving)
         {
-            _selectedRobot.StopPath();
+            _selectedRobot.StopRobot();
             SetDriveMode(false);
         }
         else
@@ -216,6 +232,52 @@ public class PlayerUIController : MonoBehaviour
         WaypointController.Instance.SaveRoute(_routeName.text);
     }
 
+    private void BackFromSorroundPhotoClick()
+    {
+        _sorroundPhotoPanel.gameObject.SetActive(false);
+        _rightPanel.gameObject.SetActive(true);
+        _layerPanel.SetActive(true);
+        SorroundPhotoController.Instance.DisableView();
+        PlayerController.Instance.CurrentPlayerState = PlayerController.PlayerState.Normal;
+    }
+
+    private void ClearTimeSliderHighlights()
+    {
+        foreach (KeyValuePair<float, TimeSliderPosition> pair in _timeSliderPositions)
+        {
+            pair.Value.SetHighlight(false);
+        }
+    }
+
+    private void OnTimeSliderValueChanged(float newValue)
+    {
+        float closestPosition = 0;
+        float distanceToClosest = float.MaxValue;
+        foreach (KeyValuePair<float, TimeSliderPosition> pair in _timeSliderPositions) {
+            float distance = Mathf.Abs(_timeSlider.value - pair.Key);
+            if (distance < distanceToClosest) {
+                closestPosition = pair.Key;
+                distanceToClosest = distance;
+            }
+        }
+
+        if (closestPosition != _highlightedTimeSliderPosition)
+        {
+            ClearTimeSliderHighlights();
+            _timeSliderDateText.text = _timeSliderPositions[closestPosition].Timestamp.ToString("dd-MM-yyyy");
+        }
+        _highlightedTimeSliderPosition = closestPosition;
+        _timeSliderPositions[closestPosition].SetHighlight(true);
+    }
+
+    public void OnTimeSlider()
+    {
+        _timeSlider.value = _highlightedTimeSliderPosition;
+        DateTime selectedDateTime = _timeSliderPositions[_timeSlider.value].Timestamp;
+        _timeSliderDateText.text = selectedDateTime.ToString("dd-MM-yyyy");
+        SorroundPhotoController.Instance.ChangeTimeOnLoadedPhoto(selectedDateTime);
+    }
+
     public void SetDriveMode(bool isDriving)
     {
         _driveRobot.colors = isDriving ? _driveRobotStopColorBlock : _driveRobotColorBlock;
@@ -238,6 +300,13 @@ public class PlayerUIController : MonoBehaviour
         IsPaused = isPaused;
     }
 
+    public void PhotoClicked()
+    {
+        _sorroundPhotoPanel.SetActive(true);
+        _rightPanel.SetActive(false);
+        _layerPanel.SetActive(false);
+    }
+
     /// <summary>
     /// Updates loading bar
     /// </summary>
@@ -248,4 +317,28 @@ public class PlayerUIController : MonoBehaviour
         if (percentDone >= 1)
             _loadingPanel.SetActive(false);
     }
+
+    public void SetSliderVisibility(bool showSlider)
+    {
+        _timeSlider.gameObject.SetActive(showSlider);
+        _timeSliderDateText.gameObject.SetActive(showSlider);
+    }
+
+    public void InstantiateTimeSliderPoint(float position, DateTime date)
+    {
+        GameObject timeSliderPoint = Instantiate(_timeSliderPositionPrefab, Vector3.zero, Quaternion.identity, _timeSlider.transform);
+        timeSliderPoint.transform.SetSiblingIndex(2);
+        float positionX = position * _sliderTransform.rect.width - _sliderTransform.rect.width / 2;
+        timeSliderPoint.transform.localPosition += new Vector3(positionX, 0, 0);
+        TimeSliderPosition sliderPosition = timeSliderPoint.GetComponent<TimeSliderPosition>();
+        sliderPosition.Timestamp = date;
+        _timeSliderPositions.Add(position, sliderPosition);
+        _timeSliderDateText.text = _timeSliderPositions[0].Timestamp.ToString("dd-MM-yyyy");
+    }
+
+    public void ResetTimeSlider()
+    {
+        _timeSliderPositions = new Dictionary<float, TimeSliderPosition>();
+    }
+
 }

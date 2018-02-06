@@ -60,11 +60,5 @@ public class ROSLocomotionDirect : ROSAgent
         };
         _publisher.publish(twist);
     }
-
-    protected override void ReceivedData(IRosMessage data)
-    {
-        Twist twist = (Twist) data;
-        Debug.Log("ROSLocomotionDirect: Receieved data - " + twist);
-    }
-
+    
 }

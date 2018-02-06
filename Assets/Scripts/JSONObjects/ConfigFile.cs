@@ -9,7 +9,8 @@ public class ConfigFile
     public float MaxLinearSpeed;
     public float LinearSpeedParameter;
     public float AngularSpeedParameter;
-    public float FloorHeight;
+    public float FloorHeightAboveGround;
+    public float FloorHeightBelowGround;
     public float FloorLineWidth;
     public int UtmZone;
     public bool IsUtmNorth;

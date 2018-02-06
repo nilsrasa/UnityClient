@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using Assets.Scripts;
 using UnityEngine;
 
 public class MazeMapController : MonoBehaviour
 {
-    public float FloorHeight { get; private set; }
+    public float FloorHeightAboveGround { get; private set; }
+    public float FloorHeightBelowGround { get; private set; }
     public int CurrentActiveLevel { get; private set; }
     public bool CampusLoaded { get; private set; }
     public int CampusId { get; private set; }
@@ -25,6 +25,9 @@ public class MazeMapController : MonoBehaviour
     //Key: BuildingId, Value: Building data
     public Dictionary<int, Building> Buildings;
 
+    public delegate void WasFinishedGeneratingCampus(int campusId);
+    public event WasFinishedGeneratingCampus OnFinishedGeneratingCampus;
+
     private const string REST_BUILDING_SEARCH = "https://api.mazemap.com/api/buildings/?campusid={0}&srid=4326";
     private const string REST_FLOOROUTLINES = "https://api.mazemap.com/api/flooroutlines/?campusid={0}&srid=4326";
     private const string REST_FLOOROUTLINE = "https://api.mazemap.com/api/flooroutlines/?floorid={0}&srid=4326";
@@ -37,6 +40,7 @@ public class MazeMapController : MonoBehaviour
     private Dictionary<int, bool> _zLayerActive;
     private float _lineWidth;
     private MazemapBackupFile _mazemapBackup;
+    private MazeMapMeasurements _mazeMapMeasurements;
     private string _backupPath;
     private bool _isUsingBackup;
     private Transform _campusParent;
@@ -54,24 +58,23 @@ public class MazeMapController : MonoBehaviour
 
     void Awake()
     {
+        Application.runInBackground = true;
         CampusId = -1;
         Instance = this;
         Buildings = new Dictionary<int, Building>();
         _floorsByZ = new Dictionary<int, List<Floor>>();
         _zLayerActive = new Dictionary<int, bool>();
         CurrentActiveLevel = 2;
-        FloorHeight = ConfigManager.ConfigFile.FloorHeight;
+        FloorHeightAboveGround = ConfigManager.ConfigFile.FloorHeightAboveGround;
+        FloorHeightBelowGround = ConfigManager.ConfigFile.FloorHeightBelowGround;
         _lineWidth = ConfigManager.ConfigFile.FloorLineWidth;
 
         _backupPath = Application.streamingAssetsPath + "/Backup/MazemapBackup.json";
-        if (File.Exists(_backupPath))
-        {
-            _mazemapBackup = JsonUtility.FromJson<MazemapBackupFile>(File.ReadAllText(_backupPath));
-        }
-        else
-        {
-            _mazemapBackup = new MazemapBackupFile();
-        }
+        _mazemapBackup = File.Exists(_backupPath) ? JsonUtility.FromJson<MazemapBackupFile>(File.ReadAllText(_backupPath)) : new MazemapBackupFile();
+
+        string measurementsPath = Application.streamingAssetsPath + "/MazeMap/Measurements.json";
+        _mazeMapMeasurements = File.Exists(measurementsPath) ? JsonUtility.FromJson<MazeMapMeasurements>(File.ReadAllText(measurementsPath)) : new MazeMapMeasurements();
+
     }
 
     /// <summary>
@@ -85,7 +88,7 @@ public class MazeMapController : MonoBehaviour
         yield return www;
         whenDone?.Invoke(www.text);
     }
-
+    
     /// <summary>
     /// Parses GeoJSON into building objects and draws them
     /// </summary>
@@ -171,7 +174,7 @@ public class MazeMapController : MonoBehaviour
         SetActiveLayer(CurrentActiveLevel);
         CampusLoaded = true;
         File.WriteAllText(_backupPath, JsonUtility.ToJson(_mazemapBackup));
-        FiducialController.Instance.LoadFiducials(CampusId);
+        OnFinishedGeneratingCampus?.Invoke(CampusId);
     }
 
     /// <summary>
@@ -205,7 +208,22 @@ public class MazeMapController : MonoBehaviour
             floorObject.SetActive(false);
             floorObject.name = floor.Name;
             floorObjects.Add(floorObject.transform);
-            floorObject.transform.position = floorObject.transform.position + new Vector3(0, floor.FloorIndex * FloorHeight, 0);
+
+            /* TODO: Implement again when we using individual building measurements
+            bool exists = false;
+            if (_mazeMapMeasurements.GetCampusMeasurement(CampusId) != null)
+                if (_mazeMapMeasurements.GetCampusMeasurement(CampusId).GetBuildingMeasurement(building.BuildingId) != null)
+                {
+                    exists = true;
+                    floorObject.transform.position = floorObject.transform.position +
+                        new Vector3(0, _mazeMapMeasurements.GetCampusMeasurement(CampusId).GetBuildingMeasurement(building.BuildingId).FloorHeights[floor.FloorIndex], 0);
+                }
+            if (!exists)
+            */
+            float y = 0;
+            if (floor.FloorIndex >= 1) y = floor.FloorIndex * FloorHeightAboveGround;
+            if (floor.FloorIndex < 1) y = floor.FloorIndex * FloorHeightBelowGround;
+            floorObject.transform.position = floorObject.transform.position + new Vector3(0, y, 0);
             floor.RenderedModel = floorObject.transform;
 
             if (!_floorsByZ.ContainsKey(floor.FloorIndex))
@@ -238,6 +256,7 @@ public class MazeMapController : MonoBehaviour
     {
         JSONObject collection = new JSONObject(text);
         GameObject floor = new GameObject();
+        floor.transform.position = Vector3.zero;
         List<Transform> points = new List<Transform>();
 
         foreach (JSONObject feature in collection["features"]) 
@@ -380,7 +399,7 @@ public class MazeMapController : MonoBehaviour
         }
     }
 
-    public IEnumerator DrawRoomsInBuilding(Building building)
+    private IEnumerator DrawRoomsInBuilding(Building building)
     {
         foreach (KeyValuePair<int, Floor> pair in building.Floors) {
             WWW www = new WWW(string.Format(REST_POI_SEARCH_BY_FLOORID, pair.Value.Id));
@@ -449,7 +468,8 @@ public class MazeMapController : MonoBehaviour
             foreach (JSONObject coord in pos)
             {
                 GameObject pointObject = InstantiatePoint(coord, _useMazemapMercator);
-                pointObject.transform.position = pointObject.transform.position + new Vector3(0, z * FloorHeight, 0);
+                float y = GetBuildingByName(buildingName).Floors[floorId].RenderedModel.position.y;
+                pointObject.transform.position = pointObject.transform.position + new Vector3(0, y, 0);
                 pointObject.transform.SetParent(roomContainer.transform, true);
             }
             roomContainer.transform.SetParent(roomObject.transform, true);
@@ -531,7 +551,10 @@ public class MazeMapController : MonoBehaviour
             if (!_zLayerActive[i])
                 SetLayerVisibility(i, true);
         }
-        _triggerFloor.position = new Vector3(_triggerFloor.position.x, CurrentActiveLevel * FloorHeight, _triggerFloor.position.z);
+        float y = 0;
+        if (CurrentActiveLevel >= 1) y = CurrentActiveLevel * FloorHeightAboveGround;
+        if (CurrentActiveLevel < 1) y = CurrentActiveLevel * FloorHeightBelowGround;
+        _triggerFloor.position = new Vector3(_triggerFloor.position.x, y, _triggerFloor.position.z);
 
     }
 

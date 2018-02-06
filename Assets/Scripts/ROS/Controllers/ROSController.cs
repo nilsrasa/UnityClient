@@ -62,7 +62,7 @@ public class ROSController : MonoBehaviour
         throw new NotImplementedException("Override this function");
     }
 
-    public virtual void StopPath() 
+    public virtual void StopRobot() 
     {
         throw new NotImplementedException("Override this function");
     }

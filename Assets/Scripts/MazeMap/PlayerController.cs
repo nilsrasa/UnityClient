@@ -1,33 +1,100 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class PlayerController : MonoBehaviour
 {
+    public enum PlayerState
+    {
+        Normal, SorroundViewing
+    }
+
     public static PlayerController Instance { get; set; }
 
     [SerializeField] private float _mouseMovementSpeed = 5;
     [SerializeField] private float _mouseScrollSpeed = 10;
-    [SerializeField] private float _mouseClickSpeed = 0.2f;
+    [SerializeField] private float _mouseClickSpeed = 0.1f;
     [SerializeField] private Transform _triggerFloor;
 
     public WaypointController WaypointController { get; private set; }
+
+    private PlayerState _currentPlayerState;
+    public PlayerState CurrentPlayerState
+    {
+        get
+        {
+            return _currentPlayerState;
+        }
+        set
+        {
+            _currentPlayerState = value;
+            switch (value)
+            {
+                case PlayerState.Normal:
+                    _camera.enabled = true;
+                    break;
+                case PlayerState.SorroundViewing:
+                    _camera.enabled = false;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("value", value, null);
+            }
+        }
+    }
 
     private Camera _camera;
     private Vector3 _currentSelectedWaypoint;
     private Coroutine _mouseClickCheck;
     private bool _isMouseClick;
+    private MouseObject _hoveredMouseObject;
 
     void Awake()
     {
         _camera = GetComponentInChildren<Camera>();
         WaypointController = GetComponent<WaypointController>();
+        CurrentPlayerState = PlayerState.Normal;
         Instance = this;
     }
 
 	void Update () {
-	    if (!MazeMapController.Instance.CampusLoaded) return;
         //Input events
+	    if (CurrentPlayerState == PlayerState.SorroundViewing) return;
+
+	    Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
+	    RaycastHit hit;
+	    if (Physics.Raycast(ray, out hit, Single.PositiveInfinity, LayerMask.GetMask("SorroundPhotoLocations")))
+	    {
+	        MouseObject hovered = hit.transform.GetComponent<MouseObject>();
+	        if (hovered != null)
+	        {
+	            if (_hoveredMouseObject != null)
+	            {
+	                if (_hoveredMouseObject == hovered)
+	                    _hoveredMouseObject.Stayed();
+	                else
+	                {
+	                    UnHoverMouseObject();
+
+                        _hoveredMouseObject = hovered;
+	                    _hoveredMouseObject.Hovered();
+                    }
+	            }
+	            else
+	            {
+	                _hoveredMouseObject = hovered;
+	                _hoveredMouseObject.Hovered();
+	            }
+	        }
+	        else
+	        {
+	            UnHoverMouseObject();
+            }
+        }
+	    else
+	    {
+	        UnHoverMouseObject();
+	    }
 
         //Check if left mouse button was clicked or held
         if (Input.GetMouseButtonDown(0))
@@ -40,7 +107,8 @@ public class PlayerController : MonoBehaviour
 	        if (_isMouseClick)
                 MouseClicked();
 	        _isMouseClick = false;
-            StopCoroutine(_mouseClickCheck);
+            if (_mouseClickCheck != null)
+                StopCoroutine(_mouseClickCheck);
 	    }
 
 	    if (Input.GetMouseButton(0) && !_isMouseClick) {
@@ -62,11 +130,17 @@ public class PlayerController : MonoBehaviour
        
 	    if (Input.GetAxis("Mouse ScrollWheel") != 0)
 	    {
-	        transform.Translate(_camera.transform.forward * Input.GetAxis("Mouse ScrollWheel") * _mouseScrollSpeed);
+	        transform.Translate(_camera.transform.forward * Input.GetAxis("Mouse ScrollWheel") * _mouseScrollSpeed, Space.World);
 	    }
 
         _triggerFloor.position = new Vector3(transform.position.x, _triggerFloor.position.y, transform.position.z);
 
+    }
+
+    private void UnHoverMouseObject()
+    {
+        _hoveredMouseObject?.Exited();
+        _hoveredMouseObject = null;
     }
 
     private IEnumerator CheckForClick(float time)
@@ -85,6 +159,11 @@ public class PlayerController : MonoBehaviour
     {
         //Checks if UI was clicked
         if (EventSystem.current.IsPointerOverGameObject()) return;
+        if (_hoveredMouseObject)
+        {
+            _hoveredMouseObject.Clicked();
+            return;
+        }
 
         Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
@@ -107,5 +186,4 @@ public class PlayerController : MonoBehaviour
         Vector3 pos = target.position - _camera.transform.forward * target.position.y;
         transform.position = new Vector3(pos.x, transform.position.y, pos.z);
     }
-
 }

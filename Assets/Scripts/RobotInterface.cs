@@ -36,9 +36,6 @@ public class RobotInterface : MonoBehaviour {
     [SerializeField] private int baudRate = 9600;
     [SerializeField] private int dataBits = 8;
 
-    [Header("ROS Parameters")]
-    [SerializeField] private string _ROS_MASTER_URI = "127.0.0.1:11311";
-
     private float _timer = 0;
     private string _portName;
    // private SerialPort HWPort;
@@ -68,10 +65,6 @@ public class RobotInterface : MonoBehaviour {
                 }
                 break;
             case RobotType.Arlobot:
-                if (!string.IsNullOrEmpty(_ROS_MASTER_URI))
-                    ArlobotROSController.Instance.StartROS(_ROS_MASTER_URI);
-                else
-                    ArlobotROSController.Instance.StartROS();
                 Connect();
                 break;
             default:
@@ -149,6 +142,22 @@ public class RobotInterface : MonoBehaviour {
                 throw new ArgumentOutOfRangeException();
         }
         
+    }
+
+    public void StopRobot()
+    {
+        switch (ControlledRobotType)
+        {
+            case RobotType.Telerobot:
+                break;
+            case RobotType.LegoRobot:
+                break;
+            case RobotType.Arlobot:
+                ArlobotROSController.Instance.StopRobot();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     public void SendCommand(Vector2 controlOutput) {

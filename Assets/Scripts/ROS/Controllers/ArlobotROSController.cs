@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Assets.Scripts;
 using Messages;
 using Messages.sensor_msgs;
 using Messages.std_msgs;
@@ -14,10 +13,12 @@ public class ArlobotROSController : ROSController {
     [SerializeField] private int _waypointStartIndex = 0;
     [SerializeField] private RawImage _cameraImage;
 
-    private enum RobotLocomotionState { MOVING, STOPPED }
-    private enum RobotLocomotionType { WAYPOINT, DIRECT }
+    public enum RobotLocomotionState { MOVING, STOPPED }
+    public enum RobotLocomotionType { WAYPOINT, DIRECT }
 
     public static ArlobotROSController Instance { get; private set; }
+    public RobotLocomotionState CurrentRobotLocomotionState { get; private set; }
+    public RobotLocomotionType CurrenLocomotionType { get; private set; }
 
     private ROSLocomotionDirect _rosLocomotionDirect;
     private ROSLocomotionWaypoint _rosLocomotionWaypoint;
@@ -28,8 +29,6 @@ public class ArlobotROSController : ROSController {
     private ROSLocomotionState _rosLocomotionState;
     private ROSLocomotionLinearSpeed _rosLocomotionLinear;
     private ROSLocomotionSpeedParams _rosLocomotionSpeedParams;
-    private RobotLocomotionState _currentRobotLocomotionState;
-    private RobotLocomotionType _currenLocomotionType = RobotLocomotionType.DIRECT;
     private ROSCamera _rosCamera;
 
     private List<GeoPointWGS84> _waypoints;
@@ -60,6 +59,8 @@ public class ArlobotROSController : ROSController {
         _maxLinearSpeed = ConfigManager.ConfigFile.MaxLinearSpeed;
         _linearSpeedParam = ConfigManager.ConfigFile.LinearSpeedParameter;
         _angularSpeedParam = ConfigManager.ConfigFile.AngularSpeedParameter;
+        CurrenLocomotionType = RobotLocomotionType.DIRECT;
+        CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
     }
 
     void Start()
@@ -72,6 +73,7 @@ public class ArlobotROSController : ROSController {
         //Direct control of robot
         float linear = 0;
         float angular = 0;
+        
         if (Input.GetKey(KeyCode.UpArrow))
         {
             linear = 1f;
@@ -88,34 +90,33 @@ public class ArlobotROSController : ROSController {
         {
             angular = -1f;
         }
-        if (linear == 0 && angular == 0 && _currentRobotLocomotionState != RobotLocomotionState.STOPPED && _currenLocomotionType == RobotLocomotionType.DIRECT)
+        if (linear == 0 && angular == 0 && CurrentRobotLocomotionState != RobotLocomotionState.STOPPED && CurrenLocomotionType == RobotLocomotionType.DIRECT)
         {
-            StopPath();
+            StopRobot();
         }
         else if (linear != 0 || angular != 0)
         {
             MoveDirect(new Vector2(angular, linear));
         }
-
+        
         //Navigation to waypoint
-        if (_currenLocomotionType != RobotLocomotionType.DIRECT && _currentRobotLocomotionState != RobotLocomotionState.STOPPED)
+        if (CurrenLocomotionType != RobotLocomotionType.DIRECT && CurrentRobotLocomotionState != RobotLocomotionState.STOPPED)
         {
             //Waypoint reached
             if (Vector3.Distance(transform.position, _currentWaypoint) < _waypointDistanceThreshhold)
             {
-                Debug.Log("STOP");
                 if (_waypointIndex < _waypoints.Count - 1)
                     MoveToNextWaypoint();
                 else
                 {
-                    StopPath();
+                    EndWaypointPath();
                 }
             }
         }
 
         if (_hasHeadingDataToConsume)
         {
-            transform.rotation = Quaternion.Euler(0, _headingDataToConsume, 0);
+                transform.rotation = Quaternion.Euler(0, _headingDataToConsume, 0);
             _hasHeadingDataToConsume = false;
         }
         if (_hasPositionDataToConsume)
@@ -146,28 +147,34 @@ public class ArlobotROSController : ROSController {
         }
     }
 
-    private new void MoveDirect(Vector2 command)
+    public override void MoveDirect(Vector2 command)
     {
-        if (_currenLocomotionType != RobotLocomotionType.DIRECT)
+        if (CurrenLocomotionType != RobotLocomotionType.DIRECT)
             _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
         _rosLocomotionDirect.PublishData(command);
-        _currenLocomotionType = RobotLocomotionType.DIRECT;
-        _currentRobotLocomotionState = RobotLocomotionState.MOVING;
+        CurrenLocomotionType = RobotLocomotionType.DIRECT;
+        CurrentRobotLocomotionState = RobotLocomotionState.MOVING;
     }
 
     private void StartWaypointRoute()
     {
         _waypointIndex = _waypointStartIndex;
-        _currenLocomotionType = RobotLocomotionType.WAYPOINT;
-        _currentWaypoint = new Vector3(0, 10, 0) + _waypoints[_waypointIndex].ToUTM().ToUnity();
+        CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
+        _currentWaypoint =_waypoints[_waypointIndex].ToUTM().ToUnity();
         Move(_currentWaypoint);
     }
 
     private void MoveToNextWaypoint()
     {
         _waypointIndex++;
-        _currentWaypoint = new Vector3(0, 10, 0) + _waypoints[_waypointIndex].ToUTM().ToUnity();
+        _currentWaypoint = _waypoints[_waypointIndex].ToUTM().ToUnity();
         Move(_currentWaypoint);
+    }
+
+    private void EndWaypointPath()
+    {
+        StopRobot();
+        PlayerUIController.Instance.SetDriveMode(false);
     }
 
     private void HandleImage(ROSAgent sender, CompressedImage compressedImage, CameraInfo info)
@@ -180,9 +187,9 @@ public class ArlobotROSController : ROSController {
         }
     }
 
-    public override void StopPath()
+    public override void StopRobot()
     {
-        _currentRobotLocomotionState = RobotLocomotionState.STOPPED;
+        CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
         _rosLocomotionDirect.PublishData(Vector2.zero);
     }
@@ -217,12 +224,13 @@ public class ArlobotROSController : ROSController {
 
     private void Move(Vector3 position)
     {
+        Debug.Log(position);
         GeoPointWGS84 point = position.ToUTM().ToWGS84();
         _rosLocomotionWaypoint.PublishData(point);
         _currentWaypoint = position;
-        _currenLocomotionType = RobotLocomotionType.WAYPOINT;
+        CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.RUNNING);
-        _currentRobotLocomotionState = RobotLocomotionState.MOVING;
+        CurrentRobotLocomotionState = RobotLocomotionState.MOVING;
     }
 
     public override void MoveToPoint(GeoPointWGS84 point)
@@ -260,7 +268,7 @@ public class ArlobotROSController : ROSController {
         };
         if (GeoUtils.UtmOriginSet)
         {
-            _positionDataToConsume = geoPoint.ToUTM().ToUnity() + new Vector3(0, 10, 0);
+            _positionDataToConsume = geoPoint.ToUTM().ToUnity() + new Vector3(0, 8, 0);
 
             _hasPositionDataToConsume = true;
             
@@ -274,6 +282,7 @@ public class ArlobotROSController : ROSController {
         _hasHeadingDataToConsume = true;
     }
 
+    //TODO: Not yet implemented
     public void ReceivedLocomotionStateUpdata(ROSAgent sender, IRosMessage state)
     {
         //TODO: Not implemented yet

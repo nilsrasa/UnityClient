@@ -13,7 +13,6 @@ public class UltrasoundBus : SensorBus {
     public override IRosMessage GetSensorData()
     {
         List<Sim_UltrasoundSensor> ultrasoundSensors = Sensors.Cast<Sim_UltrasoundSensor>().ToList();
-        //      {"p0":31, "p1":412, "p2":54, "p3":511}
         JSONObject json = new JSONObject();
         foreach (Sim_UltrasoundSensor sensor in ultrasoundSensors)
         {

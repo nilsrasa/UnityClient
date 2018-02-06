@@ -1,10 +1,11 @@
 {
-	"RosMasterUri": "raspi-ros00:11311",
+	"RosMasterUri": "localhost:11311",
 	"WaypointDistanceThreshold": 0.44999998807907107,
 	"MaxLinearSpeed": 3.0,
 	"LinearSpeedParameter": 2.0,
 	"AngularSpeedParameter": 1.0,
-	"FloorHeight": 5.0,
+	"FloorHeightAboveGround": 4,
+	"FloorHeightBelowGround": 4,
 	"FloorLineWidth": 0.10000000149011612,
 	"UtmZone": 34,
 	"IsUtmNorth": true,
@@ -13,7 +14,7 @@
 		"Position": {
 			"longitude": 12.514173060177,
 			"latitude": 55.7827023805766,
-			"altitude": 2.253
+			"altitude": 10.253
 		},
 		"Rotation": {
 			"x": 0.0,

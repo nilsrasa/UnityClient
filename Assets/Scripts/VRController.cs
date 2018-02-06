@@ -107,7 +107,7 @@ public class VRController : MonoBehaviour
                 if (robotControl.IsActivated)
                     RobotInterface.Instance.SendCommand(controlResult);
             }
-	        else
+	        else if (ArlobotROSController.Instance.CurrentRobotLocomotionState != ArlobotROSController.RobotLocomotionState.STOPPED)
 	        {
                 RobotInterface.Instance.SendCommand(Vector2.zero);
 	        }
@@ -126,7 +126,8 @@ public class VRController : MonoBehaviour
         if (_hoveredGazeObject != null)
             _hoveredGazeObject.OnUnhover();
         _hoveredGazeObject = null;
-        RobotInterface.Instance.SendCommand(Vector2.zero);
+        if (ArlobotROSController.Instance.CurrentRobotLocomotionState != ArlobotROSController.RobotLocomotionState.STOPPED)
+            RobotInterface.Instance.StopRobot();
     }
 
     /// <summary>

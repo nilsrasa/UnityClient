@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Assets.Scripts;
 using Messages;
 using Messages.geometry_msgs;
 using Messages.sensor_msgs;
@@ -10,14 +9,13 @@ using Ros_CSharp;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 
-public class VirtualRobot : ROSController {
-
-    private string _rosMasterUri = "127.0.0.1:11311";
-
+public class VirtualRobot : ROSController
+{
     private SensorBusController _sensorBusController;
     private Dictionary<Type, ROSAgent> _rosAgents;
     private List<Type> _agentsWaitingToStart;
     private Rigidbody _rigidbody;
+    private string _rosMasterUri;
 
     //Subscribers
     private ROSLocomotionDirect _rosLocomotionDirect;

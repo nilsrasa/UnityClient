@@ -1,0 +1,15 @@
+{
+	"CampusMeasurements": [{
+			"CampusId": 89,
+			"BuildingMeasurements": [{
+					"BuildingId": 752,
+					"BuildingGroundHeight": 4200.0,
+					"FloorHeights": {
+						"keys": [0, 1, 2],
+						"values": [-3.91, 0.54, 4.34]
+					}
+				}
+			]
+		}
+	]
+}
