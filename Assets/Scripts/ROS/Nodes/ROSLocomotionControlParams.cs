@@ -1,11 +1,7 @@
-﻿using System;
-using Messages;
-using Messages.geometry_msgs;
-using Ros_CSharp;
-using UnityEngine;
+﻿using Ros_CSharp;
 using String = Messages.std_msgs.String;
 
-public class ROSLocomotionSpeedParams : ROSAgent
+public class ROSLocomotionControlParams : ROSAgent
 {
     private const string TOPIC = "/waypoint/control_parameters";
 
@@ -41,9 +37,9 @@ public class ROSLocomotionSpeedParams : ROSAgent
         _nodeHandle = null;
     }
 
-    public void PublishData(float linearSpeed, float angularSpeed)
+    public void PublishData(float rho, float roll, float pitch, float yaw)
     {
-        PublishData(string.Format("{0},{1}", linearSpeed, angularSpeed));
+        PublishData($"{rho},{roll},{pitch},{yaw}");
     }
 
     public override void PublishData(object data)

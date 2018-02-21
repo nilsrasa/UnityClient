@@ -40,8 +40,8 @@ public class ConfigManager
         if (def.WaypointDistanceThreshold != userConfigFile.WaypointDistanceThreshold) ConfigFile.WaypointDistanceThreshold = userConfigFile.WaypointDistanceThreshold;
         if (def.MaxLinearSpeed != userConfigFile.MaxLinearSpeed) ConfigFile.MaxLinearSpeed = userConfigFile.MaxLinearSpeed;
         if (def.MaxAngularSpeed != userConfigFile.MaxAngularSpeed) ConfigFile.MaxAngularSpeed = userConfigFile.MaxAngularSpeed;
-        if (def.LinearSpeedParameter != userConfigFile.LinearSpeedParameter) ConfigFile.LinearSpeedParameter = userConfigFile.LinearSpeedParameter;
-        if (def.AngularSpeedParameter != userConfigFile.AngularSpeedParameter) ConfigFile.AngularSpeedParameter = userConfigFile.AngularSpeedParameter;
+        if (def.ControlParameterRho != userConfigFile.ControlParameterRho) ConfigFile.ControlParameterRho = userConfigFile.ControlParameterRho;
+        if (def.ControlParameterYaw != userConfigFile.ControlParameterYaw) ConfigFile.ControlParameterYaw = userConfigFile.ControlParameterYaw;
         if (def.FloorHeightAboveGround != userConfigFile.FloorHeightAboveGround) ConfigFile.FloorHeightAboveGround = userConfigFile.FloorHeightAboveGround;
         if (def.FloorLineWidth != userConfigFile.FloorLineWidth) ConfigFile.FloorLineWidth = userConfigFile.FloorLineWidth;
         if (def.UtmZone != userConfigFile.UtmZone) ConfigFile.UtmZone = userConfigFile.UtmZone;

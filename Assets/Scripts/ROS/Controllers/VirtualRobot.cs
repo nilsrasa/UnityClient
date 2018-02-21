@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Messages;
 using Messages.geometry_msgs;
+using Messages.nav_msgs;
 using Messages.sensor_msgs;
 using Messages.std_msgs;
 using Ros_CSharp;
@@ -30,14 +31,13 @@ public class VirtualRobot : ROSController
     private Twist _joystickDataToConsume;
 
     //Publishers
-    private ROSTransformPosition _rosTransformPosition;
-    private ROSTransformHeading _rosTransformHeading;
     private Coroutine _transformUpdateCoroutine;
     private ROSLocomotionWaypointState _rosLocomotionWaypointState;
     private ROSLocomotionWaypoint _rosLocomotionWaypoint;
     private ROSLocomotionLinearSpeed _rosLocomotionLinear;
     private ROSLocomotionAngularSpeed _rosLocomotionAngular;
-    private ROSLocomotionSpeedParams _rosLocomotionSpeedParams;
+    private ROSLocomotionControlParams _rosLocomotionControlParams;
+    private ROSOdometry _rosOdometry;
 
     //Modules
     private WaypointNavigation _waypointNavigationModule;
@@ -117,17 +117,30 @@ public class VirtualRobot : ROSController
         while (true)
         {
             GeoPointWGS84 wgs = transform.position.ToUTM().ToWGS84();
-            NavSatFix pos = new NavSatFix
+            UnityEngine.Quaternion rot = transform.rotation;
+            Odometry odometry = new Odometry
             {
-                altitude = wgs.altitude,
-                longitude = wgs.longitude,
-                latitude = wgs.latitude,
+                pose = new PoseWithCovariance
+                {
+                    pose = new Messages.geometry_msgs.Pose
+                    {
+                        position = new Point
+                        {
+                            x = wgs.longitude,
+                            y = wgs.latitude,
+                            z = wgs.altitude
+                        },
+                        orientation = new Messages.geometry_msgs.Quaternion
+                        {
+                            x = rot.x,
+                            y = rot.y,
+                            z = rot.z,
+                            w = rot.w
+                        }
+                    }
+                }
             };
-            _rosTransformPosition.PublishData(pos);
-
-            Float32 rot = new Float32();
-            rot.data = transform.eulerAngles.y;
-            _rosTransformHeading.PublishData(rot);
+            _rosOdometry.PublishData(odometry);
 
             yield return new WaitForEndOfFrame();
         }
@@ -167,10 +180,8 @@ public class VirtualRobot : ROSController
         _rosJoystick.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosJoystick.DataWasReceived += ReceivedJoystickUpdate;
 
-        _rosTransformPosition = new ROSTransformPosition();
-        _rosTransformPosition.StartAgent(ROSAgent.AgentJob.Publisher);
-        _rosTransformHeading = new ROSTransformHeading();
-        _rosTransformHeading.StartAgent(ROSAgent.AgentJob.Publisher);
+        _rosOdometry = new ROSOdometry();
+        _rosOdometry.StartAgent(ROSAgent.AgentJob.Publisher);
         _transformUpdateCoroutine = StartCoroutine(SendTransformUpdate());
 
         _rosLocomotionWaypointState = new ROSLocomotionWaypointState();
@@ -182,12 +193,13 @@ public class VirtualRobot : ROSController
         _rosLocomotionLinear.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosLocomotionAngular = new ROSLocomotionAngularSpeed();
         _rosLocomotionAngular.StartAgent(ROSAgent.AgentJob.Publisher);
-        _rosLocomotionSpeedParams = new ROSLocomotionSpeedParams();
-        _rosLocomotionSpeedParams.StartAgent(ROSAgent.AgentJob.Publisher);
+        _rosLocomotionControlParams = new ROSLocomotionControlParams();
+        _rosLocomotionControlParams.StartAgent(ROSAgent.AgentJob.Publisher);
 
         _rosLocomotionLinear.PublishData(ConfigManager.ConfigFile.MaxLinearSpeed);
         _rosLocomotionAngular.PublishData(ConfigManager.ConfigFile.MaxAngularSpeed);
-        _rosLocomotionSpeedParams.PublishData(ConfigManager.ConfigFile.LinearSpeedParameter, ConfigManager.ConfigFile.AngularSpeedParameter);
+        _rosLocomotionControlParams.PublishData(ConfigManager.ConfigFile.ControlParameterRho, ConfigManager.ConfigFile.ControlParameterRoll,
+            ConfigManager.ConfigFile.ControlParameterPitch, ConfigManager.ConfigFile.ControlParameterYaw);
 }
 
     public override void MoveDirect(Vector2 command) {

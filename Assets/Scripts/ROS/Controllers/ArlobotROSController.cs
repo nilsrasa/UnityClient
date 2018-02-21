@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Messages;
+using Messages.nav_msgs;
 using Messages.sensor_msgs;
 using Messages.std_msgs;
 using UnityEngine;
@@ -24,20 +25,15 @@ public class ArlobotROSController : ROSController {
     private ROSLocomotionWaypoint _rosLocomotionWaypoint;
     private ROSLocomotionWaypointState _rosLocomotionWaypointState;
     private ROSUltrasound _rosUltrasound;
-    private ROSTransformPosition _rosTransformPosition;
-    private ROSTransformHeading _rosTransformHeading;
     private ROSLocomotionState _rosLocomotionState;
     private ROSLocomotionLinearSpeed _rosLocomotionLinear;
-    private ROSLocomotionSpeedParams _rosLocomotionSpeedParams;
+    private ROSLocomotionAngularSpeed _rosLocomotionAngular;
+    private ROSLocomotionControlParams _rosLocomotionControlParams;
+    private ROSOdometry _rosOdometry;
     private ROSCamera _rosCamera;
 
-    private bool _hasPositionDataToConsume;
-    private Vector3 _positionDataToConsume;
-    private bool _hasHeadingDataToConsume;
-    private float _headingDataToConsume;
-    private float _oldMaxLinearSpeed;
-    private float _oldLinearSpeedParam;
-    private float _oldAngularSpeedParam;
+    private bool _hasOdometryDataToConsume;
+    private OdometryData _odometryDataToConsume;
     private CompressedImage _cameraDataToConsume;
     private CameraInfo _cameraInfoToConsume;
     private bool _hasCameraDataToConsume;
@@ -46,9 +42,12 @@ public class ArlobotROSController : ROSController {
     private Vector3 _currentWaypoint;
     private int _waypointIndex;
     private float _waypointDistanceThreshhold = 0.1f;
-    private float _maxLinearSpeed = 3;
-    private float _linearSpeedParam = 3;
-    private float _angularSpeedParam = 1;
+    private float _maxLinearSpeed;
+    private float _maxAngularSpeed;
+    private float _controlParameterRho;
+    private float _controlParameterRoll;
+    private float _controlParameterPitch;
+    private float _controlParameterYaw;
     private List<GeoPointWGS84> _waypoints;
 
     void Awake()
@@ -56,10 +55,14 @@ public class ArlobotROSController : ROSController {
         Instance = this;
         _waypointDistanceThreshhold = ConfigManager.ConfigFile.WaypointDistanceThreshold;
         _maxLinearSpeed = ConfigManager.ConfigFile.MaxLinearSpeed;
-        _linearSpeedParam = ConfigManager.ConfigFile.LinearSpeedParameter;
-        _angularSpeedParam = ConfigManager.ConfigFile.AngularSpeedParameter;
+        _maxAngularSpeed = ConfigManager.ConfigFile.MaxAngularSpeed;
+        _controlParameterRho = ConfigManager.ConfigFile.ControlParameterRho;
+        _controlParameterRoll = ConfigManager.ConfigFile.ControlParameterRoll;
+        _controlParameterPitch = ConfigManager.ConfigFile.ControlParameterPitch;
+        _controlParameterYaw = ConfigManager.ConfigFile.ControlParameterYaw;
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
+
     }
 
     void Start()
@@ -113,15 +116,11 @@ public class ArlobotROSController : ROSController {
             }
         }
 
-        if (_hasHeadingDataToConsume)
+        if (_hasOdometryDataToConsume)
         {
-                transform.rotation = Quaternion.Euler(0, _headingDataToConsume, 0);
-            _hasHeadingDataToConsume = false;
-        }
-        if (_hasPositionDataToConsume)
-        {
-            transform.position = _positionDataToConsume;
-            _hasPositionDataToConsume = false;
+            transform.rotation = _odometryDataToConsume.Orientation;
+            transform.position = _odometryDataToConsume.Position.ToUTM().ToUnity();
+            _hasOdometryDataToConsume = false;
         }
         if (_hasCameraDataToConsume)
         {
@@ -130,19 +129,6 @@ public class ArlobotROSController : ROSController {
                 _cameraImage.texture = ROSCamera.ConvertToTexture2D(_cameraDataToConsume, _cameraInfoToConsume);
                 _hasCameraDataToConsume = false;
             }
-        }
-
-        if (_maxLinearSpeed != _oldMaxLinearSpeed)
-        {
-            _oldMaxLinearSpeed = _maxLinearSpeed;
-            _rosLocomotionLinear.PublishData(_maxLinearSpeed);
-        }
-        if (_angularSpeedParam != _oldAngularSpeedParam || _linearSpeedParam != _oldLinearSpeedParam)
-        {
-            _oldAngularSpeedParam = _angularSpeedParam;
-            _oldLinearSpeedParam = _linearSpeedParam;
-
-            _rosLocomotionSpeedParams.PublishData(_linearSpeedParam, _angularSpeedParam);
         }
     }
 
@@ -201,24 +187,27 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionWaypoint.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosLocomotionWaypointState = new ROSLocomotionWaypointState();
         _rosLocomotionWaypointState.StartAgent(ROSAgent.AgentJob.Publisher);
-        _rosLocomotionSpeedParams = new ROSLocomotionSpeedParams();
-        _rosLocomotionSpeedParams.StartAgent(ROSAgent.AgentJob.Publisher);
+        _rosLocomotionControlParams = new ROSLocomotionControlParams();
+        _rosLocomotionControlParams.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosLocomotionLinear = new ROSLocomotionLinearSpeed();
         _rosLocomotionLinear.StartAgent(ROSAgent.AgentJob.Publisher);
+        _rosLocomotionAngular = new ROSLocomotionAngularSpeed();
+        _rosLocomotionAngular.StartAgent(ROSAgent.AgentJob.Publisher);
         //_rosUltrasound = new ROSUltrasound();
        //_rosUltrasound.StartAgent(ROSAgent.AgentJob.Subscriber, _clientNamespace);
-        _rosTransformPosition = new ROSTransformPosition();
-        _rosTransformPosition.StartAgent(ROSAgent.AgentJob.Subscriber);
-        _rosTransformPosition.DataWasReceived += ReceivedPositionUpdate;
-        _rosTransformHeading = new ROSTransformHeading();
-        _rosTransformHeading.StartAgent(ROSAgent.AgentJob.Subscriber);
-        _rosTransformHeading.DataWasReceived += ReceivedHeadingUpdate;
         _rosLocomotionState = new ROSLocomotionState();
         _rosLocomotionState.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosLocomotionState.DataWasReceived += ReceivedLocomotionStateUpdata;
+        _rosOdometry = new ROSOdometry();
+        _rosOdometry.StartAgent(ROSAgent.AgentJob.Subscriber);
+        _rosOdometry.DataWasReceived += ReceivedOdometryUpdate;
         //_rosCamera = new ROSCamera();
         //_rosCamera.StartAgent(ROSAgent.AgentJob.Subscriber);
         //_rosCamera.DataWasReceived += HandleImage;
+
+        _rosLocomotionLinear.PublishData(_maxLinearSpeed);
+        _rosLocomotionAngular.PublishData(_maxAngularSpeed);
+        _rosLocomotionControlParams.PublishData(_controlParameterRho, _controlParameterRoll, _controlParameterPitch, _controlParameterYaw);
     }
 
     private void Move(Vector3 position)
@@ -255,30 +244,29 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.RUNNING);
     }
 
-    public void ReceivedPositionUpdate(ROSAgent sender, IRosMessage position)
+    public void ReceivedOdometryUpdate(ROSAgent sender, IRosMessage data)
     {
         //In WGS84
-        NavSatFix nav = (NavSatFix) position;
+        Odometry nav = (Odometry) data;
+
         GeoPointWGS84 geoPoint = new GeoPointWGS84
         {
-            latitude = nav.latitude,
-            longitude = nav.longitude,
-            altitude = nav.altitude,
+            latitude = nav.pose.pose.position.y,
+            longitude = nav.pose.pose.position.x,
+            altitude = nav.pose.pose.position.z,
         };
-        if (GeoUtils.UtmOriginSet)
+        Quaternion orientation = new Quaternion(
+            x: (float)nav.pose.pose.orientation.x, 
+            y: (float)nav.pose.pose.orientation.y, 
+            z: (float)nav.pose.pose.orientation.z, 
+            w: (float)nav.pose.pose.orientation.w
+        );
+        _odometryDataToConsume = new OdometryData
         {
-            _positionDataToConsume = geoPoint.ToUTM().ToUnity();
-
-            _hasPositionDataToConsume = true;
-            
-        }
-    }
-
-    public void ReceivedHeadingUpdate(ROSAgent sender, IRosMessage heading)
-    {
-        Float32 f = (Float32) heading;
-        _headingDataToConsume = f.data;
-        _hasHeadingDataToConsume = true;
+            Position = geoPoint,
+            Orientation = orientation
+        };
+        _hasOdometryDataToConsume = true;
     }
 
     //TODO: Not yet implemented
@@ -290,4 +278,9 @@ public class ArlobotROSController : ROSController {
         //_currentRobotLocomotionState = (RobotLocomotionState) Enum.Parse(typeof(RobotLocomotionState), s.data);
     }
 
+    private struct OdometryData
+    {
+        public GeoPointWGS84 Position;
+        public Quaternion Orientation;
+    }
 }

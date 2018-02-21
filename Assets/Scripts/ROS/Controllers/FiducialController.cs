@@ -21,8 +21,7 @@ public class FiducialController : MonoBehaviour
     private Dictionary<int, Transform> _fiducials = new Dictionary<int, Transform>();
     private string _fiducialSavePath;
     private Fiducial _zeroLocation;
-    private ROSFiducialMap _rosFiducialMapSubscriber;
-    private ROSFiducialMap _rosFiducialMapPublisher;
+   // private ROSFiducialMapGps _rosFiducialMapGpsSubscriber;
     private ROSFiducialMapGps _rosFiducialMapGpsPublisher;
     private FiducialCollectionFile _fiducialCollectionFile;
     private bool _hasDataToConsume;
@@ -192,11 +191,9 @@ public class FiducialController : MonoBehaviour
     private IEnumerator StartROSComponents()
     {
         while (!ROS.isStarted()) yield return new WaitForEndOfFrame();
-        _rosFiducialMapSubscriber = new ROSFiducialMap();
-        _rosFiducialMapSubscriber.StartAgent(ROSAgent.AgentJob.Subscriber);
-        _rosFiducialMapSubscriber.DataWasReceived += OnReceivedFiducialData;
-        _rosFiducialMapPublisher = new ROSFiducialMap();
-        _rosFiducialMapPublisher.StartAgent(ROSAgent.AgentJob.Publisher);
+        //_rosFiducialMapGpsSubscriber = new ROSFiducialMapGps();
+        //_rosFiducialMapGpsSubscriber.StartAgent(ROSAgent.AgentJob.Subscriber);
+        //_rosFiducialMapGpsSubscriber.DataWasReceived += OnReceivedFiducialData;
         _rosFiducialMapGpsPublisher = new ROSFiducialMapGps();
         _rosFiducialMapGpsPublisher.StartAgent(ROSAgent.AgentJob.Publisher);
         _fiducialPublishingRoutine = StartCoroutine(PublishFiducialsLoop(_publishInGps, _publishInterval));
@@ -274,10 +271,7 @@ public class FiducialController : MonoBehaviour
             mapEntries[i].rz = f.FiducialSpaceData.RZ;
         }
         mapEntryArray.fiducials = mapEntries;
-        if (inGps)
-            _rosFiducialMapGpsPublisher.PublishData(mapEntryArray);
-        else
-            _rosFiducialMapPublisher.PublishData(mapEntryArray);
+        _rosFiducialMapGpsPublisher.PublishData(mapEntryArray);
     }
 
     public int PlaceOrUpdateNewFiducial(int id, Vector3 position, Vector3 rotation)
