@@ -21,7 +21,6 @@ GameObject:
   - component: {fileID: 224317052507015510}
   - component: {fileID: 222784054908952576}
   - component: {fileID: 114985924319074988}
-  - component: {fileID: 114560440566497024}
   m_Layer: 5
   m_Name: TimeSliderPosition
   m_TagString: Untagged
@@ -29,19 +28,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &114560440566497024
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1678598969251176}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e17cbc6180b4eae4da82d39aaa7cb3fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _highlightColor: {r: 0, g: 0.8602941, b: 0.391, a: 1}
-  PictureId: 0
 --- !u!114 &114985924319074988
 MonoBehaviour:
   m_ObjectHideFlags: 1

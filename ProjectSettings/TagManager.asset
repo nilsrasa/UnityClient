@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Fiducial
   layers:
   - Default
   - TransparentFX
@@ -18,8 +19,8 @@ TagManager:
   - Floor
   - CameraSphere
   - SorroundPhotoLocations
-  - 
-  - 
+  - Robot
+  - Geometry
   - 
   - 
   - 

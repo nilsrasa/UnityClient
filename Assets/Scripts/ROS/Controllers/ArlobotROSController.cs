@@ -31,8 +31,6 @@ public class ArlobotROSController : ROSController {
     private ROSLocomotionSpeedParams _rosLocomotionSpeedParams;
     private ROSCamera _rosCamera;
 
-    private List<GeoPointWGS84> _waypoints;
-
     private bool _hasPositionDataToConsume;
     private Vector3 _positionDataToConsume;
     private bool _hasHeadingDataToConsume;
@@ -51,6 +49,7 @@ public class ArlobotROSController : ROSController {
     private float _maxLinearSpeed = 3;
     private float _linearSpeedParam = 3;
     private float _angularSpeedParam = 1;
+    private List<GeoPointWGS84> _waypoints;
 
     void Awake()
     {
@@ -268,7 +267,7 @@ public class ArlobotROSController : ROSController {
         };
         if (GeoUtils.UtmOriginSet)
         {
-            _positionDataToConsume = geoPoint.ToUTM().ToUnity() + new Vector3(0, 8, 0);
+            _positionDataToConsume = geoPoint.ToUTM().ToUnity();
 
             _hasPositionDataToConsume = true;
             

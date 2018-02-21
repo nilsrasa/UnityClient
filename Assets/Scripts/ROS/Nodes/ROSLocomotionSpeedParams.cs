@@ -53,11 +53,4 @@ public class ROSLocomotionSpeedParams : ROSAgent
         _publisher.publish(msg);
         
     }
-
-    protected override void ReceivedData(IRosMessage data)
-    {
-        String param = (String) data;
-        Debug.Log("ROSLocomotionDirect: Receieved data - " + param);
-    }
-
 }

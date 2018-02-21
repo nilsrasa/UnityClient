@@ -2,6 +2,7 @@
 	"RosMasterUri": "",
 	"WaypointDistanceThreshold": 0.44999998807907107,
 	"MaxLinearSpeed": 3.0,
+	"MaxAngularSpeed": 3.0,
 	"LinearSpeedParameter": 2.0,
 	"AngularSpeedParameter": 1.0,
 	"FloorHeightAboveGround": 4,

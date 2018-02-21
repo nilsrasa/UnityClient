@@ -4,9 +4,9 @@ using Messages.std_msgs;
 using Ros_CSharp;
 using UnityEngine;
 
-public class ROSLocomotionLinearSpeed : ROSAgent
+public class ROSLocomotionAngularSpeed : ROSAgent
 {
-    private const string TOPIC = "/waypoint/max_linear_speed";
+    private const string TOPIC = "/waypoint/max_angular_speed";
 
     private NodeHandle _nodeHandle;
     private Publisher<Float32> _publisher;

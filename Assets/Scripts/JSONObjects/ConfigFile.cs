@@ -7,6 +7,7 @@ public class ConfigFile
     public string RosMasterUri;
     public float WaypointDistanceThreshold;
     public float MaxLinearSpeed;
+    public float MaxAngularSpeed;
     public float LinearSpeedParameter;
     public float AngularSpeedParameter;
     public float FloorHeightAboveGround;

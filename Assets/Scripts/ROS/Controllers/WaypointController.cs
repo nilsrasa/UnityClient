@@ -40,6 +40,15 @@ public class WaypointController : MonoBehaviour {
         }
     }
 
+    public void CreateRoute(List<Vector3> route)
+    {
+        ClearAllWaypoints();
+        if (_currentWaypointMode == WaypointMode.Single)
+            ToggleWaypointMode();
+
+        route.ForEach(CreateWaypoint);
+    }
+
     public void CreateWaypoint(Vector3 waypointPosition)
     {
         if (_currentWaypointMode == WaypointMode.Single)

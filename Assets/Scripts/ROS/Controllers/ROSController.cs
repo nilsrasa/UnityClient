@@ -6,6 +6,9 @@ using XmlRpc_Wrapper;
 
 public class ROSController : MonoBehaviour
 {
+    public delegate void RosStarted();
+    public event RosStarted OnRosStarted;
+
     protected bool _robotModelInitialised;
 
     protected virtual void OnApplicationQuit()
@@ -28,6 +31,7 @@ public class ROSController : MonoBehaviour
         if (ROS.isStarted()) return;
         ROS.Init(new string[0], "VRClient");
         XmlRpcUtil.SetLogLevel(XmlRpcUtil.XMLRPC_LOG_LEVEL.ERROR);
+        OnRosStarted?.Invoke();
     }
 
     public virtual void StopROS()

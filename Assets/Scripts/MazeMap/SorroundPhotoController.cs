@@ -151,6 +151,17 @@ public class SorroundPhotoController : MonoBehaviour
         }
     }
 
+    public void SetCameraPositionVisibility(bool isVisible)
+    {
+        if (_photoLocations != null)
+        {
+            foreach (KeyValuePair<int, SorroundPhotoLocation> location in _photoLocations)
+            {
+                location.Value.gameObject.SetActive(isVisible);
+            }
+        }
+    }
+
     public void DisableView()
     {
         _camera.enabled = false;

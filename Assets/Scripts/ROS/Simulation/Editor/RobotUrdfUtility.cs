@@ -14,7 +14,7 @@ public class RobotUrdfUtility {
     private static string assetFolderPath = "Assets/Materials/Robots";
     private static string assetPathFormat = assetFolderPath + "/{0}/{1}.mat";
     private static string prefabFolderPath = "Assets/Resources";
-    private static string prefabResourcesFolderPath = "Prefabs/Robots";
+    private static string prefabResourcesFolderPath = "Prefabs/RobotModels/";
     private static string prefabPathFormat = prefabFolderPath + "/" + prefabResourcesFolderPath + "/{0}.prefab";
 
     /// <summary>

@@ -30,6 +30,11 @@ public class FiducialController : MonoBehaviour
     private bool _initialised;
     private Coroutine _fiducialPublishingRoutine;
 
+    private int _tempFiducialId;
+    private Transform _tempFiducial;
+    private Transform _fiducialToUpdate;
+    private List<int> _fiducialsToDelete;
+
     void Awake()
     {
         Instance = this;
@@ -70,9 +75,24 @@ public class FiducialController : MonoBehaviour
         GameObject newFiducial = Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _zeroLocation.Position.ToUTM().ToUnity(), 
             Quaternion.Euler(_zeroLocation.Rotation)) as GameObject;
 
-        newFiducial.name = "Fiducial " + _zeroLocation.FiducialId;
+        newFiducial.name = _zeroLocation.FiducialId.ToString();
         newFiducial.GetComponentInChildren<TextMesh>().text = _zeroLocation.FiducialId.ToString();
         _fiducials.Add(_zeroLocation.FiducialId, newFiducial.transform);
+
+        FiducialObject.FiducialData orgData = new FiducialObject.FiducialData
+        {
+            X = 0, Y = 0, Z = 0,
+            RX = 0, RY = 0, RZ = 0
+        };
+
+        _fiducialObjects.Add(_zeroLocation.FiducialId, new FiducialObject
+        {
+            Id = _zeroLocation.FiducialId,
+            Position = newFiducial.transform.position.ToUTM().ToWGS84(),
+            Rotation = newFiducial.transform.eulerAngles,
+            FiducialSpaceData = orgData
+        });
+
         _initialised = true;
     }
 
@@ -89,7 +109,7 @@ public class FiducialController : MonoBehaviour
                 {
                     if (entry.fiducial_id != _zeroLocation.FiducialId) {
                         Vector3 localpos = new Vector3((float)entry.x, (float)entry.z, (float)entry.y);
-                        fiducialTransform.localPosition = _fiducials[_zeroLocation.FiducialId].rotation * localpos;
+                        fiducialTransform.localPosition = localpos;
                         fiducialTransform.localEulerAngles = new Vector3((float)entry.rx * Mathf.Rad2Deg, (float)entry.rz * Mathf.Rad2Deg, (float)entry.ry * Mathf.Rad2Deg);
                     }
                 }
@@ -110,7 +130,7 @@ public class FiducialController : MonoBehaviour
                         Id = entry.fiducial_id,
                         Position = newFiducial.transform.position.ToUTM().ToWGS84(),
                         Rotation = newFiducial.transform.eulerAngles,
-                        OriginalData = orgData
+                        FiducialSpaceData = orgData
                     });
                 }
             }
@@ -118,23 +138,15 @@ public class FiducialController : MonoBehaviour
         }
     }
 
-    private GameObject InstantiateFiducial(int id, Vector3 worldPosition, Vector3 eulerRotation)
+    private GameObject InstantiateFiducial(FiducialMapEntry entry)
     {
-        GameObject newFiducial = Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _fiducials[_zeroLocation.FiducialId]) as GameObject;
-        newFiducial.transform.position = worldPosition;
-        newFiducial.transform.localEulerAngles = eulerRotation;
-        newFiducial.name = "Fiducial " + id;
-        _fiducials.Add(id, newFiducial.transform);
-        return newFiducial;
-    }
-
-    private GameObject InstantiateFiducial(FiducialMapEntry entry) {
         GameObject newFiducial = Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _fiducials[_zeroLocation.FiducialId]) as GameObject;
         newFiducial.transform.localPosition = new Vector3((float)entry.x, 0, (float)entry.y);
         newFiducial.transform.localEulerAngles = new Vector3((float)entry.rx * Mathf.Rad2Deg, (float)entry.rz * Mathf.Rad2Deg, (float)entry.ry * Mathf.Rad2Deg);
-        newFiducial.name = "Fiducial " + entry.fiducial_id;
+        newFiducial.name = entry.fiducial_id.ToString();
         newFiducial.GetComponentInChildren<TextMesh>().text = entry.fiducial_id.ToString();
         _fiducials.Add(entry.fiducial_id, newFiducial.transform);
+
         return newFiducial;
     }
 
@@ -160,8 +172,10 @@ public class FiducialController : MonoBehaviour
         bool saved = false;
         if (_fiducialCollectionFile.FiducialCollections != null)
         {
-            for (int i = 0; i < _fiducialCollectionFile.FiducialCollections.Count; i++) {
-                if (_fiducialCollectionFile.FiducialCollections[i].CampusId == collection.CampusId) {
+            for (int i = 0; i < _fiducialCollectionFile.FiducialCollections.Count; i++)
+            {
+                if (_fiducialCollectionFile.FiducialCollections[i].CampusId == collection.CampusId)
+                {
                     _fiducialCollectionFile.FiducialCollections[i] = collection;
                     saved = true;
                 }
@@ -210,15 +224,15 @@ public class FiducialController : MonoBehaviour
                 {
                     foreach (FiducialObject fiducialObject in collection.SavedFiducials)
                     {
+                        if (fiducialObject.Id == _zeroLocation.FiducialId) continue;
                         //TODO: Use once markers are place correctly
                         InstantiateFiducial(new FiducialMapEntry
                         {
                             fiducial_id = fiducialObject.Id,
-                            x = fiducialObject.OriginalData.X, y = fiducialObject.OriginalData.Y, z = fiducialObject.OriginalData.Z,
-                            rx = fiducialObject.OriginalData.RX, ry = fiducialObject.OriginalData.RY, rz = fiducialObject.OriginalData.RZ,
+                            x = fiducialObject.FiducialSpaceData.X, y = fiducialObject.FiducialSpaceData.Y, z = fiducialObject.FiducialSpaceData.Z,
+                            rx = fiducialObject.FiducialSpaceData.RX, ry = fiducialObject.FiducialSpaceData.RY, rz = fiducialObject.FiducialSpaceData.RZ,
                             
                         });
-                        //InstantiateFiducial(fiducialObject.Id, fiducialObject.Position.ToUTM().ToUnity(), fiducialObject.Rotation);
                         _fiducialObjects.Add(fiducialObject.Id, fiducialObject);
                     }
                     return;
@@ -252,18 +266,161 @@ public class FiducialController : MonoBehaviour
                 mapEntries[i] = new FiducialMapEntry
                 {
                     fiducial_id = f.Id,
-                    x = f.OriginalData.X, y = f.OriginalData.Y, z = f.OriginalData.Z,
+                    x = f.FiducialSpaceData.X, y = f.FiducialSpaceData.Y, z = f.FiducialSpaceData.Z,
                 };
             }
-            mapEntries[i].rx = f.OriginalData.RX;
-            mapEntries[i].ry = f.OriginalData.RY;
-            mapEntries[i].rz = f.OriginalData.RZ;
+            mapEntries[i].rx = f.FiducialSpaceData.RX;
+            mapEntries[i].ry = f.FiducialSpaceData.RY;
+            mapEntries[i].rz = f.FiducialSpaceData.RZ;
         }
         mapEntryArray.fiducials = mapEntries;
         if (inGps)
             _rosFiducialMapGpsPublisher.PublishData(mapEntryArray);
         else
             _rosFiducialMapPublisher.PublishData(mapEntryArray);
+    }
+
+    public int PlaceOrUpdateNewFiducial(int id, Vector3 position, Vector3 rotation)
+    {
+        if (_fiducialObjects.ContainsKey(id))
+            _tempFiducialId = GetNewFiducialId();
+        _tempFiducialId = id;
+
+        if (_tempFiducial == null)
+        {
+            _tempFiducial = (Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _fiducials[_zeroLocation.FiducialId]) as GameObject).transform;
+            _tempFiducial.SetPositionAndRotation(position, Quaternion.Euler(rotation));
+        }
+        else
+        {
+            _tempFiducial.SetPositionAndRotation(position, Quaternion.Euler(rotation));
+
+        }
+        _tempFiducial.GetComponentInChildren<TextMesh>().text = _tempFiducialId.ToString();
+        return _tempFiducialId;
+    }
+
+    public void FinalizeNewFiducialPlacement()
+    {
+        _tempFiducial.name = _tempFiducialId.ToString();
+        _fiducials.Add(_tempFiducialId, _tempFiducial);
+
+        FiducialObject.FiducialData orgData = new FiducialObject.FiducialData
+        {
+            X = _tempFiducial.localPosition.x,
+            Y = _tempFiducial.localPosition.z,
+            Z = _tempFiducial.localPosition.y,
+            RX = _tempFiducial.localEulerAngles.x,
+            RY = _tempFiducial.localEulerAngles.z,
+            RZ = _tempFiducial.localEulerAngles.y,
+        };
+
+        _fiducialObjects.Add(_tempFiducialId, new FiducialObject
+        {
+            Id = _tempFiducialId,
+            Position = _tempFiducial.position.ToUTM().ToWGS84(),
+            Rotation = _tempFiducial.eulerAngles,
+            FiducialSpaceData = orgData
+        });
+
+        _tempFiducial = null;
+    }
+
+    public void CancelNewFiducialPlacement()
+    {
+        Destroy(_tempFiducial.gameObject);
+        _tempFiducial = null;
+    }
+
+    public int GetNewFiducialId()
+    {
+        int highestId = int.MinValue;
+        foreach (KeyValuePair<int, FiducialObject> fiducial in _fiducialObjects)
+        {
+            if (fiducial.Key > highestId)
+                highestId = fiducial.Key;
+        }
+        return highestId + 1;
+    }
+
+    public void SetFiducialColliders(bool isActive)
+    {
+        foreach (KeyValuePair<int, Transform> fiducial in _fiducials)
+        {
+            fiducial.Value.GetComponent<SphereCollider>().enabled = isActive;
+        }
+    }
+
+    public void DeleteFiducial(Transform fiducial)
+    {
+        if (_fiducialsToDelete == null) _fiducialsToDelete = new List<int>();
+        int id = int.Parse(fiducial.gameObject.name);
+        _fiducialsToDelete.Add(id);
+        _fiducials[id].gameObject.SetActive(false);
+    }
+
+    public void FinalizeDelete()
+    {
+        foreach (int id in _fiducialsToDelete)
+        {
+            Destroy(_fiducials[id].gameObject);
+            _fiducials.Remove(id);
+            _fiducialObjects.Remove(id);
+        }
+    }
+
+    public void CancelDelete()
+    {
+        foreach (int id in _fiducialsToDelete)
+        {
+            _fiducials[id].gameObject.SetActive(true);
+        }
+        _fiducialsToDelete = null;
+    }
+
+    public int StartUpdateFiducial(Transform fiducial)
+    {
+        _tempFiducial = Instantiate(fiducial.gameObject).transform;
+        _tempFiducial.SetPositionAndRotation(fiducial.position, fiducial.rotation);
+        _tempFiducial.name = fiducial.name;
+        _tempFiducialId = int.Parse(fiducial.gameObject.name);
+        _fiducialToUpdate = fiducial;
+        _fiducialToUpdate.gameObject.SetActive(false);
+        return _tempFiducialId;
+    }
+
+    public void UpdateFiducial(int id, Vector3 newPosition, Vector3 newRotation)
+    {
+        _tempFiducial.position = newPosition;
+        _tempFiducial.eulerAngles = newRotation;
+    }
+
+    public void FinalizeUpdate()
+    {
+        _fiducialToUpdate.SetPositionAndRotation(_tempFiducial.position, Quaternion.Euler(_tempFiducial.eulerAngles));
+        
+        _fiducialObjects[_tempFiducialId].FiducialSpaceData = new FiducialObject.FiducialData
+        {
+            X = _fiducialToUpdate.localPosition.x,
+            Y = _fiducialToUpdate.localPosition.z,
+            Z = _fiducialToUpdate.localPosition.y,
+            RX = _fiducialToUpdate.localEulerAngles.x,
+            RY = _fiducialToUpdate.localEulerAngles.z,
+            RZ = _fiducialToUpdate.localEulerAngles.y,
+        };
+
+        _fiducialObjects[_tempFiducialId].Position = _fiducialToUpdate.position.ToUTM().ToWGS84();
+        _fiducialObjects[_tempFiducialId].Rotation = _fiducialToUpdate.eulerAngles;
+
+        Destroy(_tempFiducial.gameObject);
+        _tempFiducial = null;
+    }
+
+    public void CancelUpdate()
+    {
+        Destroy(_tempFiducial.gameObject);
+        _tempFiducial = null;
+        _fiducialToUpdate.gameObject.SetActive(true);
     }
 
 }

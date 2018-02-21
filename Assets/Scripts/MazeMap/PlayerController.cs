@@ -12,6 +12,9 @@ public class PlayerController : MonoBehaviour
 
     public static PlayerController Instance { get; set; }
 
+    public delegate void MouseWasClicked(Ray mouseRay);
+    public event MouseWasClicked OnMouseClick;
+
     [SerializeField] private float _mouseMovementSpeed = 5;
     [SerializeField] private float _mouseScrollSpeed = 10;
     [SerializeField] private float _mouseClickSpeed = 0.1f;
@@ -159,13 +162,20 @@ public class PlayerController : MonoBehaviour
     {
         //Checks if UI was clicked
         if (EventSystem.current.IsPointerOverGameObject()) return;
-        if (_hoveredMouseObject)
+        if (_hoveredMouseObject && OnMouseClick == null)
         {
             _hoveredMouseObject.Clicked();
             return;
         }
-
         Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
+
+        //If something subscribed to mouse click, redirect
+        if (OnMouseClick != null)
+        {
+            OnMouseClick(ray);
+            return;
+        }
+
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit, 1000))
         {
@@ -176,7 +186,7 @@ public class PlayerController : MonoBehaviour
                 return;
             }
             if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Floor")) return;
-
+            
             WaypointController.CreateWaypoint(hit.point);
         }
     }

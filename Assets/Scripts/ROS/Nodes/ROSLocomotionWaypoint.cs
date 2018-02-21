@@ -1,5 +1,4 @@
-﻿using System;
-using Messages;
+﻿using Messages;
 using Ros_CSharp;
 using UnityEngine;
 using String = Messages.std_msgs.String;
@@ -47,13 +46,6 @@ public class ROSLocomotionWaypointState : ROSAgent
         RobotWaypointState state = (RobotWaypointState) (int)data;
         String msg = new String(state.ToString());
         _publisher.publish(msg);
-    }
-
-    protected override void ReceivedData(IRosMessage data)
-    {
-        base.ReceivedData(data);
-        String nav = (String) data;
-        Debug.Log("ROSLocomotionWaypointState: Receieved data - " + nav);
     }
 
 }

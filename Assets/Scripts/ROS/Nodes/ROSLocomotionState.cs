@@ -1,8 +1,5 @@
-﻿using Messages;
-using Messages.sensor_msgs;
-using Messages.std_msgs;
+﻿using Messages.std_msgs;
 using Ros_CSharp;
-using UnityEngine;
 
 /// <summary>
 /// Ultrasound agent that sends or receives ultrasound data

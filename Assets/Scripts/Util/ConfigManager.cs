@@ -39,6 +39,7 @@ public class ConfigManager
         if (def.RosMasterUri != userConfigFile.RosMasterUri) ConfigFile.RosMasterUri = userConfigFile.RosMasterUri;
         if (def.WaypointDistanceThreshold != userConfigFile.WaypointDistanceThreshold) ConfigFile.WaypointDistanceThreshold = userConfigFile.WaypointDistanceThreshold;
         if (def.MaxLinearSpeed != userConfigFile.MaxLinearSpeed) ConfigFile.MaxLinearSpeed = userConfigFile.MaxLinearSpeed;
+        if (def.MaxAngularSpeed != userConfigFile.MaxAngularSpeed) ConfigFile.MaxAngularSpeed = userConfigFile.MaxAngularSpeed;
         if (def.LinearSpeedParameter != userConfigFile.LinearSpeedParameter) ConfigFile.LinearSpeedParameter = userConfigFile.LinearSpeedParameter;
         if (def.AngularSpeedParameter != userConfigFile.AngularSpeedParameter) ConfigFile.AngularSpeedParameter = userConfigFile.AngularSpeedParameter;
         if (def.FloorHeightAboveGround != userConfigFile.FloorHeightAboveGround) ConfigFile.FloorHeightAboveGround = userConfigFile.FloorHeightAboveGround;

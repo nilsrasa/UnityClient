@@ -7,7 +7,7 @@ public class FiducialObject
     public int Id;
     public GeoPointWGS84 Position;
     public Vector3 Rotation;
-    public FiducialData OriginalData;
+    public FiducialData FiducialSpaceData;
 
     [Serializable]
     public struct FiducialData

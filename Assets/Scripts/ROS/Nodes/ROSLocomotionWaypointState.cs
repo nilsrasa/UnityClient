@@ -55,10 +55,4 @@ public class ROSLocomotionWaypoint : ROSAgent
         _publisher.publish(nav);
     }
 
-    protected override void ReceivedData(IRosMessage data)
-    {
-        NavSatFix nav = (NavSatFix) data;
-        Debug.Log("ROSLocomotionWaypoint: Receieved data - " + nav);
-    }
-
 }
