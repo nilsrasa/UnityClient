@@ -1,5 +1,6 @@
 {
 	"RosMasterUri": "",
+	"RosMasterPort": 9090,
 	"WaypointDistanceThreshold": 0.44999998807907107,
 	"MaxLinearSpeed": 3.0,
 	"MaxAngularSpeed": 3.0,

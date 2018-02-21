@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class ConfigFile
 {
     public string RosMasterUri;
+    public int RosMasterPort;
     public float WaypointDistanceThreshold;
     public float MaxLinearSpeed;
     public float MaxAngularSpeed;

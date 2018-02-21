@@ -1,5 +1,6 @@
 {
-	"RosMasterUri": "192.168.255.10:11311",
+	"RosMasterUri": "192.168.255.10",
+	"RosMasterPort": 9090,
 	"WaypointDistanceThreshold": 0.44999998807907107,
 	"MaxLinearSpeed": 1.0,
 	"MaxAngularSpeed": 1.0,

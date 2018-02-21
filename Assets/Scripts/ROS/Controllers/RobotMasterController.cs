@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Ros_CSharp;
+using ROSBridgeLib;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -14,6 +14,8 @@ public class RobotMasterController : MonoBehaviour
 
     public RobotConfigFile RobotConfigFile { get; private set; }
 
+    //Master URI, Corresponding Socket
+    private readonly Dictionary<string, ROSBridgeWebSocketConnection> _rosBridges = new Dictionary<string, ROSBridgeWebSocketConnection>();
     private int _selectedRobotIndex;
     private Dictionary<string, RobotConfigFile> _robotConfigs;
     private string _configPath;
@@ -55,6 +57,17 @@ public class RobotMasterController : MonoBehaviour
         RobotConfigFile config;
         if (_robotConfigs.TryGetValue(robotName, out config))
         {
+            ROSBridgeWebSocketConnection rosBridge;
+            if (_rosBridges.TryGetValue(config.RosMasterUri, out rosBridge))
+            {
+
+            }
+            else
+            {
+                rosBridge = new ROSBridgeWebSocketConnection(config.RosMasterUri)
+            }
+
+
             GameObject robot = Instantiate(Resources.Load(_robotPrefabPath + robotName)) as GameObject;
             return robot.GetComponent<ROSController>();
         }
