@@ -8,8 +8,10 @@ public class ConfigFile
     public float WaypointDistanceThreshold;
     public float MaxLinearSpeed;
     public float MaxAngularSpeed;
-    public float LinearSpeedParameter;
-    public float AngularSpeedParameter;
+    public float ControlParameterRho;
+    public float ControlParameterRoll;
+    public float ControlParameterPitch;
+    public float ControlParameterYaw;
     public float FloorHeightAboveGround;
     public float FloorHeightBelowGround;
     public float FloorLineWidth;

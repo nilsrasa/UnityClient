@@ -7,13 +7,10 @@ public class TestVideoPlayer : MonoBehaviour
 {
 
     private VideoPlayer _videoPlayer;
-    private VideoSource _videoSource;
-    private AudioSource _audioSource;
 
     void Awake()
     {
         _videoPlayer = GetComponent<VideoPlayer>();
-        _audioSource = GetComponent<AudioSource>();
     }
 
     void Start()
@@ -30,15 +27,10 @@ public class TestVideoPlayer : MonoBehaviour
         _videoPlayer.prepareCompleted += VideoPlayer_prepareCompleted;
 
         _videoPlayer.playOnAwake = false;
-        _audioSource.playOnAwake = false;
-
-        _audioSource.Pause();
 
         _videoPlayer.source = VideoSource.Url;
-        _videoPlayer.url = "http://docs.evostream.com/sample_content/assets/bun33s.mp4";
-        _videoPlayer.audioOutputMode = VideoAudioOutputMode.AudioSource;
-        _videoPlayer.EnableAudioTrack(0, true);
-        _videoPlayer.SetTargetAudioSource(0, _audioSource);
+        _videoPlayer.url = "http://localhost:8081/video.mjpg?q=75&fps=33&id=0.8826213513689396&r=1519218756772";
+        _videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
 
         Debug.Log("will prepare Video");
 
@@ -50,8 +42,6 @@ public class TestVideoPlayer : MonoBehaviour
         Debug.Log("Done Preparing Video");
         //Play Video
         _videoPlayer.Play();
-        //Play Sound
-        _audioSource.Play();
     }
     private void VideoPlayer_errorReceived(VideoPlayer source, string message) {
         Debug.Log("Error:" + message);
