@@ -1,12 +1,9 @@
 ﻿using System.Collections.Generic;
-using Messages;
-using Messages.nav_msgs;
-using Messages.sensor_msgs;
-using Messages.std_msgs;
+using ROSBridgeLib.nav_msgs;
+using ROSBridgeLib.std_msgs;
 using UnityEngine;
 using UnityEngine.UI;
 using Quaternion = UnityEngine.Quaternion;
-using String = Messages.std_msgs.String;
 using Vector3 = UnityEngine.Vector3;
 
 public class ArlobotROSController : ROSController {
@@ -34,9 +31,9 @@ public class ArlobotROSController : ROSController {
 
     private bool _hasOdometryDataToConsume;
     private OdometryData _odometryDataToConsume;
-    private CompressedImage _cameraDataToConsume;
-    private CameraInfo _cameraInfoToConsume;
-    private bool _hasCameraDataToConsume;
+    //private CompressedImageMsg _cameraDataToConsume;
+    //private CameraInfo _cameraInfoToConsume;
+    //private bool _hasCameraDataToConsume;
 
     //Navigation
     private Vector3 _currentWaypoint;
@@ -122,6 +119,7 @@ public class ArlobotROSController : ROSController {
             transform.position = _odometryDataToConsume.Position.ToUTM().ToUnity();
             _hasOdometryDataToConsume = false;
         }
+        /*
         if (_hasCameraDataToConsume)
         {
             lock (_cameraDataToConsume)
@@ -129,7 +127,7 @@ public class ArlobotROSController : ROSController {
                 _cameraImage.texture = ROSCamera.ConvertToTexture2D(_cameraDataToConsume, _cameraInfoToConsume);
                 _hasCameraDataToConsume = false;
             }
-        }
+        }*/
     }
 
     public override void MoveDirect(Vector2 command)
@@ -161,8 +159,8 @@ public class ArlobotROSController : ROSController {
         StopRobot();
         PlayerUIController.Instance.SetDriveMode(false);
     }
-
-    private void HandleImage(ROSAgent sender, CompressedImage compressedImage, CameraInfo info)
+    /*
+    private void HandleImage(ROSAgent sender, CompressedImageMsg compressedImage, CameraInfo info)
     {
         lock (_cameraDataToConsume) 
         {
@@ -170,7 +168,7 @@ public class ArlobotROSController : ROSController {
             _cameraDataToConsume = compressedImage;
             _hasCameraDataToConsume = true;
         }
-    }
+    }*/
 
     public override void StopRobot()
     {
@@ -179,8 +177,7 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionDirect.PublishData(Vector2.zero);
     }
 
-    public override void StartROS(string uri) {
-        base.StartROS(uri);
+    protected override void StartROS() {
         _rosLocomotionDirect = new ROSLocomotionDirect();
         _rosLocomotionDirect.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosLocomotionWaypoint = new ROSLocomotionWaypoint();
@@ -244,22 +241,22 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.RUNNING);
     }
 
-    public void ReceivedOdometryUpdate(ROSAgent sender, IRosMessage data)
+    public void ReceivedOdometryUpdate(ROSAgent sender, ROSBridgeMsg data)
     {
         //In WGS84
-        Odometry nav = (Odometry) data;
+        OdometryMsg nav = (OdometryMsg) data;
 
         GeoPointWGS84 geoPoint = new GeoPointWGS84
         {
-            latitude = nav.pose.pose.position.y,
-            longitude = nav.pose.pose.position.x,
-            altitude = nav.pose.pose.position.z,
+            latitude = nav._pose._pose._position.GetY(),
+            longitude = nav._pose._pose._position.GetX(),
+            altitude = nav._pose._pose._position.GetZ(),
         };
         Quaternion orientation = new Quaternion(
-            x: (float)nav.pose.pose.orientation.x, 
-            y: (float)nav.pose.pose.orientation.y, 
-            z: (float)nav.pose.pose.orientation.z, 
-            w: (float)nav.pose.pose.orientation.w
+            x: (float)nav._pose._pose._orientation.GetX(), 
+            y: (float)nav._pose._pose._orientation.GetY(), 
+            z: (float)nav._pose._pose._orientation.GetZ(), 
+            w: (float)nav._pose._pose._orientation.GetW()
         );
         _odometryDataToConsume = new OdometryData
         {
@@ -270,11 +267,11 @@ public class ArlobotROSController : ROSController {
     }
 
     //TODO: Not yet implemented
-    public void ReceivedLocomotionStateUpdata(ROSAgent sender, IRosMessage state)
+    public void ReceivedLocomotionStateUpdata(ROSAgent sender, ROSBridgeMsg state)
     {
         //TODO: Not implemented yet
 
-        String s = (String) state;
+        StringMsg s = (StringMsg) state;
         //_currentRobotLocomotionState = (RobotLocomotionState) Enum.Parse(typeof(RobotLocomotionState), s.data);
     }
 

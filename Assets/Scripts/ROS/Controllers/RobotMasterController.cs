@@ -12,8 +12,6 @@ public class RobotMasterController : MonoBehaviour
 
     [SerializeField] private List<ROSController> _activeRobots;
 
-    public RobotConfigFile RobotConfigFile { get; private set; }
-
     //Master URI, Corresponding Socket
     private readonly Dictionary<string, ROSBridgeWebSocketConnection> _rosBridges = new Dictionary<string, ROSBridgeWebSocketConnection>();
     private int _selectedRobotIndex;
@@ -26,11 +24,28 @@ public class RobotMasterController : MonoBehaviour
         Instance = this;
         _configPath = Application.streamingAssetsPath + "/Config/Robots/";
         _robotPrefabPath = "Prefabs/Robots/";
+
     }
 
     void Start()
     {
         Initialise();
+    }
+
+    void Update()
+    {
+        foreach (KeyValuePair<string, ROSBridgeWebSocketConnection> bridge in _rosBridges)
+        {
+            bridge.Value.Render();
+        }
+    }
+
+    void OnApplicationQuit()
+    {
+        foreach (KeyValuePair<string, ROSBridgeWebSocketConnection> bridge in _rosBridges)
+        {
+            bridge.Value.Disconnect();    
+        }
     }
 
     private void Initialise()
@@ -58,18 +73,16 @@ public class RobotMasterController : MonoBehaviour
         if (_robotConfigs.TryGetValue(robotName, out config))
         {
             ROSBridgeWebSocketConnection rosBridge;
-            if (_rosBridges.TryGetValue(config.RosMasterUri, out rosBridge))
+            if (!_rosBridges.TryGetValue($"{config.RosMasterUri}:{config.RosMasterPort}", out rosBridge))
             {
-
+                rosBridge = new ROSBridgeWebSocketConnection(config.RosMasterUri, config.RosMasterPort);
+                rosBridge.Connect();
+                _rosBridges.Add($"{config.RosMasterUri}:{config.RosMasterPort}", rosBridge);
             }
-            else
-            {
-                rosBridge = new ROSBridgeWebSocketConnection(config.RosMasterUri)
-            }
-
 
             GameObject robot = Instantiate(Resources.Load(_robotPrefabPath + robotName)) as GameObject;
-            return robot.GetComponent<ROSController>();
+            ROSController rosController = robot.GetComponent<ROSController>();
+            rosController.InitialiseRobot(rosBridge, config);
         }
         else
         {

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Ros_CSharp;
+using ROSBridgeLib;
 using UnityEngine;
-using XmlRpc_Wrapper;
 
 public class ROSController : MonoBehaviour
 {
@@ -10,35 +9,12 @@ public class ROSController : MonoBehaviour
     public event RosStarted OnRosStarted;
 
     protected bool _robotModelInitialised;
+    protected ROSBridgeWebSocketConnection _rosBridge;
+    protected RobotConfigFile _robotConfig;
 
-    protected virtual void OnApplicationQuit()
+    protected virtual void StartROS()
     {
-        if (ROS.ok || ROS.isStarted())
-            StopROS();
-    }
-
-    public virtual void StartROS(string ros_master_uri)
-    {
-        if (!ros_master_uri.Contains("http://"))
-            ros_master_uri = "http://" + ros_master_uri;
-        ROS.ROS_MASTER_URI = ros_master_uri;
-        StartROS();
-    }
-
-    public virtual void StartROS()
-    {
-        Debug.Log("---Starting ROS---");
-        if (ROS.isStarted()) return;
-        ROS.Init(new string[0], "VRClient");
-        XmlRpcUtil.SetLogLevel(XmlRpcUtil.XMLRPC_LOG_LEVEL.ERROR);
-        OnRosStarted?.Invoke();
-    }
-
-    public virtual void StopROS()
-    {
-        Debug.Log("---Stopping ROS---");
-        ROS.shutdown();
-        ROS.waitForShutdown(); 
+        Debug.Log("Starting Robot");
     }
 
     public virtual void MoveDirect(Vector2 movementCommand)
@@ -71,7 +47,12 @@ public class ROSController : MonoBehaviour
         throw new NotImplementedException("Override this function");
     }
 
-    protected virtual void InitialiseRobot() {
+    public virtual void InitialiseRobot(ROSBridgeWebSocketConnection rosBridge, RobotConfigFile robotConfig)
+    {
+        _rosBridge = rosBridge;
+        _robotConfig = robotConfig;
+        StartROS();
+        /*
         if (Param.has("robot_description"))
         {
             string robotDescription = "";
@@ -82,6 +63,7 @@ public class ROSController : MonoBehaviour
         else
             Debug.Log("---No robot description available - could not automatically generate robot---");
         _robotModelInitialised = true;
+        */
     }
 
     private void GenerateRobot(string robotDescription) {
