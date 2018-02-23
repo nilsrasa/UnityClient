@@ -52,6 +52,8 @@ public class ROSController : MonoBehaviour
         _rosBridge = rosBridge;
         _robotConfig = robotConfig;
         StartROS();
+
+
         /*
         if (Param.has("robot_description"))
         {

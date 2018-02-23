@@ -3,9 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Messages;
-using Messages.fiducial_msgs;
-using Ros_CSharp;
 using UnityEngine;
 
 public class FiducialController : MonoBehaviour

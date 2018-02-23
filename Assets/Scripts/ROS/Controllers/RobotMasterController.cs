@@ -83,6 +83,8 @@ public class RobotMasterController : MonoBehaviour
             GameObject robot = Instantiate(Resources.Load(_robotPrefabPath + robotName)) as GameObject;
             ROSController rosController = robot.GetComponent<ROSController>();
             rosController.InitialiseRobot(rosBridge, config);
+
+            return rosController;
         }
         else
         {

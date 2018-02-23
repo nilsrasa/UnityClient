@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Messages;
-using Messages.geometry_msgs;
-using Messages.nav_msgs;
-using Messages.sensor_msgs;
-using Messages.std_msgs;
-using Ros_CSharp;
+using ROSBridgeLib;
+using ROSBridgeLib.geometry_msgs;
+using TriangleNet.Geometry;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 
@@ -25,10 +22,10 @@ public class VirtualRobot : ROSController
     //Subscribers
     private ROSLocomotionDirect _rosLocomotionDirect;
     private bool _hasLocomotionDirectDataToConsume;
-    private Twist _locomotionDirectDataToConsume;
+    private TwistMsg _locomotionDirectDataToConsume;
     private ROSJoystick _rosJoystick;
     private bool _hasJoystickDataToConsume;
-    private Twist _joystickDataToConsume;
+    private TwistMsg _joystickDataToConsume;
 
     //Publishers
     private Coroutine _transformUpdateCoroutine;
@@ -67,8 +64,6 @@ public class VirtualRobot : ROSController
     }
 
     void Update() {
-        if (!(ROS.ok || ROS.isStarted()))
-            return;
         if (_agentsWaitingToStart.Count > 0) {
             foreach (Type type in _agentsWaitingToStart) {
                 StartAgent(type);

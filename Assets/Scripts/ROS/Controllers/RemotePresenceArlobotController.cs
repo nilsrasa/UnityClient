@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Messages.sensor_msgs;
+﻿using ROSBridgeLib.sensor_msgs;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,7 +15,7 @@ public class RemotePresenceArlobotController : ROSController {
 
     private List<GeoPointWGS84> _waypoints;
     
-    private CompressedImage _cameraDataToConsume;
+    private CompressedImageMsg _cameraDataToConsume;
     private CameraInfo _cameraInfoToConsume;
     private bool _hasCameraDataToConsume;
 
@@ -46,7 +46,7 @@ public class RemotePresenceArlobotController : ROSController {
         _rosLocomotionDirect.PublishData(command);
     }
 
-    private void HandleImage(ROSAgent sender, CompressedImage compressedImage, CameraInfo info)
+    private void HandleImage(ROSAgent sender, CompressedImageMsg compressedImage, CameraInfo info)
     {
         lock (_cameraDataToConsume) 
         {
