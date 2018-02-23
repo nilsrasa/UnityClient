@@ -492,8 +492,18 @@ public class PlayerUIController : MonoBehaviour
 
     private void OnSelectedRobotValueChanged(int newIndex)
     {
-        if (newIndex > 0) 
+        if (newIndex > 0)
+        {
             _selectedRobot = RobotMasterController.Instance.LoadRobot(_selectRobot.options[newIndex].text);
+            _driveRobot.interactable = true;
+            _returnToBase.interactable = true;
+        }
+        else
+        {
+            SetDriveMode(false);
+            _driveRobot.interactable = false;
+            _returnToBase.interactable = false;
+        }
     }
 
     private void OnTimeSliderValueChanged(float newValue)

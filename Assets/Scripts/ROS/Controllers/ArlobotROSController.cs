@@ -212,7 +212,6 @@ public class ArlobotROSController : ROSController {
 
     private void Move(Vector3 position)
     {
-        Debug.Log(position);
         GeoPointWGS84 point = position.ToUTM().ToWGS84();
         _rosLocomotionWaypoint.PublishData(point);
         _currentWaypoint = position;
@@ -257,8 +256,8 @@ public class ArlobotROSController : ROSController {
         };
         Quaternion orientation = new Quaternion(
             x: (float)nav.pose.pose.orientation.x, 
-            y: (float)nav.pose.pose.orientation.y, 
-            z: (float)nav.pose.pose.orientation.z, 
+            y: (float)nav.pose.pose.orientation.z, 
+            z: (float)nav.pose.pose.orientation.y, 
             w: (float)nav.pose.pose.orientation.w
         );
         _odometryDataToConsume = new OdometryData
