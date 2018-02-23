@@ -34,7 +34,7 @@ public class WaypointNavigation : MonoBehaviour
     //Subscribers
     private ROSLocomotionWaypoint _rosLocomotionWaypoint;
     private ROSLocomotionWaypointState _rosLocomotionWaypointState;
-    private ROSLocomotionSpeedParams _rosLocomotionSpeedParams;
+    private ROSLocomotionControlParams _rosLocomotionControlParams;
     private ROSLocomotionLinearSpeed _rosLocomotionLinear;
     private ROSLocomotionAngularSpeed _rosLocomotionAngular;
 
@@ -146,9 +146,9 @@ public class WaypointNavigation : MonoBehaviour
         _rosLocomotionWaypointState = new ROSLocomotionWaypointState();
         _rosLocomotionWaypointState.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosLocomotionWaypointState.DataWasReceived += ReceivedNavigationState;
-        _rosLocomotionSpeedParams = new ROSLocomotionSpeedParams();
-        _rosLocomotionSpeedParams.StartAgent(ROSAgent.AgentJob.Subscriber);
-        _rosLocomotionSpeedParams.DataWasReceived += ReceivedNavigationParameters;
+        _rosLocomotionControlParams = new ROSLocomotionControlParams();
+        _rosLocomotionControlParams.StartAgent(ROSAgent.AgentJob.Subscriber);
+        _rosLocomotionControlParams.DataWasReceived += ReceivedNavigationParameters;
         _rosLocomotionAngular = new ROSLocomotionAngularSpeed();
         _rosLocomotionAngular.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosLocomotionAngular.DataWasReceived += ReceivedNavigationAngularSpeedParameter;
