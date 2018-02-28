@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class WaypointController : MonoBehaviour {
 
-	public enum WaypointMode { Single, Route }
+	public enum WaypointMode { Point, Route }
     public static WaypointController Instance { get; private set; }
 
     [SerializeField] private GameObject _waypointMarkerPrefab;
@@ -14,7 +14,7 @@ public class WaypointController : MonoBehaviour {
     [SerializeField] private Color32 _waypointRouteColor;
     [SerializeField] private float _lineYOffset = 0.4f;
 
-    private WaypointMode _currentWaypointMode = WaypointMode.Single;
+    private WaypointMode _currentWaypointMode = WaypointMode.Point;
     private List<WaypointMarker> _waypointMarkers;
     private LineRenderer _lineRenderer;
     private readonly Dictionary<string, List<GeoPointWGS84>> _savedRoutes = new Dictionary<string, List<GeoPointWGS84>>();
@@ -50,7 +50,7 @@ public class WaypointController : MonoBehaviour {
 
     public void CreateWaypoint(Vector3 waypointPosition)
     {
-        if (_currentWaypointMode == WaypointMode.Single)
+        if (_currentWaypointMode == WaypointMode.Point)
         {
             ClearAllWaypoints();
         }
@@ -63,13 +63,13 @@ public class WaypointController : MonoBehaviour {
         }
 
         WaypointMarker waypoint = Instantiate(_waypointMarkerPrefab, waypointPosition, Quaternion.identity).GetComponent<WaypointMarker>();
-        waypoint.SetColour(_currentWaypointMode == WaypointMode.Single ? _singleWaypointColor : _waypointRouteColor);
+        waypoint.SetColour(_currentWaypointMode == WaypointMode.Point ? _singleWaypointColor : _waypointRouteColor);
         _waypointMarkers.Add(waypoint);
     }
 
     public void ToggleWaypointMode()
     {
-        _currentWaypointMode = _currentWaypointMode == WaypointMode.Single ? WaypointMode.Route : WaypointMode.Single;
+        _currentWaypointMode = _currentWaypointMode == WaypointMode.Point ? WaypointMode.Route : WaypointMode.Point;
         if (_currentWaypointMode == WaypointMode.Route)
         {
             if (_waypointMarkers.Count > 0)
@@ -85,6 +85,7 @@ public class WaypointController : MonoBehaviour {
     {
         if (_currentWaypointMode != mode)
             ToggleWaypointMode();
+        PlayerUIController.Instance.SetWaypointMode(_currentWaypointMode);
     }
 
     public void DeleteMarker(WaypointMarker toDelete)

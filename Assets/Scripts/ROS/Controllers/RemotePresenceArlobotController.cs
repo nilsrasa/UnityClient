@@ -24,11 +24,6 @@ public class RemotePresenceArlobotController : ROSController {
         Instance = this;
     }
 
-    void Start()
-    {
-        StartROS(ConfigManager.ConfigFile.RosMasterUri);
-    }
-
     void Update()
     {
         if (_hasCameraDataToConsume)

@@ -36,7 +36,6 @@ public class ConfigManager
         ConfigFile userConfigFile = JsonUtility.FromJson<ConfigFile>(userFileJson);
         ConfigFile def = new ConfigFile();
 
-        if (def.RosMasterUri != userConfigFile.RosMasterUri) ConfigFile.RosMasterUri = userConfigFile.RosMasterUri;
         if (def.WaypointDistanceThreshold != userConfigFile.WaypointDistanceThreshold) ConfigFile.WaypointDistanceThreshold = userConfigFile.WaypointDistanceThreshold;
         if (def.MaxLinearSpeed != userConfigFile.MaxLinearSpeed) ConfigFile.MaxLinearSpeed = userConfigFile.MaxLinearSpeed;
         if (def.MaxAngularSpeed != userConfigFile.MaxAngularSpeed) ConfigFile.MaxAngularSpeed = userConfigFile.MaxAngularSpeed;

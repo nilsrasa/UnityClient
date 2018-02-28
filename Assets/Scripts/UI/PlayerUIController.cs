@@ -4,13 +4,24 @@ using System.Globalization;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using WaypointMode = WaypointController.WaypointMode;
 
 public class PlayerUIController : MonoBehaviour
 {
     public static PlayerUIController Instance { get; private set; }
 
-    private enum UIState { Navigation, Options, PlacingFiducial, UpdatingFiducial, DeletingFiducial, SorroundPhoto, Loading }
-    private enum WaypointMode { Point, Route }
+    private enum UIState
+    {
+        Navigation,
+        Options,
+        PlacingFiducial,
+        UpdatingFiducial,
+        DeletingFiducial,
+        SorroundPhoto,
+        Loading,
+        SetRobotPosition,
+        SetRobotOrientation
+    }
 
     //Right Panel
     [Header("Right Panel")]
@@ -67,6 +78,7 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Button _addFiducial;
     [SerializeField] private Button _updateFiducial;
     [SerializeField] private Button _deleteFiducial;
+    [SerializeField] private Button _overrideRobotPosition;
     [SerializeField] private Button _exitApplication;
     [SerializeField] private Button _closeOptions;
 
@@ -137,6 +149,16 @@ public class PlayerUIController : MonoBehaviour
                 case UIState.Loading:
                     ActivatePanels(_loadingPanel);
                     break;
+                case UIState.SetRobotPosition:
+                    ActivatePanels(_donePanel);
+                    SetInfoText("Click to set the position of the robot");
+                    break;
+                case UIState.SetRobotOrientation:
+                    ActivatePanels(_donePanel);
+                    SetInfoText("Click to set robot orientation (Robot will face this point)");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }
@@ -168,6 +190,8 @@ public class PlayerUIController : MonoBehaviour
     private Dictionary<float, TimeSliderPosition> _timeSliderPositions;
     private float _highlightedTimeSliderPosition;
     private Transform _fiducialToUpdate;
+    private Vector3 _robotOverridePosition;
+    private Quaternion _robotOverrideOrientation;
 
     void Awake()
     {
@@ -201,7 +225,7 @@ public class PlayerUIController : MonoBehaviour
         _deleteFiducial.onClick.AddListener(DeleteFiducialClick);
         _doneAccept.onClick.AddListener(DoneAcceptClick);
         _doneCancel.onClick.AddListener(DoneCancelClick);
-
+        _overrideRobotPosition.onClick.AddListener(OverrideRobotPositionClick);
 
         _toggleWaypointPointColorBlock = _toggleWaypointMode.colors;
 
@@ -271,6 +295,18 @@ public class PlayerUIController : MonoBehaviour
         _selectRobot.interactable = true;
     }
 
+    private void CancelRobotPositionOverride()
+    {
+        CurrentUIState = UIState.Navigation;
+    }
+
+    private void FinalizeRobotPositionOverride()
+    {
+        _selectedRobot.OverridePositionAndOrientation(_robotOverridePosition, _robotOverrideOrientation);
+        UnregisterMouseClick();
+        CurrentUIState = UIState.Navigation;
+    }
+
     #region ButtonClickEvents
     private void GenerateCampusButtonOnClick()
     {
@@ -303,7 +339,7 @@ public class PlayerUIController : MonoBehaviour
     private void ToggleWaypointModeOnClick()
     {
         CurrentWaypointMode = CurrentWaypointMode == WaypointMode.Point ? WaypointMode.Route : WaypointMode.Point;
-        _waypointController.ToggleWaypointMode();
+        _waypointController.SetWaypointMode(CurrentWaypointMode);
     }
 
     private void ClearAllWaypointsOnClick()
@@ -452,6 +488,10 @@ public class PlayerUIController : MonoBehaviour
                 FiducialController.Instance.SetFiducialColliders(false);
                 CurrentUIState = UIState.Navigation;
                 break;
+            case UIState.SetRobotPosition:
+            case UIState.SetRobotOrientation:
+                CancelRobotPositionOverride();
+                break;
         }
     }
 
@@ -471,7 +511,17 @@ public class PlayerUIController : MonoBehaviour
                 FiducialController.Instance.SetFiducialColliders(false);
                 CurrentUIState = UIState.Navigation;
                 break;
+            case UIState.SetRobotPosition:
+            case UIState.SetRobotOrientation:
+                CancelRobotPositionOverride();
+                break;
         }
+    }
+
+    private void OverrideRobotPositionClick()
+    {
+        CurrentUIState = UIState.SetRobotPosition;
+        RegisterMouseClick();
     }
 
     #endregion
@@ -554,6 +604,7 @@ public class PlayerUIController : MonoBehaviour
         RaycastHit[] hits = Physics.RaycastAll(ray, Single.PositiveInfinity);
         foreach (RaycastHit hit in hits)
         {
+            Debug.Log(CurrentUIState);
             switch (CurrentUIState)
             {
                 case UIState.Navigation:
@@ -576,6 +627,16 @@ public class PlayerUIController : MonoBehaviour
                     break;
                 case UIState.Loading:
                     break;
+                case UIState.SetRobotPosition:
+                    _robotOverridePosition = hit.point;
+                    CurrentUIState = UIState.SetRobotOrientation;
+                    break;
+                case UIState.SetRobotOrientation:
+                    _robotOverrideOrientation = Quaternion.LookRotation(hit.point - _robotOverridePosition, Vector3.up);
+                    FinalizeRobotPositionOverride();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }
@@ -695,6 +756,11 @@ public class PlayerUIController : MonoBehaviour
     public void ResetTimeSlider()
     {
         _timeSliderPositions = new Dictionary<float, TimeSliderPosition>();
+    }
+
+    public void SetWaypointMode(WaypointMode mode)
+    {
+        CurrentWaypointMode = mode;
     }
 
 }

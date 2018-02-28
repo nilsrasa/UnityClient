@@ -10,6 +10,7 @@ public class ROSController : MonoBehaviour
     public event RosStarted OnRosStarted;
 
     protected bool _robotModelInitialised;
+    protected RobotConfigFile _robotConfigFile;
 
     protected virtual void OnApplicationQuit()
     {
@@ -41,6 +42,12 @@ public class ROSController : MonoBehaviour
         ROS.waitForShutdown(); 
     }
 
+    public virtual void StartRobot(RobotConfigFile robotConfig)
+    {
+        _robotConfigFile = robotConfig;
+        StartROS(robotConfig.RosMasterUri);
+    }
+
     public virtual void MoveDirect(Vector2 movementCommand)
     {
         throw new NotImplementedException("Override this function");
@@ -67,6 +74,11 @@ public class ROSController : MonoBehaviour
     }
 
     public virtual void StopRobot() 
+    {
+        throw new NotImplementedException("Override this function");
+    }
+
+    public virtual void OverridePositionAndOrientation(Vector3 newPosition, Quaternion newOrientation)
     {
         throw new NotImplementedException("Override this function");
     }

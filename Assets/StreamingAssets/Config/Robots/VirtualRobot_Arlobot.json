@@ -1,9 +1,9 @@
 {
 	"Campuses": [ 89, 88 ],
-	"RosMasterUri": "192.168.255.18:11311",
+	"RosMasterUri": "192.168.255.6:11311",
 	"WaypointDistanceThreshold": 0.44999998807907107,
-	"MaxLinearSpeed": 1.0,
-	"MaxAngularSpeed": 1.0,
+	"MaxLinearSpeed": 0.3,
+	"MaxAngularSpeed": 0.5,
 	"LinearSpeedParameter": 2.0,
 	"AngularSpeedParameter": 1.0
 }

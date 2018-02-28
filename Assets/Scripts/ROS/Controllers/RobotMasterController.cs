@@ -10,14 +10,13 @@ public class RobotMasterController : MonoBehaviour
 {
     public static RobotMasterController Instance { get; set; }
 
-    [SerializeField] private List<ROSController> _activeRobots;
-
     public RobotConfigFile RobotConfigFile { get; private set; }
 
     private int _selectedRobotIndex;
     private Dictionary<string, RobotConfigFile> _robotConfigs;
     private string _configPath;
     private string _robotPrefabPath;
+    private readonly List<ROSController> _activeRobots = new List<ROSController>();
 
     void Awake()
     {
@@ -56,7 +55,9 @@ public class RobotMasterController : MonoBehaviour
         if (_robotConfigs.TryGetValue(robotName, out config))
         {
             GameObject robot = Instantiate(Resources.Load(_robotPrefabPath + robotName)) as GameObject;
-            return robot.GetComponentInChildren<ROSController>();
+            ROSController rosController = robot.GetComponentInChildren<ROSController>();
+            rosController.StartRobot(config);
+            return rosController;
         }
         else
         {

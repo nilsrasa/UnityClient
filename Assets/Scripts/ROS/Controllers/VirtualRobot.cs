@@ -8,6 +8,7 @@ using Messages.sensor_msgs;
 using Messages.std_msgs;
 using Ros_CSharp;
 using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 
 public class VirtualRobot : ROSController
@@ -52,7 +53,6 @@ public class VirtualRobot : ROSController
         _rosAgents = new Dictionary<Type, ROSAgent>();
         _agentsWaitingToStart = new List<Type>();
         _rigidbody = GetComponent<Rigidbody>();
-        _rosMasterUri = ConfigManager.ConfigFile.RosMasterUri;
         _waypointNavigationModule = GetComponent<WaypointNavigation>();
         OnRosStarted += _waypointNavigationModule.InitialiseRos;
 
@@ -63,7 +63,6 @@ public class VirtualRobot : ROSController
 
     void Start() {
         _sensorBusController = new SensorBusController(this);
-        StartROS(_rosMasterUri);
     }
 
     void Update() {
@@ -183,12 +182,10 @@ public class VirtualRobot : ROSController
         _rosOdometry = new ROSOdometry();
         _rosOdometry.StartAgent(ROSAgent.AgentJob.Publisher);
         _transformUpdateCoroutine = StartCoroutine(SendTransformUpdate());
-
         _rosLocomotionWaypointState = new ROSLocomotionWaypointState();
         _rosLocomotionWaypointState.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosLocomotionWaypoint = new ROSLocomotionWaypoint();
         _rosLocomotionWaypoint.StartAgent(ROSAgent.AgentJob.Publisher);
-
         _rosLocomotionLinear = new ROSLocomotionLinearSpeed();
         _rosLocomotionLinear.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosLocomotionAngular = new ROSLocomotionAngularSpeed();
@@ -266,5 +263,10 @@ public class VirtualRobot : ROSController
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
         _rosLocomotionDirect.PublishData(Vector2.zero);
         Debug.Log("STOP");
+    }
+
+    public override void OverridePositionAndOrientation(Vector3 newPosition, Quaternion newOrientation)
+    {
+        transform.SetPositionAndRotation(newPosition, newOrientation);
     }
 }

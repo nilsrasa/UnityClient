@@ -4,7 +4,6 @@ using System.Collections.Generic;
 [Serializable]
 public class ConfigFile
 {
-    public string RosMasterUri;
     public float WaypointDistanceThreshold;
     public float MaxLinearSpeed;
     public float MaxAngularSpeed;

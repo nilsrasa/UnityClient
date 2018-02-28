@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Messages;
+using Messages.geometry_msgs;
 using Messages.nav_msgs;
 using Messages.sensor_msgs;
 using Messages.std_msgs;
@@ -30,6 +31,7 @@ public class ArlobotROSController : ROSController {
     private ROSLocomotionAngularSpeed _rosLocomotionAngular;
     private ROSLocomotionControlParams _rosLocomotionControlParams;
     private ROSOdometry _rosOdometry;
+    private ROSOdometryCalibration _rosOdometryCalibration;
     private ROSCamera _rosCamera;
 
     private bool _hasOdometryDataToConsume;
@@ -63,11 +65,6 @@ public class ArlobotROSController : ROSController {
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
 
-    }
-
-    void Start()
-    {
-        StartROS(ConfigManager.ConfigFile.RosMasterUri);
     }
 
     void Update()
@@ -193,6 +190,8 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionLinear.StartAgent(ROSAgent.AgentJob.Publisher);
         _rosLocomotionAngular = new ROSLocomotionAngularSpeed();
         _rosLocomotionAngular.StartAgent(ROSAgent.AgentJob.Publisher);
+        _rosOdometryCalibration = new ROSOdometryCalibration();
+        _rosOdometryCalibration.StartAgent(ROSAgent.AgentJob.Publisher);
         //_rosUltrasound = new ROSUltrasound();
        //_rosUltrasound.StartAgent(ROSAgent.AgentJob.Subscriber, _clientNamespace);
         _rosLocomotionState = new ROSLocomotionState();
@@ -275,6 +274,34 @@ public class ArlobotROSController : ROSController {
 
         String s = (String) state;
         //_currentRobotLocomotionState = (RobotLocomotionState) Enum.Parse(typeof(RobotLocomotionState), s.data);
+    }
+
+    public override void OverridePositionAndOrientation(Vector3 newPosition, Quaternion newOrientation)
+    {
+        GeoPointWGS84 wgs84 = newPosition.ToUTM().ToWGS84();
+        Odometry odometry = new Odometry
+        {
+            pose = new PoseWithCovariance
+            {
+                pose = new Messages.geometry_msgs.Pose
+                {
+                    position = new Point
+                    {
+                        x = wgs84.longitude,
+                        y = wgs84.latitude,
+                        z = wgs84.altitude
+                    },
+                    orientation = new Messages.geometry_msgs.Quaternion
+                    {
+                        x = newOrientation.x,
+                        y = newOrientation.z,
+                        z = newOrientation.y,
+                        w = newOrientation.w
+                    }
+                }
+            }
+        };
+        _rosOdometryCalibration.PublishData(odometry);
     }
 
     private struct OdometryData
