@@ -265,5 +265,6 @@ public class VirtualRobot : ROSController
         CurrentRobotLocomotionState = ArlobotROSController.RobotLocomotionState.STOPPED;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
         _rosLocomotionDirect.PublishData(Vector2.zero);
+        Debug.Log("STOP");
     }
 }

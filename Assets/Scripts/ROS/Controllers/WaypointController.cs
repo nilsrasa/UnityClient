@@ -43,8 +43,7 @@ public class WaypointController : MonoBehaviour {
     public void CreateRoute(List<Vector3> route)
     {
         ClearAllWaypoints();
-        if (_currentWaypointMode == WaypointMode.Single)
-            ToggleWaypointMode();
+        SetWaypointMode(WaypointMode.Route);
 
         route.ForEach(CreateWaypoint);
     }
@@ -82,6 +81,12 @@ public class WaypointController : MonoBehaviour {
         }
     }
 
+    public void SetWaypointMode(WaypointMode mode)
+    {
+        if (_currentWaypointMode != mode)
+            ToggleWaypointMode();
+    }
+
     public void DeleteMarker(WaypointMarker toDelete)
     {
         if (_lineRenderer.positionCount > 0)
@@ -107,12 +112,8 @@ public class WaypointController : MonoBehaviour {
         if (!MazeMapController.Instance.CampusLoaded) return;
         if (_savedRoutes.ContainsKey(routeName))
         {
-            ClearAllWaypoints();
             List<GeoPointWGS84> routePoints = _savedRoutes[routeName];
-            foreach (GeoPointWGS84 point in routePoints)
-            {
-                CreateWaypoint(point.ToUTM().ToUnity());
-            }
+            CreateRoute(routePoints.Select(point => point.ToUTM().ToUnity()).ToList());
         }
     }
 

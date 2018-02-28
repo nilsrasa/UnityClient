@@ -14,8 +14,10 @@ public class WaypointNavigation : MonoBehaviour
 
     private float _publishTimer = 0;
 
-    private float k_rho = 0.3f;
-    private float k_alpha = 0.8f;
+    private float k_rho = 0.75f;
+    private float k_yaw = 0.8f;
+    private float k_roll = 0.8f;
+    private float k_pitch = 0.8f;
     private string state = "STOP";
     private string subState = "STOP";
     private bool goal_set = false;
@@ -72,7 +74,7 @@ public class WaypointNavigation : MonoBehaviour
                         break;
                     case "TURNING":
                         vel.linear.x = 0;
-                        vel.angular.z = k_alpha * angle;
+                        vel.angular.z = k_yaw * angle;
                         if (Mathf.Abs(angle) < 0.2f)
                             subState = "FORWARDING";
                         break;
@@ -80,17 +82,17 @@ public class WaypointNavigation : MonoBehaviour
                         if (angle > Mathf.PI / 2)
                         {
                             vel.linear.x = -k_rho * distance;
-                            vel.angular.z = k_alpha * (angle - Mathf.PI);
+                            vel.angular.z = k_yaw * (angle - Mathf.PI);
                         }
                         else if (angle < -Mathf.PI / 2)
                         {
                             vel.linear.x = -k_rho * distance;
-                            vel.angular.z = k_alpha * (angle + Mathf.PI);
+                            vel.angular.z = k_yaw * (angle + Mathf.PI);
                         }
                         else
                         {
                             vel.linear.x = k_rho * distance;
-                            vel.angular.z = k_alpha * angle;
+                            vel.angular.z = k_yaw * angle;
                         }
 
                         vel.linear.x = Mathf.Clamp((float) vel.linear.x, -vel_maxlin, vel_maxlin);
@@ -159,15 +161,18 @@ public class WaypointNavigation : MonoBehaviour
 
     private void PublishVelocity(Twist twist)
     {
-        _rosLocomotionDirect.PublishData(new Vector2((float)vel.angular.z, (float)vel.linear.x));
+        _rosLocomotionDirect.PublishData(new Vector2((float)twist.angular.z, (float)twist.linear.x));
     }
 
     private void ReceivedNavigationParameters(ROSAgent sender, IRosMessage parameters)
     {
+        return;
         String data = (String) parameters;
         string[] split = data.data.Split(',');
         k_rho = float.Parse(split[0]);
-        k_alpha = float.Parse(split[1]);
+        k_roll = float.Parse(split[1]);
+        k_pitch = float.Parse(split[2]);
+        k_yaw = float.Parse(split[3]);
     }
 
     private void ReceivedNavigationLinearSpeedParameter(ROSAgent sender, IRosMessage parameter)

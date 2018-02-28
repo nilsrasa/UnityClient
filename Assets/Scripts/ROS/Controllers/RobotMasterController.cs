@@ -56,7 +56,7 @@ public class RobotMasterController : MonoBehaviour
         if (_robotConfigs.TryGetValue(robotName, out config))
         {
             GameObject robot = Instantiate(Resources.Load(_robotPrefabPath + robotName)) as GameObject;
-            return robot.GetComponent<ROSController>();
+            return robot.GetComponentInChildren<ROSController>();
         }
         else
         {
