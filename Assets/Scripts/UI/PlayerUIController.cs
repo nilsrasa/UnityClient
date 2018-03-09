@@ -10,7 +10,7 @@ public class PlayerUIController : MonoBehaviour
 {
     public static PlayerUIController Instance { get; private set; }
 
-    private enum UIState
+    public enum UIState
     {
         Navigation,
         Options,
@@ -20,7 +20,8 @@ public class PlayerUIController : MonoBehaviour
         SorroundPhoto,
         Loading,
         SetRobotPosition,
-        SetRobotOrientation
+        SetRobotOrientation,
+        Hidden
     }
 
     //Right Panel
@@ -156,6 +157,9 @@ public class PlayerUIController : MonoBehaviour
                 case UIState.SetRobotOrientation:
                     ActivatePanels(_donePanel);
                     SetInfoText("Click to set robot orientation (Robot will face this point)");
+                    break;
+                case UIState.Hidden:
+                    //All UI is hidden
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -302,7 +306,7 @@ public class PlayerUIController : MonoBehaviour
 
     private void FinalizeRobotPositionOverride()
     {
-        _selectedRobot.OverridePositionAndOrientation(_robotOverridePosition, _robotOverrideOrientation);
+        RobotMasterController.SelectedRobot.OverridePositionAndOrientation(_robotOverridePosition, _robotOverrideOrientation);
         UnregisterMouseClick();
         CurrentUIState = UIState.Navigation;
     }
@@ -763,4 +767,8 @@ public class PlayerUIController : MonoBehaviour
         CurrentWaypointMode = mode;
     }
 
+    public void SetUIState(UIState state)
+    {
+        CurrentUIState = state;
+    }
 }

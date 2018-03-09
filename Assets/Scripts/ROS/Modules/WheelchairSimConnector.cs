@@ -64,7 +64,7 @@ public class Movement
     public int LeftTicks
     {
         private set;
-        get;
+        get; 
     }
 
     public int RightTicks

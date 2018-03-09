@@ -45,6 +45,7 @@ public class VirtualRobot : ROSController
 
     //Navigation
     private Vector3 _currentWaypoint;
+    private GeoPointWGS84 _currentWaypointWgs;
     private int _waypointIndex;
     private float _waypointDistanceThreshhold = 0.1f;
     private List<GeoPointWGS84> _waypoints;
@@ -211,13 +212,13 @@ public class VirtualRobot : ROSController
         _waypointIndex = 0;
         CurrenLocomotionType = ArlobotROSController.RobotLocomotionType.WAYPOINT;
         _currentWaypoint = _waypoints[_waypointIndex].ToUTM().ToUnity();
-        Move(_currentWaypoint);
+        MoveToPoint(_currentWaypointWgs);
     }
 
     private void MoveToNextWaypoint() {
         _waypointIndex++;
         _currentWaypoint = _waypoints[_waypointIndex].ToUTM().ToUnity();
-        Move(_currentWaypoint);
+        MoveToPoint(_currentWaypointWgs);
     }
 
     private void EndWaypointPath() {
@@ -225,20 +226,14 @@ public class VirtualRobot : ROSController
         PlayerUIController.Instance.SetDriveMode(false);
     }
 
-    private void Move(Vector3 position) {
-        GeoPointWGS84 point = position.ToUTM().ToWGS84();
+    public override void MoveToPoint(GeoPointWGS84 point)
+    {
         _rosLocomotionWaypoint.PublishData(point);
-        _currentWaypoint = position;
+        _currentWaypoint = point.ToUTM().ToUnity();
+        _currentWaypointWgs = point;
         CurrenLocomotionType = ArlobotROSController.RobotLocomotionType.WAYPOINT;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.RUNNING);
         CurrentRobotLocomotionState = ArlobotROSController.RobotLocomotionState.MOVING;
-    }
-
-    public override void MoveToPoint(GeoPointWGS84 point)
-    {
-        _waypoints.Clear();
-        _waypoints.Add(point);
-        _waypointIndex = 0;
     }
 
     public override void MovePath(List<GeoPointWGS84> waypoints) 
@@ -262,7 +257,6 @@ public class VirtualRobot : ROSController
         CurrentRobotLocomotionState = ArlobotROSController.RobotLocomotionState.STOPPED;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
         _rosLocomotionDirect.PublishData(Vector2.zero);
-        Debug.Log("STOP");
     }
 
     public override void OverridePositionAndOrientation(Vector3 newPosition, Quaternion newOrientation)

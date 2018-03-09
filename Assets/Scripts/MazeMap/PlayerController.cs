@@ -47,7 +47,6 @@ public class PlayerController : MonoBehaviour
     }
 
     private Camera _camera;
-    private Vector3 _currentSelectedWaypoint;
     private Coroutine _mouseClickCheck;
     private bool _isMouseClick;
     private MouseObject _hoveredMouseObject;
@@ -126,9 +125,8 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetMouseButton(1))
 	    {
-            transform.Translate(_mouseMovementSpeed * -Input.GetAxis("Mouse X"), 
-                0, 
-                _mouseMovementSpeed * -Input.GetAxis("Mouse Y"));
+            Vector2 pan = new Vector2(_mouseMovementSpeed * -Input.GetAxis("Mouse X"), _mouseMovementSpeed * -Input.GetAxis("Mouse Y"));
+            PanCamera(pan);
 	    }
        
 	    if (Input.GetAxis("Mouse ScrollWheel") != 0)
@@ -191,9 +189,26 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void FocusCameraOn(Vector3 point)
+    {
+        Vector3 pos = point - _camera.transform.forward * point.y;
+        transform.position = new Vector3(pos.x, transform.position.y, pos.z);
+    }
+
+    public void PanCamera(Vector2 panDirection)
+    {
+        transform.Translate(panDirection.x, 0, panDirection.y);
+    }
+
     public void FocusCameraOn(Transform target)
     {
-        Vector3 pos = target.position - _camera.transform.forward * target.position.y;
-        transform.position = new Vector3(pos.x, transform.position.y, pos.z);
+        FocusCameraOn(target.position);
+    }
+
+    public void FocusCameraOn2D(Transform target)
+    {
+        transform.position = new Vector3(target.position.x, transform.position.y, target.position.z);
+        transform.rotation = Quaternion.identity;
+        _camera.transform.localRotation = Quaternion.LookRotation(Vector3.down, Vector3.forward);
     }
 }

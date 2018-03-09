@@ -24,15 +24,18 @@ public class GazeButton : GazeObject
         base.Awake();
         _border = GetComponentInChildren<SpriteRenderer>();
         _buttonText = GetComponentInChildren<Text>();
-        _orgText = _buttonText.text;
-
-        //TODO: Find better solution
-        //As unity's inspector encapsulates strings, they don't allow newline character
-        //and they are therefore replaced with '#'
-        if (_activatedTextOverride.Length > 0)
+        if (_buttonText != null)
         {
-            _activeText = _activatedTextOverride.Replace('#', '\n');
-            _buttonText.text = IsActivated ? _activeText : _orgText;
+            _orgText = _buttonText.text;
+
+            //TODO: Find better solution
+            //As unity's inspector encapsulates strings, they don't allow newline character
+            //and they are therefore replaced with '#'
+            if (_activatedTextOverride.Length > 0)
+            {
+                _activeText = _activatedTextOverride.Replace('#', '\n');
+                _buttonText.text = IsActivated ? _activeText : _orgText;
+            }
         }
     }
 
@@ -48,7 +51,7 @@ public class GazeButton : GazeObject
 
         _background.color = IsActivated ? _activatedColor : _backgroundColor;
         if (!_resetOnUnhover) _background.color = Gazed ? _hoverColor : _backgroundColor;
-        if (_activatedTextOverride.Length > 0)
+        if (_activatedTextOverride.Length > 0 && _buttonText != null)
             _buttonText.text = IsActivated ? _activeText : _orgText;
     }
 
@@ -77,7 +80,7 @@ public class GazeButton : GazeObject
         base.SetState(isOn);
         _background.color = IsActivated ? _activatedColor : _backgroundColor;
 
-        if (_activatedTextOverride.Length > 0)
+        if (_activatedTextOverride.Length > 0 && _buttonText != null)
             _buttonText.text = IsActivated ? _activeText : _orgText;
     }
 
@@ -85,7 +88,8 @@ public class GazeButton : GazeObject
     {
         _background.color = background;
         _hoverColor = hover;
-        _buttonText.color = text;
+        if (_buttonText != null)
+            _buttonText.color = text;
         _border.color = border;
         _activatedColor = activated;
     }

@@ -4,19 +4,16 @@ using System.IO;
 using System.Linq;
 using Ros_CSharp;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class RobotMasterController : MonoBehaviour
 {
     public static RobotMasterController Instance { get; set; }
+    public static ROSController SelectedRobot { get; private set; }
+    public static RobotConfigFile RobotConfigFile { get; private set; }
 
-    public RobotConfigFile RobotConfigFile { get; private set; }
-
-    private int _selectedRobotIndex;
     private Dictionary<string, RobotConfigFile> _robotConfigs;
     private string _configPath;
     private string _robotPrefabPath;
-    private readonly List<ROSController> _activeRobots = new List<ROSController>();
 
     void Awake()
     {
@@ -57,6 +54,7 @@ public class RobotMasterController : MonoBehaviour
             GameObject robot = Instantiate(Resources.Load(_robotPrefabPath + robotName)) as GameObject;
             ROSController rosController = robot.GetComponentInChildren<ROSController>();
             rosController.StartRobot(config);
+            SelectedRobot = rosController;
             return rosController;
         }
         else

@@ -42,6 +42,7 @@ public class ArlobotROSController : ROSController {
 
     //Navigation
     private Vector3 _currentWaypoint;
+    private GeoPointWGS84 _currentWaypointWgs;
     private int _waypointIndex;
     private float _waypointDistanceThreshhold = 0.1f;
     private float _maxLinearSpeed;
@@ -143,14 +144,14 @@ public class ArlobotROSController : ROSController {
         _waypointIndex = _waypointStartIndex;
         CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
         _currentWaypoint =_waypoints[_waypointIndex].ToUTM().ToUnity();
-        Move(_currentWaypoint);
+        MoveToPoint(_currentWaypointWgs);
     }
 
     private void MoveToNextWaypoint()
     {
         _waypointIndex++;
         _currentWaypoint = _waypoints[_waypointIndex].ToUTM().ToUnity();
-        Move(_currentWaypoint);
+        MoveToPoint(_currentWaypointWgs);
     }
 
     private void EndWaypointPath()
@@ -209,21 +210,14 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionControlParams.PublishData(_controlParameterRho, _controlParameterRoll, _controlParameterPitch, _controlParameterYaw);
     }
 
-    private void Move(Vector3 position)
+    public override void MoveToPoint(GeoPointWGS84 point)
     {
-        GeoPointWGS84 point = position.ToUTM().ToWGS84();
         _rosLocomotionWaypoint.PublishData(point);
-        _currentWaypoint = position;
+        _currentWaypoint = point.ToUTM().ToUnity();
+        _currentWaypointWgs = point;
         CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.RUNNING);
         CurrentRobotLocomotionState = RobotLocomotionState.MOVING;
-    }
-
-    public override void MoveToPoint(GeoPointWGS84 point)
-    {
-        _waypoints.Clear();
-        _waypoints.Add(point);
-        _waypointIndex = 0;
     }
 
     public override void MovePath(List<GeoPointWGS84> waypoints) 
