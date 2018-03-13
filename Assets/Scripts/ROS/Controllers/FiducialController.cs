@@ -408,6 +408,7 @@ public class FiducialController : MonoBehaviour
 
         Destroy(_tempFiducial.gameObject);
         _tempFiducial = null;
+        _fiducialToUpdate.gameObject.SetActive(true);
     }
 
     public void CancelUpdate()

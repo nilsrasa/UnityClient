@@ -481,7 +481,7 @@ public class PlayerUIController : MonoBehaviour
         switch (CurrentUIState)
         {
             case UIState.UpdatingFiducial:
-                FiducialController.Instance.CancelUpdate();
+                FiducialController.Instance.FinalizeUpdate();
                 UnregisterMouseClick();
                 CurrentUIState = UIState.Navigation;
                 FiducialController.Instance.SetFiducialColliders(false);
@@ -608,7 +608,6 @@ public class PlayerUIController : MonoBehaviour
         RaycastHit[] hits = Physics.RaycastAll(ray, Single.PositiveInfinity);
         foreach (RaycastHit hit in hits)
         {
-            Debug.Log(CurrentUIState);
             switch (CurrentUIState)
             {
                 case UIState.Navigation:
@@ -672,7 +671,6 @@ public class PlayerUIController : MonoBehaviour
         _addFidRotX.text = "0.0";
         _addFidRotY.text = "0.0";
         _addFidRotZ.text = "0.0";
-
         Vector3 position = new Vector3(float.Parse(_addFidPosX.text, CultureInfo.InvariantCulture),
             float.Parse(_addFidPosY.text, CultureInfo.InvariantCulture), float.Parse(_addFidPosZ.text, CultureInfo.InvariantCulture));
         Vector3 rotation = new Vector3(float.Parse(_addFidRotX.text, CultureInfo.InvariantCulture),
