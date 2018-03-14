@@ -136,7 +136,8 @@ public class RobotInterface : MonoBehaviour {
                 break;
             case RobotType.Arlobot:
                 Vector2 movement = new Vector2(-controlOutput.x, controlOutput.y);
-                ArlobotROSController.Instance.MoveDirect(movement);
+                if (RobotMasterController.SelectedRobot != null)
+                    RobotMasterController.SelectedRobot.MoveDirect(movement);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -153,7 +154,8 @@ public class RobotInterface : MonoBehaviour {
             case RobotType.LegoRobot:
                 break;
             case RobotType.Arlobot:
-                ArlobotROSController.Instance.StopRobot();
+                if (RobotMasterController.SelectedRobot != null)
+                    RobotMasterController.SelectedRobot.StopRobot();
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

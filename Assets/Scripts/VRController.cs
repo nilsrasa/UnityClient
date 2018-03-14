@@ -107,6 +107,13 @@ public class VRController : MonoBehaviour
                 if (robotControl.IsActivated)
                     RobotInterface.Instance.SendCommand(controlResult);
             }
+
+	        MazemapScreen mazemap = gazeObject.GetComponent<MazemapScreen>();
+	        if (mazemap != null)
+	        {
+	            mazemap.OnHover(hit);
+	        }
+
 	        if (gazeObject == _hoveredGazeObject) return;
             if (_hoveredGazeObject != null) _hoveredGazeObject.OnUnhover();
             gazeObject.OnHover();
@@ -120,15 +127,16 @@ public class VRController : MonoBehaviour
     private void ResetHoveredObject()
     {
         if (_hoveredGazeObject != null)
-            _hoveredGazeObject.OnUnhover();
-        if (_hoveredGazeObject != null)
         {
-            _hoveredGazeObject = null;
-            if (RobotMasterController.SelectedRobot != null)
-            {
-                RobotMasterController.SelectedRobot.StopRobot();
-            }
+            if (_hoveredGazeObject.GetType() == typeof(RobotControlTrackPad))
+                if (RobotMasterController.SelectedRobot != null)
+                {
+                    RobotMasterController.SelectedRobot.StopRobot();
+                }
+            _hoveredGazeObject.OnUnhover();
         }
+        _hoveredGazeObject = null;
+
     }
 
     /// <summary>

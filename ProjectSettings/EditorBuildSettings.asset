@@ -12,11 +12,8 @@ EditorBuildSettings:
     path: Assets/Scenes/Telerobot_ThetaS_Limited.unity
     guid: b6995a10492d4564eafa34aefae058d7
   - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
-  - enabled: 1
     path: Assets/Scenes/MazeMapModel.unity
     guid: 98c071a6a6d195747b7ff8e63f3ddc34
-  - enabled: 0
-    path: Assets/Scenes/MazeMapModel_3DDummy.unity
-    guid: 5a94b9c7317f9b14b8eec442d648b8b4
+  - enabled: 1
+    path: Assets/Scenes/MazeMapModel_GazeInteraction.unity
+    guid: 497b9925b464fe44db469dd962beecf2

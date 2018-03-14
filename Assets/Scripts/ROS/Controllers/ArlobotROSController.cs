@@ -73,7 +73,7 @@ public class ArlobotROSController : ROSController {
         //Direct control of robot
         float linear = 0;
         float angular = 0;
-        
+        /*
         if (Input.GetKey(KeyCode.UpArrow))
         {
             linear = 1f;
@@ -97,7 +97,7 @@ public class ArlobotROSController : ROSController {
         else if (linear != 0 || angular != 0)
         {
             MoveDirect(new Vector2(angular, linear));
-        }
+        }*/
         
         //Navigation to waypoint
         if (CurrenLocomotionType != RobotLocomotionType.DIRECT && CurrentRobotLocomotionState != RobotLocomotionState.STOPPED)

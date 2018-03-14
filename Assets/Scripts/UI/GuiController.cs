@@ -16,6 +16,12 @@ public class GuiController : MonoBehaviour {
     [SerializeField] private Transform _seatControlsInterfaceContainer;
     [SerializeField] private Transform _staticControlsInterfaceContainer;
     [SerializeField] private GazeButton _toggleViewport;
+    [SerializeField] private GazeButton _mazeMap;
+    [SerializeField] private GazeButton _mazeMapArrowUp;
+    [SerializeField] private GazeButton _mazeMapArrowDown;
+    [SerializeField] private GazeButton _mazeMapArrowLeft;
+    [SerializeField] private GazeButton _mazeMapArrowRight;
+    [SerializeField] private GameObject _mazemapImage;
 
     [Header("RobotControl")]
     [SerializeField]
@@ -62,6 +68,7 @@ public class GuiController : MonoBehaviour {
         _robotControlTrackPad.Activated += OnTrackpadInteracted;
         _robotControlTrackPad.Unhovered += OnTrackpadUnhovered;
         _toggleControlOverlay.Unhovered += OnToggleControlOverlayActivated;
+        _mazeMap.Activated += OnMazemapButtonClick;
 
         iTween.MoveTo(gameObject, new Hashtable { { "oncomplete", "HideUI" }, { "time", 2 } });
     }
@@ -89,6 +96,21 @@ public class GuiController : MonoBehaviour {
 
     void OnTrackpadUnhovered(GazeObject sender) {
         StreamController.Instance.DisableDrivingMode();
+    }
+
+    private void OnMazemapButtonClick(GazeObject sender) {
+        if (sender.IsActivated)
+        {
+            HideUI();
+            StreamController.Instance.SetViewportVisibility(false);
+            _mazemapImage.SetActive(true);
+        }
+        else
+        {
+            ShowUI();
+            StreamController.Instance.SetViewportVisibility(true);
+            _mazemapImage.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -205,5 +227,25 @@ public class GuiController : MonoBehaviour {
     {
         _keyboardController.ToggleKeyboard();
         _robotControlTrackPad.SetEnabled(_keyboardController.IsActive);
+    }
+
+    public void PanArrowLooked(int index)
+    {
+        float panSpeed = 4 * Time.deltaTime;
+        switch (index)
+        {
+            case 0:
+                PlayerController.Instance.PanCamera(new Vector2(0, panSpeed));
+                break;
+            case 1:
+                PlayerController.Instance.PanCamera(new Vector2(panSpeed, 0));
+                break;
+            case 2:
+                PlayerController.Instance.PanCamera(new Vector2(0, -panSpeed));
+                break;
+            case 3:
+                PlayerController.Instance.PanCamera(new Vector2(-panSpeed, 0));
+                break;
+        }
     }
 }

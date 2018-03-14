@@ -205,10 +205,21 @@ public class PlayerController : MonoBehaviour
         FocusCameraOn(target.position);
     }
 
-    public void FocusCameraOn2D(Transform target)
+    public void FocusCameraOn2D(Vector3 point)
     {
-        transform.position = new Vector3(target.position.x, transform.position.y, target.position.z);
+        transform.position = new Vector3(point.x, transform.position.y, point.z);
         transform.rotation = Quaternion.identity;
         _camera.transform.localRotation = Quaternion.LookRotation(Vector3.down, Vector3.forward);
+    }
+
+    public void FocusCameraOn2D(Transform target)
+    {
+        FocusCameraOn2D(transform.position);
+    }
+
+    public void FocusCameraOn2D(Vector3 point, Vector3 rotation)
+    {
+        FocusCameraOn2D(point);
+        transform.rotation = Quaternion.Euler(rotation);
     }
 }

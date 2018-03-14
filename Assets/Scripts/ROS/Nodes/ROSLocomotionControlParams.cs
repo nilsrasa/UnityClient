@@ -1,4 +1,5 @@
-﻿using Ros_CSharp;
+﻿using System.Globalization;
+using Ros_CSharp;
 using String = Messages.std_msgs.String;
 
 public class ROSLocomotionControlParams : ROSAgent
@@ -39,7 +40,7 @@ public class ROSLocomotionControlParams : ROSAgent
 
     public void PublishData(float rho, float roll, float pitch, float yaw)
     {
-        PublishData($"{rho},{roll},{pitch},{yaw}");
+        PublishData($"{rho.ToString(CultureInfo.InvariantCulture)},{roll.ToString(CultureInfo.InvariantCulture)},{pitch.ToString(CultureInfo.InvariantCulture)},{yaw.ToString(CultureInfo.InvariantCulture)}");
     }
 
     public override void PublishData(object data)

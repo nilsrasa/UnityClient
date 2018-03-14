@@ -99,7 +99,7 @@ public class StreamController : MonoBehaviour
                     _shaftLid.gameObject.SetActive(false);
                 }
             }
-            if (Vector3.Distance(ActiveChair.position, _chairEndPosition.position) < 0.1f) {
+            if (Vector3.Distance(ActiveChair.position, _chairEndPosition.position) < 0.2f) {
                 _currentChairState = ChairState.Stopped;
                 foreach (Light light in _shaftLights)
                     light.enabled = false;
