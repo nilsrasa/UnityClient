@@ -88,7 +88,8 @@ public class MazeMapController : MonoBehaviour
     {
         WWW www = new WWW(url);
         yield return www;
-        whenDone?.Invoke(www.text);
+        if (whenDone != null)
+            whenDone(www.text);
     }
     
     /// <summary>
@@ -198,7 +199,10 @@ public class MazeMapController : MonoBehaviour
         SetActiveLayer(CurrentActiveLevel);
         CampusLoaded = true;
         File.WriteAllText(_backupPath, JsonUtility.ToJson(_mazemapBackup));
-        OnFinishedGeneratingCampus?.Invoke(CampusId);
+
+        if (OnFinishedGeneratingCampus != null)
+            OnFinishedGeneratingCampus(CampusId);
+
         foreach (KeyValuePair<int, Building> building in Buildings) {
             foreach (KeyValuePair<int, Floor> floor in building.Value.Floors) {
                 CreateFloorColliders(floor.Value.RenderedModel);

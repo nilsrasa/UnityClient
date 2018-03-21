@@ -13,16 +13,16 @@ using UnityEngine;
 namespace ROSBridgeLib {
 	namespace geometry_msgs {
 		public class PointMsg : ROSBridgeMsg {
-			private float _x, _y, _z;
+			private double _x, _y, _z;
 
 			public PointMsg(JSONNode msg) {
 				//Debug.Log ("PointMsg with " + msg.ToString());
-				_x = float.Parse(msg["x"]);
-				_y = float.Parse(msg["y"]);
-				_z = float.Parse(msg["z"]);
+				_x = double.Parse(msg["x"]);
+				_y = double.Parse(msg["y"]);
+				_z = double.Parse(msg["z"]);
 			}
 
-			public PointMsg(float x, float y, float z) {
+			public PointMsg(double x, double y, double z) {
 				_x = x;
 				_y = y;
 				_z = z;
@@ -32,15 +32,15 @@ namespace ROSBridgeLib {
 				return "geometry_msgs/Point";
 			}
 			
-			public float GetX() {
+			public double GetX() {
 				return _x;
 			}
 			
-			public float GetY() {
+			public double GetY() {
 				return _y;
 			}
 			
-			public float GetZ() {
+			public double GetZ() {
 				return _z;
 			}
 			

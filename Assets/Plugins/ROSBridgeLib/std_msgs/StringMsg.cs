@@ -10,7 +10,7 @@ using SimpleJSON;
 namespace ROSBridgeLib {
 	namespace std_msgs {
 		public class StringMsg : ROSBridgeMsg {
-			private string _data;
+			public string _data;
 			
 			public StringMsg(JSONNode msg) {
 				_data = msg["data"];

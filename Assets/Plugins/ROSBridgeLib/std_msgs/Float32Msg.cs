@@ -11,7 +11,7 @@ using UnityEngine;
 namespace ROSBridgeLib {
 	namespace std_msgs {
 		public class Float32Msg : ROSBridgeMsg {
-			private float _data;
+			public float _data;
 			
 			public Float32Msg(JSONNode msg) {
 				_data = float.Parse(msg["data"]);

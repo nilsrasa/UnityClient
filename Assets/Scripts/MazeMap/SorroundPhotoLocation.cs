@@ -43,6 +43,7 @@ public class SorroundPhotoLocation : MouseObject
     public override void Clicked()
     {
         base.Clicked();
-        OnClick?.Invoke(this);
+        if (OnClick != null)
+            OnClick(this);
     }
 }

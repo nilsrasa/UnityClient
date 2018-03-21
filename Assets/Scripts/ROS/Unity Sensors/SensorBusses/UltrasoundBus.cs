@@ -1,16 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Messages;
-using String = Messages.std_msgs.String;
+using ROSBridgeLib.std_msgs;
 
 public class UltrasoundBus : SensorBus {
 
     public UltrasoundBus()
     {
-        ROSAgentType = typeof(ROSUltrasound);
+        //ROSAgentType = typeof(ROSUltrasound);
     }
 
-    public override IRosMessage GetSensorData()
+    public override ROSBridgeMsg GetSensorData()
     {
         List<Sim_UltrasoundSensor> ultrasoundSensors = Sensors.Cast<Sim_UltrasoundSensor>().ToList();
         JSONObject json = new JSONObject();
@@ -18,6 +17,6 @@ public class UltrasoundBus : SensorBus {
         {
             json.AddField(sensor.SensorId, sensor.GetSensorData());
         }
-        return new String(json.ToString());
+        return new StringMsg(json.ToString());
     }
 }

@@ -3,56 +3,43 @@ using System.Collections.Generic;
 using ROSBridgeLib;
 using UnityEngine;
 
-public class ROSController : MonoBehaviour
+public abstract class ROSController : MonoBehaviour
 {
-    public delegate void RosStarted();
+    public delegate void RosStarted(ROSBridgeWebSocketConnection rosBridge);
     public event RosStarted OnRosStarted;
 
     protected bool _robotModelInitialised;
     protected ROSBridgeWebSocketConnection _rosBridge;
     protected RobotConfigFile _robotConfig;
 
-    protected virtual void StartROS()
+    protected virtual void OnApplicationQuit()
     {
-        Debug.Log("Starting Robot");
+        StopROS();
     }
 
-    public virtual void MoveDirect(Vector2 movementCommand)
-    {
-        throw new NotImplementedException("Override this function");
-    }
+    protected abstract void StartROS();
 
-    public virtual void MoveToPoint(GeoPointWGS84 point) 
-    {
-        throw new NotImplementedException("Override this function");
-    }
+    protected virtual void StopROS() { }
 
-    public virtual void MovePath(List<GeoPointWGS84> waypoints) 
-    {
-        throw new NotImplementedException("Override this function");
-    }
+    public abstract void MoveDirect(Vector2 movementCommand);
 
-    public virtual void PausePath() 
-    {
-        throw new NotImplementedException("Override this function");
-    }
+    public abstract void MoveToPoint(GeoPointWGS84 point);
 
-    public virtual void ResumePath() 
-    {
-        throw new NotImplementedException("Override this function");
-    }
+    public abstract void MovePath(List<GeoPointWGS84> waypoints);
 
-    public virtual void StopRobot() 
-    {
-        throw new NotImplementedException("Override this function");
-    }
+    public abstract void PausePath();
+
+    public abstract void ResumePath();
+
+    public abstract void StopRobot();
 
     public virtual void InitialiseRobot(ROSBridgeWebSocketConnection rosBridge, RobotConfigFile robotConfig)
     {
         _rosBridge = rosBridge;
         _robotConfig = robotConfig;
         StartROS();
-
+        if (OnRosStarted != null)
+            OnRosStarted(rosBridge);
 
         /*
         if (Param.has("robot_description"))

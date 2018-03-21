@@ -10,8 +10,8 @@ using SimpleJSON;
 namespace ROSBridgeLib {
 	namespace geometry_msgs {
 		public class TwistMsg : ROSBridgeMsg {
-			private Vector3Msg _linear;
-			private Vector3Msg _angular;
+			public Vector3Msg _linear;
+            public Vector3Msg _angular;
 			
 			public TwistMsg(JSONNode msg) {
 				_linear = new Vector3Msg(msg["linear"]);

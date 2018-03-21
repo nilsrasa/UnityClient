@@ -54,8 +54,8 @@ namespace ROSBridgeLib {
 					
 			public override string ToYAMLString()
 			{
-			    return string.Format("{\"fiducial_id\": {0}, \"direction\": {1}, \"x0\": {2}, \"y0\": {3}, \"x1\": {4}, \"y1\": {5}, \"x2\": {6}, \"y2\": {7}, \"x3\": {8}, \"y3\": {9}}", 
-                    _fiducial_id, _direction, _x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3);
+			    return "{\"fiducial_id\": "+ _fiducial_id + ", \"direction\": "+ _direction + ", \"x0\": "+ _x0 + ", \"y0\": "+ _y0 + ", \"x1\": "+ _x1 
+                    + ", \"y1\": "+ _y1 + ", \"x2\": "+ _x2 + ", \"y2\": "+ _y2 + ", \"x3\": "+ _x3 + ", \"y3\": "+ _y3 + "}";
 			}
 		}
 	}

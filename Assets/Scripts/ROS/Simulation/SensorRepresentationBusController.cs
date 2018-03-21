@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Messages;
 
 /// <summary>
 /// Handles collecting and managing visual sensor representations
@@ -27,7 +26,7 @@ class SensorRepresentationBusController {
     /// <summary>
     /// Distributes ROS messages to relevant sensor representation busses
     /// </summary>
-    public void HandleData(ROSAgent sender, IRosMessage data)
+    public void HandleData(ROSAgent sender, ROSBridgeMsg data)
     {
         foreach (SensorRepresentationBus bus in SensorRepresentationsBusses)
         {
@@ -37,7 +36,7 @@ class SensorRepresentationBusController {
         }
     }
 
-
+    //TODO: Change to subscriber/publisher pattern, using topics as keys
     public void Register<T>(SensorRepresentation sensorRepresentation) where T : SensorRepresentationBus {
         for (int i = 0; i < SensorRepresentationsBusses.Count; i++) {
             SensorRepresentationBus b = SensorRepresentationsBusses[i];

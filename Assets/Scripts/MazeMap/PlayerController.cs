@@ -142,7 +142,8 @@ public class PlayerController : MonoBehaviour
 
     private void UnHoverMouseObject()
     {
-        _hoveredMouseObject?.Exited();
+        if (_hoveredMouseObject != null)
+            _hoveredMouseObject.Exited();
         _hoveredMouseObject = null;
     }
 

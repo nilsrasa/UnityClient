@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Messages.std_msgs;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Sim_UltrasoundSensor : UnitySensor {
 

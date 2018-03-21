@@ -1,51 +1,46 @@
-﻿using Messages;
-using Ros_CSharp;
-using UnityEngine;
-using String = Messages.std_msgs.String;
+﻿using System;
+using ROSBridgeLib;
+using ROSBridgeLib.sensor_msgs;
 
-public class ROSLocomotionWaypointState : ROSAgent
+public class ROSLocomotionWaypoint : ROSAgent
 {
-    private const string TOPIC = "/waypoint/state";
-    public enum RobotWaypointState { RUNNING, STOP, PARK }
+    private ROSGenericSubscriber<NavSatFixMsg> _subscriber;
+    private ROSGenericPublisher _publisher;
 
-    private NodeHandle _nodeHandle;
-    private Publisher<String> _publisher;
-    private Subscriber<String> _subscriber;
-    private bool _isRunning;
-    private AgentJob _job;
+    public delegate void DataReceived(ROSBridgeMsg msg);
+    public event DataReceived OnDataReceived;
 
-    ///<summary>
-    ///Starts advertising loop
-    ///</summary>
-    public override void StartAgent(AgentJob job)
+    public ROSLocomotionWaypoint(AgentJob job, ROSBridgeWebSocketConnection rosConnection, string topicName)
     {
-        base.StartAgent(job);
-        if (_isRunning) return;
-        _nodeHandle = new NodeHandle();
         if (job == AgentJob.Publisher)
-            _publisher = _nodeHandle.advertise<String>(TOPIC, 1, false);
+        {
+            _publisher = new ROSGenericPublisher(rosConnection, topicName, NavSatFixMsg.GetMessageType());
+            rosConnection.AddPublisher(_publisher);
+        }
         else if (job == AgentJob.Subscriber)
-            _subscriber = _nodeHandle.subscribe<String>(TOPIC, 1, ReceivedData);
-        _job = job;
-        _isRunning = true;
+        {
+            _subscriber = new ROSGenericSubscriber<NavSatFixMsg>(rosConnection, topicName, NavSatFixMsg.GetMessageType(), (msg) => new NavSatFixMsg(msg));
+            _subscriber.OnDataReceived += (data) =>
+            {
+                if (OnDataReceived != null)
+                    OnDataReceived(data);
+            };
+            rosConnection.AddSubscriber(_subscriber);
+        }
     }
 
-    ///<summary>
-    ///Stops advertising loop
-    ///</summary>
-    public void Stop() {
-        if (!_isRunning) return;
-        _nodeHandle.shutdown();
-        _publisher = null;
-        _nodeHandle = null;
-    }
-
-    public override void PublishData(object data)
+    protected override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
     {
-        if (_job != AgentJob.Publisher) return;
-        RobotWaypointState state = (RobotWaypointState) (int)data;
-        String msg = new String(state.ToString());
-        _publisher.publish(msg);
+        throw new NotImplementedException();
+    }
+
+    /// <param name="data">X: Angular speed in meter/s, Y: Linear speed in meter/s</param>
+    public void PublishData(GeoPointWGS84 data)
+    {
+        if (_publisher == null) return;
+
+        NavSatFixMsg navSatFix = new NavSatFixMsg(null, null, data.latitude, data.longitude, data.altitude, null, 0);
+        _publisher.PublishData(navSatFix);
     }
 
 }

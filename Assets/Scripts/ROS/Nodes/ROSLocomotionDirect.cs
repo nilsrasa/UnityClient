@@ -1,64 +1,48 @@
 ﻿using System;
-using Messages;
-using Messages.geometry_msgs;
-using Ros_CSharp;
+using ROSBridgeLib;
+using ROSBridgeLib.geometry_msgs;
 using UnityEngine;
 
 public class ROSLocomotionDirect : ROSAgent
 {
-    private const string TOPIC = "/cmd_vel";
+    private ROSGenericSubscriber<TwistMsg> _subscriber;
+    private ROSGenericPublisher _publisher;
 
-    private NodeHandle _nodeHandle;
-    private Publisher<Twist> _publisher;
-    private Subscriber<Twist> _subscriber;
-    private bool _isRunning;
-    private AgentJob _job;
+    public delegate void DataReceived(ROSBridgeMsg msg);
+    public event ROSLocomotionControlParams.DataReceived OnDataReceived;
 
-    ///<summary>
-    ///Starts advertising loop
-    ///</summary>
-    public override void StartAgent(AgentJob job)
+    public ROSLocomotionDirect(AgentJob job, ROSBridgeWebSocketConnection rosConnection, string topicName)
     {
-        base.StartAgent(job);
-        if (_isRunning) return;
-        _nodeHandle = new NodeHandle();
         if (job == AgentJob.Publisher)
-            _publisher = _nodeHandle.advertise<Twist>(TOPIC, 1, false);
-        else if (job == AgentJob.Subscriber)
-            _subscriber = _nodeHandle.subscribe<Twist>(TOPIC, 1, ReceivedData);
-        _job = job;
-        _isRunning = true;
-    }
-
-    ///<summary>
-    ///Stops advertising loop
-    ///</summary>
-    public void Stop() {
-        if (!_isRunning) return;
-        _nodeHandle.shutdown();
-        _publisher = null;
-        _nodeHandle = null;
-    }
-
-    public override void PublishData(object data)
-    {
-        if (_job != AgentJob.Publisher) return;
-        Vector2 vector = (Vector2) data;
-        Twist twist = new Twist
         {
-            angular = new Messages.geometry_msgs.Vector3
+            _publisher = new ROSGenericPublisher(rosConnection, topicName, TwistMsg.GetMessageType());
+            rosConnection.AddPublisher(_publisher);
+        }
+        else if (job == AgentJob.Subscriber)
+        {
+            _subscriber = new ROSGenericSubscriber<TwistMsg>(rosConnection, topicName, TwistMsg.GetMessageType(), (msg) => new TwistMsg(msg));
+            _subscriber.OnDataReceived += (data) =>
             {
-                x = 0,
-                y = 0,
-                z = vector.x
-            },
-            linear = new Messages.geometry_msgs.Vector3 {
-                x = vector.y,
-                y = 0,
-                z = 0
-            }
-        };
-        _publisher.publish(twist);
+                if (OnDataReceived != null)
+                    OnDataReceived(data);
+            };
+            rosConnection.AddSubscriber(_subscriber);
+        }
+    }
+
+    protected override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <param name="data">X: Angular speed in meter/s, Y: Linear speed in meter/s</param>
+    public void PublishData(Vector2 data)
+    {
+        if (_publisher == null) return;
+
+        TwistMsg twist = new TwistMsg(new Vector3Msg(0, 0, data.x), 
+            new Vector3Msg(data.y, 0, 0));
+        _publisher.PublishData(twist);
     }
     
 }

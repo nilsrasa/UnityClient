@@ -11,9 +11,9 @@ using ROSBridgeLib.geometry_msgs;
 namespace ROSBridgeLib {
 	namespace geometry_msgs {
 		public class Vector3Msg : ROSBridgeMsg {
-			private double _x;
-			private double _y;
-			private double _z;
+			public double _x;
+		    public double _y;
+		    public double _z;
 			
 			public Vector3Msg(JSONNode msg) {
 				_x = double.Parse(msg["x"]);

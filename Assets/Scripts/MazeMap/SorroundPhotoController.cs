@@ -63,7 +63,7 @@ public class SorroundPhotoController : MonoBehaviour
     public void InitialisePhotoLocations(int campusId)
     {
         _photoLocations = new Dictionary<int, SorroundPhotoLocation>();
-        string path = $"{_cameraFolderPath}/{campusId}/";
+        string path = string.Format("{0}/{1}/", _cameraFolderPath, campusId);
         if (!Directory.Exists(path)) return;
 
         string[] directories = Directory.GetDirectories(path);
@@ -107,10 +107,11 @@ public class SorroundPhotoController : MonoBehaviour
         _camera.enabled = true;
         DateTime firstTimestamp = photoLocation.Timestamps[0];
         string sId = photoLocation.PictureId.ToString("D4", CultureInfo.InvariantCulture);
-        string imagePath = $"{_cameraFolderPath}/{MazeMapController.Instance.CampusId}/{sId}_{firstTimestamp.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture)}";
+        string imagePath = string.Format("{0}/{1}/{2}_{3}", _cameraFolderPath, MazeMapController.Instance.CampusId, sId,
+            firstTimestamp.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture));
         foreach (KeyValuePair<Camera, MeshRenderer> camera in _cameraPlanes)
         {
-            string path = $"{imagePath}/{camera.Key}/IMAG{sId}.JPG";
+            string path = string.Format("{0}/{1}/IMAG{2}.JPG", imagePath, camera.Key, sId);
             StartCoroutine(RenderPhoto(path, camera.Value));
         }
         
@@ -143,10 +144,11 @@ public class SorroundPhotoController : MonoBehaviour
     public void ChangeTimeOnLoadedPhoto(DateTime dateTime)
     {
         string sId = _currentLoadedPhotoLocation.PictureId.ToString("D4", CultureInfo.InvariantCulture);
-        string imagePath = $"{_cameraFolderPath}/{MazeMapController.Instance.CampusId}/{sId}_{dateTime.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture)}";
-        foreach (KeyValuePair<Camera, MeshRenderer> camera in _cameraPlanes) 
+        string imagePath = string.Format("{0}/{1}/{2}_{3}", _cameraFolderPath, MazeMapController.Instance.CampusId, sId,
+            dateTime.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture));
+        foreach (KeyValuePair<Camera, MeshRenderer> camera in _cameraPlanes)
         {
-            string path = $"{imagePath}/{camera.Key}/IMAG{sId}.JPG";
+            string path = string.Format("{0}/{1}/IMAG{2}.JPG", imagePath, camera.Key, sId);
             StartCoroutine(RenderPhoto(path, camera.Value));
         }
     }

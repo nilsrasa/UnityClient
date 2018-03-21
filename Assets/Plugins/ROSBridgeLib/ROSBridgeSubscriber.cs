@@ -1,40 +1,36 @@
-﻿using System.Collections;
-using SimpleJSON;
-
-/**
- * This defines a subscriber. Subscribers listen to publishers in ROS. Now if we could have inheritance
- * on static classes then we could do this differently. But basically, you have to make up one of these
- * for every subscriber you need.
- * 
- * Subscribers require a ROSBridgePacket to subscribe to (its type). They need the name of
- * the message, and they need something to draw it. 
- * 
- * Version History
- * 3.1 - changed methods to start with an upper case letter to be more consistent with c#
- * style.
- * 3.0 - modification from hand crafted version 2.0
- * 
- * @author Michael Jenkin, Robert Codd-Downey and Andrew Speers
- * @version 3.1
- */
+﻿using SimpleJSON;
 
 namespace ROSBridgeLib {
-	public class ROSBridgeSubscriber {
+	public abstract class ROSBridgeSubscriber : ROSAgent
+	{
+	    public delegate void DataWasReceived(ROSBridgeMsg data);
+	    public event DataWasReceived OnDataReceived;
 
-		public static string GetMessageTopic() {
-			return null;
-		}  
+	    public string GetMessageTopic()
+	    {
+	        return TopicName;
+	    }
 
-		public static string GetMessageType() {
-			return null;
-		}
+	    public string GetMessageType()
+	    {
+	        return MessageType;
+	    }
 
-		public static ROSBridgeMsg ParseMessage(JSONNode msg) {
-			return null;
-		}
+	    public virtual void CallBack(ROSBridgeMsg msg)
+	    {
+	        if (OnDataReceived != null)
+	            OnDataReceived(msg);
+	    }
 
-		public static void CallBack(ROSBridgeMsg msg) {
-		}
-	}
+	    public abstract ROSBridgeMsg ParseMessage(JSONNode msg);
+
+	    protected sealed override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
+	    {
+	        TopicName = topicName;
+	        MessageType = messageType;
+	        ROSConnection = rosConnection;
+            ROSConnection.AddSubscriber(this);
+	    }
+    }
 }
 

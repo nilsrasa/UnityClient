@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ROSBridgeLib;
+using ROSBridgeLib.fiducial_msgs;
 using UnityEngine;
 
 public class FiducialController : MonoBehaviour
@@ -15,14 +17,15 @@ public class FiducialController : MonoBehaviour
     [SerializeField] private float _publishInterval = 3;
     [SerializeField] private bool _publishInGps = true;
 
+    private ROSBridgeWebSocketConnection _rosConnection;
     private Dictionary<int, Transform> _fiducials = new Dictionary<int, Transform>();
     private string _fiducialSavePath;
     private Fiducial _zeroLocation;
-   // private ROSFiducialMapGps _rosFiducialMapGpsSubscriber;
-    private ROSFiducialMapGps _rosFiducialMapGpsPublisher;
+    private ROSGenericPublisher _rosFiducialMapGpsPublisher;
+    private ROSGenericSubscriber<FiducialMapEntryArrayMsg> _rosFiducialMapGpsSubscriber;
     private FiducialCollectionFile _fiducialCollectionFile;
     private bool _hasDataToConsume;
-    private FiducialMapEntryArray _dataToConsume;
+    private FiducialMapEntryArrayMsg _dataToConsume;
     private bool _initialised;
     private Coroutine _fiducialPublishingRoutine;
 
@@ -58,9 +61,9 @@ public class FiducialController : MonoBehaviour
         SaveFiducials();
     }
 
-    private void OnReceivedFiducialData(ROSAgent sender, IRosMessage mapArray)
+    private void OnReceivedFiducialData(ROSBridgeMsg mapArray)
     {
-        FiducialMapEntryArray fids = (FiducialMapEntryArray)mapArray;
+        FiducialMapEntryArrayMsg fids = (FiducialMapEntryArrayMsg)mapArray;
         _dataToConsume = fids;
         _hasDataToConsume = true;
     }
@@ -92,21 +95,21 @@ public class FiducialController : MonoBehaviour
         _initialised = true;
     }
 
-    private void HandleFiducialData(FiducialMapEntryArray data)
+    private void HandleFiducialData(FiducialMapEntryArrayMsg data)
     {
         if (!MazeMapController.Instance.CampusLoaded)
             return;
         if (!_initialised)
             Initialise();
         lock (_fiducials) {
-            foreach (FiducialMapEntry entry in data.fiducials) {
+            foreach (FiducialMapEntryMsg entry in data._fiducials) {
                 Transform fiducialTransform;
-                if (_fiducials.TryGetValue(entry.fiducial_id, out fiducialTransform))
+                if (_fiducials.TryGetValue(entry._fiducial_id, out fiducialTransform))
                 {
-                    if (entry.fiducial_id != _zeroLocation.FiducialId) {
-                        Vector3 localpos = new Vector3((float)entry.x, (float)entry.z, (float)entry.y);
+                    if (entry._fiducial_id != _zeroLocation.FiducialId) {
+                        Vector3 localpos = new Vector3((float)entry._x, (float)entry._z, (float)entry._y);
                         fiducialTransform.localPosition = localpos;
-                        fiducialTransform.localEulerAngles = new Vector3((float)entry.rx * Mathf.Rad2Deg, (float)entry.rz * Mathf.Rad2Deg, (float)entry.ry * Mathf.Rad2Deg);
+                        fiducialTransform.localEulerAngles = new Vector3((float)entry._rx * Mathf.Rad2Deg, (float)entry._rz * Mathf.Rad2Deg, (float)entry._ry * Mathf.Rad2Deg);
                     }
                 }
                 else
@@ -114,16 +117,16 @@ public class FiducialController : MonoBehaviour
                     GameObject newFiducial = InstantiateFiducial(entry);
 
                     FiducialObject.FiducialData orgData = new FiducialObject.FiducialData {
-                        X = entry.x,
-                        Y = entry.y,
-                        Z = entry.z,
-                        RX = entry.rx,
-                        RY = entry.ry,
-                        RZ = entry.rz
+                        X = entry._x,
+                        Y = entry._y,
+                        Z = entry._z,
+                        RX = entry._rx,
+                        RY = entry._ry,
+                        RZ = entry._rz
                     };
 
-                    _fiducialObjects.Add(entry.fiducial_id, new FiducialObject {
-                        Id = entry.fiducial_id,
+                    _fiducialObjects.Add(entry._fiducial_id, new FiducialObject {
+                        Id = entry._fiducial_id,
                         Position = newFiducial.transform.position.ToUTM().ToWGS84(),
                         Rotation = newFiducial.transform.eulerAngles,
                         FiducialSpaceData = orgData
@@ -134,23 +137,23 @@ public class FiducialController : MonoBehaviour
         }
     }
 
-    private GameObject InstantiateFiducial(FiducialMapEntry entry)
+    private GameObject InstantiateFiducial(FiducialMapEntryMsg entry)
     {
         GameObject newFiducial = Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _fiducials[_zeroLocation.FiducialId]) as GameObject;
-        newFiducial.transform.localPosition = new Vector3((float)entry.x, 0, (float)entry.y);
-        newFiducial.transform.localEulerAngles = new Vector3((float)entry.rx * Mathf.Rad2Deg, (float)entry.rz * Mathf.Rad2Deg, (float)entry.ry * Mathf.Rad2Deg);
-        newFiducial.name = entry.fiducial_id.ToString();
-        newFiducial.GetComponentInChildren<TextMesh>().text = entry.fiducial_id.ToString();
-        _fiducials.Add(entry.fiducial_id, newFiducial.transform);
+        newFiducial.transform.localPosition = new Vector3((float)entry._x, 0, (float)entry._y);
+        newFiducial.transform.localEulerAngles = new Vector3((float)entry._rx * Mathf.Rad2Deg, (float)entry._rz * Mathf.Rad2Deg, (float)entry._ry * Mathf.Rad2Deg);
+        newFiducial.name = entry._fiducial_id.ToString();
+        newFiducial.GetComponentInChildren<TextMesh>().text = entry._fiducial_id.ToString();
+        _fiducials.Add(entry._fiducial_id, newFiducial.transform);
 
         return newFiducial;
     }
 
-    private void UpdateFiducial(FiducialMapEntry entry)
+    private void UpdateFiducial(FiducialMapEntryMsg entry)
     {
-        Vector3 localpos = new Vector3((float)entry.x, (float)entry.z, (float)entry.y);
-        _fiducials[entry.fiducial_id].localPosition = _fiducials[_zeroLocation.FiducialId].rotation * localpos;
-        _fiducials[entry.fiducial_id].localEulerAngles = new Vector3((float)entry.rx * Mathf.Rad2Deg, (float)entry.rz * Mathf.Rad2Deg, (float)entry.ry * Mathf.Rad2Deg);
+        Vector3 localpos = new Vector3((float)entry._x, (float)entry._z, (float)entry._y);
+        _fiducials[entry._fiducial_id].localPosition = _fiducials[_zeroLocation.FiducialId].rotation * localpos;
+        _fiducials[entry._fiducial_id].localEulerAngles = new Vector3((float)entry._rx * Mathf.Rad2Deg, (float)entry._rz * Mathf.Rad2Deg, (float)entry._ry * Mathf.Rad2Deg);
     }
 
     private void SaveFiducials()
@@ -187,13 +190,13 @@ public class FiducialController : MonoBehaviour
 
     private IEnumerator StartROSComponents()
     {
-        while (!ROS.isStarted()) yield return new WaitForEndOfFrame();
-        //_rosFiducialMapGpsSubscriber = new ROSFiducialMapGps();
-        //_rosFiducialMapGpsSubscriber.StartAgent(ROSAgent.AgentJob.Subscriber);
-        //_rosFiducialMapGpsSubscriber.DataWasReceived += OnReceivedFiducialData;
-        _rosFiducialMapGpsPublisher = new ROSFiducialMapGps();
-        _rosFiducialMapGpsPublisher.StartAgent(ROSAgent.AgentJob.Publisher);
+        //TODO: Detect when necessary ROS connection is up
+        while (_rosConnection == null) yield return new WaitForSecondsRealtime(0.3f);
+        _rosFiducialMapGpsPublisher = new ROSGenericPublisher(_rosConnection, "fiducial_map_GPS", FiducialMapEntryArrayMsg.GetMessageType());
         _fiducialPublishingRoutine = StartCoroutine(PublishFiducialsLoop(_publishInGps, _publishInterval));
+
+        _rosFiducialMapGpsSubscriber = new ROSGenericSubscriber<FiducialMapEntryArrayMsg>(_rosConnection, "/fiducial_map_gps", FiducialMapEntryArrayMsg.GetMessageType(), (msg) => new FiducialMapEntryArrayMsg(msg));
+        _rosFiducialMapGpsSubscriber.OnDataReceived += OnReceivedFiducialData;
     }
 
     private IEnumerator PublishFiducialsLoop(bool inGps, float intervalInSeconds) {
@@ -220,13 +223,10 @@ public class FiducialController : MonoBehaviour
                     {
                         if (fiducialObject.Id == _zeroLocation.FiducialId) continue;
                         //TODO: Use once markers are place correctly
-                        InstantiateFiducial(new FiducialMapEntry
-                        {
-                            fiducial_id = fiducialObject.Id,
-                            x = fiducialObject.FiducialSpaceData.X, y = fiducialObject.FiducialSpaceData.Y, z = fiducialObject.FiducialSpaceData.Z,
-                            rx = fiducialObject.FiducialSpaceData.RX, ry = fiducialObject.FiducialSpaceData.RY, rz = fiducialObject.FiducialSpaceData.RZ,
-                            
-                        });
+
+                        FiducialMapEntryMsg msg = new FiducialMapEntryMsg(fiducialObject.Id, fiducialObject.FiducialSpaceData.X, fiducialObject.FiducialSpaceData.Y, fiducialObject.FiducialSpaceData.Z,
+                            fiducialObject.FiducialSpaceData.RX, fiducialObject.FiducialSpaceData.RY, fiducialObject.FiducialSpaceData.RZ);
+                        InstantiateFiducial(msg);
                         _fiducialObjects.Add(fiducialObject.Id, fiducialObject);
                     }
                     return;
@@ -242,33 +242,28 @@ public class FiducialController : MonoBehaviour
     /// false: Publishes fiducials in fiducial space.</param>
     private void PublishFiducials(bool inGps)
     {
-        FiducialMapEntryArray mapEntryArray = new FiducialMapEntryArray();
-        FiducialMapEntry[] mapEntries = new FiducialMapEntry[_fiducialObjects.Count];
+        FiducialMapEntryMsg[] mapEntries = new FiducialMapEntryMsg[_fiducialObjects.Count];
         for (int i = 0; i < _fiducialObjects.Count; i++)
         {
             FiducialObject f = _fiducialObjects.ElementAt(i).Value;
             if (inGps)
             {
-                mapEntries[i] = new FiducialMapEntry
-                {
-                    fiducial_id = f.Id,
-                    x = f.Position.latitude, y = f.Position.longitude, z = f.Position.altitude,
-                };
+                mapEntries[i] = new FiducialMapEntryMsg(f.Id, f.Position.latitude, f.Position.longitude, f.Position.altitude, f.FiducialSpaceData.RX, f.FiducialSpaceData.RY, f.FiducialSpaceData.RZ);
             }
             else
             {
-                mapEntries[i] = new FiducialMapEntry
-                {
-                    fiducial_id = f.Id,
-                    x = f.FiducialSpaceData.X, y = f.FiducialSpaceData.Y, z = f.FiducialSpaceData.Z,
-                };
+                mapEntries[i] = new FiducialMapEntryMsg(f.Id, f.FiducialSpaceData.X, f.FiducialSpaceData.Y, f.FiducialSpaceData.Z, f.FiducialSpaceData.RX, f.FiducialSpaceData.RY, f.FiducialSpaceData.RZ);
             }
-            mapEntries[i].rx = f.FiducialSpaceData.RX;
-            mapEntries[i].ry = f.FiducialSpaceData.RY;
-            mapEntries[i].rz = f.FiducialSpaceData.RZ;
         }
-        mapEntryArray.fiducials = mapEntries;
+        FiducialMapEntryArrayMsg mapEntryArray = new FiducialMapEntryArrayMsg(mapEntries);
+
         _rosFiducialMapGpsPublisher.PublishData(mapEntryArray);
+    }
+
+    public void Initialise(ROSBridgeWebSocketConnection rosConnection)
+    {
+        _rosConnection = rosConnection;
+        Initialise();
     }
 
     public int PlaceOrUpdateNewFiducial(int id, Vector3 position, Vector3 rotation)

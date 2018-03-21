@@ -1,52 +1,43 @@
-﻿using Ros_CSharp;
-using String = Messages.std_msgs.String;
+﻿using System;
+using ROSBridgeLib;
+using ROSBridgeLib.std_msgs;
 
 public class ROSLocomotionControlParams : ROSAgent
 {
-    private const string TOPIC = "/waypoint/control_parameters";
+    private ROSGenericSubscriber<StringMsg> _subscriber;
+    private ROSGenericPublisher _publisher;
 
-    private NodeHandle _nodeHandle;
-    private Publisher<String> _publisher;
-    private Subscriber<String> _subscriber;
-    private bool _isRunning;
-    private AgentJob _job;
+    public delegate void DataReceived(ROSBridgeMsg msg);
+    public event DataReceived OnDataReceived;
 
-    ///<summary>
-    ///Starts advertising loop
-    ///</summary>
-    public override void StartAgent(AgentJob job)
+    public ROSLocomotionControlParams(AgentJob job, ROSBridgeWebSocketConnection rosConnection, string topicName)
     {
-        base.StartAgent(job);
-        if (_isRunning) return;
-        _nodeHandle = new NodeHandle();
         if (job == AgentJob.Publisher)
-            _publisher = _nodeHandle.advertise<String>(TOPIC, 1, false);
+        {
+            _publisher = new ROSGenericPublisher(rosConnection, topicName, StringMsg.GetMessageType());
+            rosConnection.AddPublisher(_publisher);
+        }
         else if (job == AgentJob.Subscriber)
-            _subscriber = _nodeHandle.subscribe<String>(TOPIC, 1, ReceivedData);
-        _job = job;
-        _isRunning = true;
+        {
+            _subscriber = new ROSGenericSubscriber<StringMsg>(rosConnection, topicName, StringMsg.GetMessageType(), (msg) => new StringMsg(msg));
+            _subscriber.OnDataReceived += (data) =>
+            {
+                if (OnDataReceived != null)
+                    OnDataReceived(data);
+            };
+            rosConnection.AddSubscriber(_subscriber);
+        }
     }
 
-    ///<summary>
-    ///Stops advertising loop
-    ///</summary>
-    public void Stop() {
-        if (!_isRunning) return;
-        _nodeHandle.shutdown();
-        _publisher = null;
-        _nodeHandle = null;
+    protected override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
+    {
+        throw new NotImplementedException();
     }
 
     public void PublishData(float rho, float roll, float pitch, float yaw)
     {
-        PublishData($"{rho},{roll},{pitch},{yaw}");
+        if (_publisher != null)
+            _publisher.PublishData(new StringMsg(string.Format("{0}, {1}, {2}, {3}", rho, roll, pitch, yaw)));
     }
-
-    public override void PublishData(object data)
-    {
-        if (_job != AgentJob.Publisher) return;
-        String msg = new String((string)data);
-        _publisher.publish(msg);
-        
-    }
+    
 }

@@ -61,19 +61,22 @@ public class GazeObject : MonoBehaviour {
             IsActivated = !IsActivated;
         else IsActivated = true;
 
-        Activated?.Invoke(this);
+        if (Activated != null)
+            Activated(this);
     }
 
     public virtual void OnHover() {
         Gazed = true;
-        Hovered?.Invoke(this);
+        if (Hovered != null)
+            Hovered(this);
     }
 
     public virtual void OnUnhover() {
         if (IsActivated && _oneTimeUse) return;
         Gazed = false;
         _locked = false;
-        Unhovered?.Invoke(this);
+        if (Unhovered != null)
+            Unhovered(this);
 
         if (!_retainAccumulatedDwell) _dwellTimer = 0;
         if (!_useToggle)

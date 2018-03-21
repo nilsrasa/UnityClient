@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using ROSBridgeLib;
 using ROSBridgeLib.geometry_msgs;
-using TriangleNet.Geometry;
+using ROSBridgeLib.nav_msgs;
+using ROSBridgeLib.std_msgs;
 using UnityEngine;
-using Vector3 = UnityEngine.Vector3;
 
 public class VirtualRobot : ROSController
 {
+    [SerializeField] private float _publishInterval = 0.05f;
 
     public ArlobotROSController.RobotLocomotionState CurrentRobotLocomotionState { get; private set; }
     public ArlobotROSController.RobotLocomotionType CurrenLocomotionType { get; private set; }
@@ -17,13 +17,12 @@ public class VirtualRobot : ROSController
     private Dictionary<Type, ROSAgent> _rosAgents;
     private List<Type> _agentsWaitingToStart;
     private Rigidbody _rigidbody;
-    private string _rosMasterUri;
 
     //Subscribers
     private ROSLocomotionDirect _rosLocomotionDirect;
     private bool _hasLocomotionDirectDataToConsume;
     private TwistMsg _locomotionDirectDataToConsume;
-    private ROSJoystick _rosJoystick;
+    private ROSGenericSubscriber<TwistMsg> _rosJoystick;
     private bool _hasJoystickDataToConsume;
     private TwistMsg _joystickDataToConsume;
 
@@ -31,10 +30,10 @@ public class VirtualRobot : ROSController
     private Coroutine _transformUpdateCoroutine;
     private ROSLocomotionWaypointState _rosLocomotionWaypointState;
     private ROSLocomotionWaypoint _rosLocomotionWaypoint;
-    private ROSLocomotionLinearSpeed _rosLocomotionLinear;
-    private ROSLocomotionAngularSpeed _rosLocomotionAngular;
+    private ROSGenericPublisher _rosLocomotionLinear;
+    private ROSGenericPublisher _rosLocomotionAngular;
     private ROSLocomotionControlParams _rosLocomotionControlParams;
-    private ROSOdometry _rosOdometry;
+    private ROSGenericPublisher _rosOdometry;
 
     //Modules
     private WaypointNavigation _waypointNavigationModule;
@@ -49,7 +48,6 @@ public class VirtualRobot : ROSController
         _rosAgents = new Dictionary<Type, ROSAgent>();
         _agentsWaitingToStart = new List<Type>();
         _rigidbody = GetComponent<Rigidbody>();
-        _rosMasterUri = ConfigManager.ConfigFile.RosMasterUri;
         _waypointNavigationModule = GetComponent<WaypointNavigation>();
         OnRosStarted += _waypointNavigationModule.InitialiseRos;
 
@@ -60,7 +58,6 @@ public class VirtualRobot : ROSController
 
     void Start() {
         _sensorBusController = new SensorBusController(this);
-        StartROS(_rosMasterUri);
     }
 
     void Update() {
@@ -84,115 +81,97 @@ public class VirtualRobot : ROSController
         }
 
         if (_hasJoystickDataToConsume) {
-            _rigidbody.velocity = transform.forward * (float)_joystickDataToConsume.linear.x;
-            _rigidbody.angularVelocity = new Vector3(0, (float)-_joystickDataToConsume.angular.z, 0);
+            _rigidbody.velocity = transform.forward * (float)_joystickDataToConsume._linear._x;
+            _rigidbody.angularVelocity = new Vector3(0, (float)-_joystickDataToConsume._angular._z, 0);
             _hasJoystickDataToConsume = false;
         }
         if (_hasLocomotionDirectDataToConsume)
         {
-            _rigidbody.velocity = transform.forward * (float)_locomotionDirectDataToConsume.linear.x;
-            _rigidbody.angularVelocity = new Vector3(0, (float)-_locomotionDirectDataToConsume.angular.z, 0);
+            _rigidbody.velocity = transform.forward * (float)_locomotionDirectDataToConsume._linear._x;
+            _rigidbody.angularVelocity = new Vector3(0, (float)-_locomotionDirectDataToConsume._angular._z, 0);
             _hasLocomotionDirectDataToConsume = false;
         }
     }
 
-    private void ReceivedJoystickUpdate(ROSAgent sender, IRosMessage data) {
-        _joystickDataToConsume = (Twist)data;
+    private void ReceivedJoystickUpdate(ROSBridgeMsg data) {
+        _joystickDataToConsume = (TwistMsg)data;
         _hasJoystickDataToConsume = true;
     }
 
-    private void ReceivedLocomotionDirectUpdate(ROSAgent sender, IRosMessage data)
+    private void ReceivedLocomotionDirectUpdate(ROSBridgeMsg data)
     {
-        _locomotionDirectDataToConsume = (Twist) data;
+        _locomotionDirectDataToConsume = (TwistMsg) data;
         _hasLocomotionDirectDataToConsume = true;
     }
 
-    private IEnumerator SendTransformUpdate( )
+    private IEnumerator SendTransformUpdate(float interval)
     {
         while (true)
         {
             GeoPointWGS84 wgs = transform.position.ToUTM().ToWGS84();
             UnityEngine.Quaternion rot = transform.rotation;
-            Odometry odometry = new Odometry
-            {
-                pose = new PoseWithCovariance
-                {
-                    pose = new Messages.geometry_msgs.Pose
-                    {
-                        position = new Point
-                        {
-                            x = wgs.longitude,
-                            y = wgs.latitude,
-                            z = wgs.altitude
-                        },
-                        orientation = new Messages.geometry_msgs.Quaternion
-                        {
-                            x = rot.x,
-                            y = rot.y,
-                            z = rot.z,
-                            w = rot.w
-                        }
-                    }
-                }
-            };
+            PoseMsg pose = new PoseMsg(new PointMsg(wgs.longitude, wgs.latitude, wgs.altitude), 
+                new QuaternionMsg(rot.x, rot.y, rot.z, rot.w));
+            PoseWithCovarianceMsg poseWithCovariance = new PoseWithCovarianceMsg(pose, null);
+
+            OdometryMsg odometry = new OdometryMsg();
+            odometry._pose = poseWithCovariance;
             _rosOdometry.PublishData(odometry);
 
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForSeconds(interval);
         }
     }
 
-    private void TransmitSensorData() {
-        foreach (SensorBus sensorBus in _sensorBusController.SensorBusses) {
+    //TODO: Rework SIM
+    private void TransmitSensorData()
+    {
+        /*
+        foreach (SensorBus sensorBus in _sensorBusController.SensorBusses)
+        {
             if (!_rosAgents.ContainsKey(sensorBus.ROSAgentType)) continue;
             _rosAgents[sensorBus.ROSAgentType].PublishData(sensorBus.GetSensorData());
         }
+        */
     }
 
-    public override void StopROS() {
+    protected override void StopROS()
+    {
         StopCoroutine(_transformUpdateCoroutine);
-        base.StopROS();
     }
 
+    //TODO: Rework SIM
     public void StartAgent(Type agentType)
     {
-        if (!(ROS.ok || ROS.isStarted()))
+        /*
+        if (_rosBridge != null)
         {
             _agentsWaitingToStart.Add(agentType);
             return;
         }
         ROSAgent agent = (ROSAgent) Activator.CreateInstance(agentType);
-        agent.StartAgent(ROSAgent.AgentJob.Publisher);
+        agent.StartAgent();
         _rosAgents.Add(agentType, agent);
+        */
     }
 
-    public override void StartROS(string uri) {
-        base.StartROS(uri);
+    protected override void StartROS()
+    {
+        _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Subscriber, _rosBridge, "/cmd_vel");
+        _rosLocomotionDirect.OnDataReceived += ReceivedLocomotionDirectUpdate;
+        _rosJoystick = new ROSGenericSubscriber<TwistMsg>(_rosBridge, "/teleop_velocity_smoother/raw_cmd_vel", TwistMsg.GetMessageType(), (msg) => new TwistMsg(msg));
+        _rosJoystick.OnDataReceived += ReceivedJoystickUpdate;
 
-        _rosLocomotionDirect = new ROSLocomotionDirect();
-        _rosLocomotionDirect.StartAgent(ROSAgent.AgentJob.Subscriber);
-        _rosLocomotionDirect.DataWasReceived += ReceivedLocomotionDirectUpdate;
-        _rosJoystick = new ROSJoystick();
-        _rosJoystick.StartAgent(ROSAgent.AgentJob.Subscriber);
-        _rosJoystick.DataWasReceived += ReceivedJoystickUpdate;
+        _rosOdometry = new ROSGenericPublisher(_rosBridge, "/robot_gps_pose", OdometryMsg.GetMessageType());
+        _transformUpdateCoroutine = StartCoroutine(SendTransformUpdate(_publishInterval));
+        
+        _rosLocomotionWaypointState = new ROSLocomotionWaypointState(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/state");
+        _rosLocomotionWaypoint = new ROSLocomotionWaypoint(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint");
+        _rosLocomotionLinear = new ROSGenericPublisher(_rosBridge, "/waypoint/max_linear_speed", Float32Msg.GetMessageType());
+        _rosLocomotionAngular = new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());
+        _rosLocomotionControlParams = new ROSLocomotionControlParams(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/control_parameters");
 
-        _rosOdometry = new ROSOdometry();
-        _rosOdometry.StartAgent(ROSAgent.AgentJob.Publisher);
-        _transformUpdateCoroutine = StartCoroutine(SendTransformUpdate());
-
-        _rosLocomotionWaypointState = new ROSLocomotionWaypointState();
-        _rosLocomotionWaypointState.StartAgent(ROSAgent.AgentJob.Publisher);
-        _rosLocomotionWaypoint = new ROSLocomotionWaypoint();
-        _rosLocomotionWaypoint.StartAgent(ROSAgent.AgentJob.Publisher);
-
-        _rosLocomotionLinear = new ROSLocomotionLinearSpeed();
-        _rosLocomotionLinear.StartAgent(ROSAgent.AgentJob.Publisher);
-        _rosLocomotionAngular = new ROSLocomotionAngularSpeed();
-        _rosLocomotionAngular.StartAgent(ROSAgent.AgentJob.Publisher);
-        _rosLocomotionControlParams = new ROSLocomotionControlParams();
-        _rosLocomotionControlParams.StartAgent(ROSAgent.AgentJob.Publisher);
-
-        _rosLocomotionLinear.PublishData(ConfigManager.ConfigFile.MaxLinearSpeed);
-        _rosLocomotionAngular.PublishData(ConfigManager.ConfigFile.MaxAngularSpeed);
+        _rosLocomotionLinear.PublishData(new Float32Msg(ConfigManager.ConfigFile.MaxLinearSpeed));
+        _rosLocomotionAngular.PublishData(new Float32Msg(ConfigManager.ConfigFile.MaxAngularSpeed));
         _rosLocomotionControlParams.PublishData(ConfigManager.ConfigFile.ControlParameterRho, ConfigManager.ConfigFile.ControlParameterRoll,
             ConfigManager.ConfigFile.ControlParameterPitch, ConfigManager.ConfigFile.ControlParameterYaw);
 }

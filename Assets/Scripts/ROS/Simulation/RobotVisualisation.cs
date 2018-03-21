@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Messages;
-using Messages.geometry_msgs;
-using Ros_CSharp;
+using ROSBridgeLib;
+using ROSBridgeLib.geometry_msgs;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 
@@ -19,9 +18,9 @@ public class RobotVisualisation : ROSController
     public static RobotVisualisation Instance { get; private set; }
 
     private ROSLocomotionDirect _rosLocomotionDirect;
-    private ROSJoystick _rosJoystick;
+    private ROSGenericSubscriber<TwistMsg> _rosJoystick;
     private bool _hasJoystickDataToConsume;
-    private Twist _joystickDataToConsume;
+    private TwistMsg _joystickDataToConsume;
 
     void Awake() {
         Instance = this;
@@ -32,13 +31,10 @@ public class RobotVisualisation : ROSController
 
     void Start() {
         _sensorRepresentationBusController = SensorRepresentationBusController.Instance;
-        if (!_runConjoinedWithSim)
-            StartROS(_ROS_MASTER_URI);
     }
 
     void Update() {
-        if (!(ROS.ok || ROS.isStarted()))
-            return;
+        if (_rosBridge == null) return;
         if (_agentsWaitingToStart.Count > 0) {
             foreach (Type type in _agentsWaitingToStart) {
                 StartAgent(type);
@@ -48,25 +44,28 @@ public class RobotVisualisation : ROSController
 
         if (_hasJoystickDataToConsume)
         {
-            _rigidbody.velocity = transform.forward * (float) _joystickDataToConsume.linear.x;
-            _rigidbody.angularVelocity = new Vector3(0, (float)-_joystickDataToConsume.angular.z, 0);
+            _rigidbody.velocity = transform.forward * (float) _joystickDataToConsume._linear._x;
+            _rigidbody.angularVelocity = new Vector3(0, (float)-_joystickDataToConsume._angular._z, 0);
             _hasJoystickDataToConsume = false;
         }
     }
 
-    void DataReceived(ROSAgent sender, IRosMessage data)
+    void DataReceived(ROSBridgeMsg data)
     {
-        _sensorRepresentationBusController.HandleData(sender, data);
+        //TODO: Update SIM
+        //_sensorRepresentationBusController.HandleData(sender, data);
     }
 
-    private void ReceivedJoystickUpdate(ROSAgent sender, IRosMessage data)
+    private void ReceivedJoystickUpdate(ROSBridgeMsg data)
     {
-        _joystickDataToConsume = (Twist) data;
+        _joystickDataToConsume = (TwistMsg) data;
         _hasJoystickDataToConsume = true;
     }
 
+    //TODO: Needs to be changed to better thing
     public void StartAgent(Type agentType) {
-        if (!(ROS.ok || ROS.isStarted())) {
+        /*
+        if (_rosBridge == null) {
             _agentsWaitingToStart.Add(agentType);
             return;
         }
@@ -74,15 +73,23 @@ public class RobotVisualisation : ROSController
         agent.StartAgent(ROSAgent.AgentJob.Subscriber);
         _rosAgents.Add(agentType, agent);
         agent.DataWasReceived += DataReceived;
+        */
     }
 
-    public override void StartROS(string uri)
+    public override void StopRobot()
     {
-        base.StartROS(uri);
+        throw new NotImplementedException();
+    }
 
-        _rosJoystick = new ROSJoystick();
-        _rosJoystick.StartAgent(ROSAgent.AgentJob.Subscriber);
-        _rosJoystick.DataWasReceived += ReceivedJoystickUpdate;
+    protected override void StartROS()
+    {
+        _rosJoystick = new ROSGenericSubscriber<TwistMsg>(_rosBridge, "/teleop_velocity_smoother/raw_cmd_vel", TwistMsg.GetMessageType(), (msg) => new TwistMsg(msg));
+        _rosJoystick.OnDataReceived += ReceivedJoystickUpdate;
+    }
+
+    public override void MoveDirect(Vector2 movementCommand)
+    {
+        throw new NotImplementedException();
     }
 
     public override void MoveToPoint(GeoPointWGS84 point) {

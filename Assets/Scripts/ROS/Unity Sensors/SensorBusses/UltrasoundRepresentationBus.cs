@@ -1,20 +1,18 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Messages;
-using Messages.std_msgs;
-using UnityEngine;
+﻿using System;
+using ROSBridgeLib.std_msgs;
 
 public class UltrasoundRepresentationBus : SensorRepresentationBus {
 
     public UltrasoundRepresentationBus()
     {
-        ROSAgentType = typeof(ROSUltrasound);
+        
+        //ROSAgentType = typeof(ROSUltrasound);
     }
 
-    public override void HandleData(IRosMessage data)
+    public override void HandleData(ROSBridgeMsg data)
     {
-        String dataString = (String) data;
-        JSONObject root = new JSONObject(dataString.data);
+        StringMsg dataString = (StringMsg) data;
+        JSONObject root = new JSONObject(dataString._data);
         foreach (string key in root.keys)
         {
             foreach (SensorRepresentation sensor in _sensorRepresentations) {

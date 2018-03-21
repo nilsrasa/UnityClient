@@ -3,8 +3,6 @@ using ROSBridgeLib.nav_msgs;
 using ROSBridgeLib.std_msgs;
 using UnityEngine;
 using UnityEngine.UI;
-using Quaternion = UnityEngine.Quaternion;
-using Vector3 = UnityEngine.Vector3;
 
 public class ArlobotROSController : ROSController {
 
@@ -21,13 +19,11 @@ public class ArlobotROSController : ROSController {
     private ROSLocomotionDirect _rosLocomotionDirect;
     private ROSLocomotionWaypoint _rosLocomotionWaypoint;
     private ROSLocomotionWaypointState _rosLocomotionWaypointState;
-    private ROSUltrasound _rosUltrasound;
-    private ROSLocomotionState _rosLocomotionState;
-    private ROSLocomotionLinearSpeed _rosLocomotionLinear;
-    private ROSLocomotionAngularSpeed _rosLocomotionAngular;
+    private ROSGenericPublisher _rosLocomotionLinear;
+    private ROSGenericPublisher _rosLocomotionAngular;
     private ROSLocomotionControlParams _rosLocomotionControlParams;
-    private ROSOdometry _rosOdometry;
-    private ROSCamera _rosCamera;
+    private ROSGenericSubscriber<StringMsg> _rosUltrasound;
+    private ROSGenericSubscriber<OdometryMsg> _rosOdometry;
 
     private bool _hasOdometryDataToConsume;
     private OdometryData _odometryDataToConsume;
@@ -62,42 +58,8 @@ public class ArlobotROSController : ROSController {
 
     }
 
-    void Start()
-    {
-        StartROS(ConfigManager.ConfigFile.RosMasterUri);
-    }
-
     void Update()
     {
-        //Direct control of robot
-        float linear = 0;
-        float angular = 0;
-        
-        if (Input.GetKey(KeyCode.UpArrow))
-        {
-            linear = 1f;
-        }
-        if (Input.GetKey(KeyCode.DownArrow))
-        {
-            linear = -1f;
-        }
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            angular = 1f;
-        }
-        if (Input.GetKey(KeyCode.RightArrow))
-        {
-            angular = -1f;
-        }
-        if (linear == 0 && angular == 0 && CurrentRobotLocomotionState != RobotLocomotionState.STOPPED && CurrenLocomotionType == RobotLocomotionType.DIRECT)
-        {
-            StopRobot();
-        }
-        else if (linear != 0 || angular != 0)
-        {
-            MoveDirect(new Vector2(angular, linear));
-        }
-        
         //Navigation to waypoint
         if (CurrenLocomotionType != RobotLocomotionType.DIRECT && CurrentRobotLocomotionState != RobotLocomotionState.STOPPED)
         {
@@ -170,40 +132,22 @@ public class ArlobotROSController : ROSController {
         }
     }*/
 
-    public override void StopRobot()
+    protected override void StartROS()
     {
-        CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
-        _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
-        _rosLocomotionDirect.PublishData(Vector2.zero);
-    }
+        _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Publisher, _rosBridge, "/cmd_vel");
+        _rosLocomotionWaypoint = new ROSLocomotionWaypoint(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint");
+        _rosLocomotionWaypointState = new ROSLocomotionWaypointState(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/state");
+        _rosLocomotionControlParams = new ROSLocomotionControlParams(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/control_parameters");
+        _rosLocomotionLinear = new ROSGenericPublisher(_rosBridge, "/waypoint/max_linear_speed", Float32Msg.GetMessageType());
+        _rosLocomotionAngular = new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());
 
-    protected override void StartROS() {
-        _rosLocomotionDirect = new ROSLocomotionDirect();
-        _rosLocomotionDirect.StartAgent(ROSAgent.AgentJob.Publisher);
-        _rosLocomotionWaypoint = new ROSLocomotionWaypoint();
-        _rosLocomotionWaypoint.StartAgent(ROSAgent.AgentJob.Publisher);
-        _rosLocomotionWaypointState = new ROSLocomotionWaypointState();
-        _rosLocomotionWaypointState.StartAgent(ROSAgent.AgentJob.Publisher);
-        _rosLocomotionControlParams = new ROSLocomotionControlParams();
-        _rosLocomotionControlParams.StartAgent(ROSAgent.AgentJob.Publisher);
-        _rosLocomotionLinear = new ROSLocomotionLinearSpeed();
-        _rosLocomotionLinear.StartAgent(ROSAgent.AgentJob.Publisher);
-        _rosLocomotionAngular = new ROSLocomotionAngularSpeed();
-        _rosLocomotionAngular.StartAgent(ROSAgent.AgentJob.Publisher);
-        //_rosUltrasound = new ROSUltrasound();
-       //_rosUltrasound.StartAgent(ROSAgent.AgentJob.Subscriber, _clientNamespace);
-        _rosLocomotionState = new ROSLocomotionState();
-        _rosLocomotionState.StartAgent(ROSAgent.AgentJob.Subscriber);
-        _rosLocomotionState.DataWasReceived += ReceivedLocomotionStateUpdata;
-        _rosOdometry = new ROSOdometry();
-        _rosOdometry.StartAgent(ROSAgent.AgentJob.Subscriber);
-        _rosOdometry.DataWasReceived += ReceivedOdometryUpdate;
-        //_rosCamera = new ROSCamera();
-        //_rosCamera.StartAgent(ROSAgent.AgentJob.Subscriber);
-        //_rosCamera.DataWasReceived += HandleImage;
+        _rosUltrasound = new ROSGenericSubscriber<StringMsg>(_rosBridge, "/ultrasonic_data", StringMsg.GetMessageType(), (msg) => new StringMsg(msg));
+        _rosUltrasound.OnDataReceived += ReceivedUltrasoundUpdata;
+        _rosOdometry = new ROSGenericSubscriber<OdometryMsg>(_rosBridge, "/robot_gps_pose", OdometryMsg.GetMessageType(), (msg) => new OdometryMsg(msg));
+        _rosOdometry.OnDataReceived += ReceivedOdometryUpdate;
 
-        _rosLocomotionLinear.PublishData(_maxLinearSpeed);
-        _rosLocomotionAngular.PublishData(_maxAngularSpeed);
+        _rosLocomotionLinear.PublishData(new Float32Msg(_maxLinearSpeed));
+        _rosLocomotionAngular.PublishData(new Float32Msg(_maxAngularSpeed));
         _rosLocomotionControlParams.PublishData(_controlParameterRho, _controlParameterRoll, _controlParameterPitch, _controlParameterYaw);
     }
 
@@ -216,6 +160,13 @@ public class ArlobotROSController : ROSController {
         CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.RUNNING);
         CurrentRobotLocomotionState = RobotLocomotionState.MOVING;
+    }
+
+    public override void StopRobot()
+    {
+        CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
+        _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
+        _rosLocomotionDirect.PublishData(Vector2.zero);
     }
 
     public override void MoveToPoint(GeoPointWGS84 point)
@@ -241,7 +192,7 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.RUNNING);
     }
 
-    public void ReceivedOdometryUpdate(ROSAgent sender, ROSBridgeMsg data)
+    public void ReceivedOdometryUpdate(ROSBridgeMsg data)
     {
         //In WGS84
         OdometryMsg nav = (OdometryMsg) data;
@@ -267,12 +218,19 @@ public class ArlobotROSController : ROSController {
     }
 
     //TODO: Not yet implemented
-    public void ReceivedLocomotionStateUpdata(ROSAgent sender, ROSBridgeMsg state)
+    public void ReceivedLocomotionStateUpdata(ROSBridgeMsg data)
     {
         //TODO: Not implemented yet
 
-        StringMsg s = (StringMsg) state;
+        StringMsg s = (StringMsg) data;
         //_currentRobotLocomotionState = (RobotLocomotionState) Enum.Parse(typeof(RobotLocomotionState), s.data);
+    }
+
+    public void ReceivedUltrasoundUpdata(ROSBridgeMsg data)
+    {
+        //TODO: Not implemented yet
+
+        StringMsg s = (StringMsg) data;
     }
 
     private struct OdometryData

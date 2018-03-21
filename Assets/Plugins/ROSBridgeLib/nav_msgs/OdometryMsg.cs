@@ -24,6 +24,10 @@ namespace ROSBridgeLib {
 				_twist = new TwistWithCovarianceMsg(msg["twist"]);
 			}
 
+		    public OdometryMsg()
+		    {
+		    }
+
 			public HeaderMsg GetHeader() {
 				return _header;
 			}
@@ -39,6 +43,12 @@ namespace ROSBridgeLib {
 			public TwistWithCovarianceMsg GetTwistWithCovariance() {
 				return _twist;
 			}
+
+		    public static string GetMessageType()
+		    {
+		        return "nav_msgs/Odometry";
+
+		    }
 			
 			public override string ToString() {
 				return "Odometry [header=" + _header.ToString() 

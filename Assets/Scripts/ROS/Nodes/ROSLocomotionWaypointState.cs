@@ -1,58 +1,52 @@
 ﻿using System;
-using Messages;
-using Messages.geometry_msgs;
-using Messages.sensor_msgs;
-using Ros_CSharp;
-using UnityEngine;
+using ROSBridgeLib;
+using ROSBridgeLib.std_msgs;
 
-public class ROSLocomotionWaypoint : ROSAgent
+public class ROSLocomotionWaypointState : ROSAgent
 {
-    private const string TOPIC = "/waypoint";
+    public enum RobotWaypointState { RUNNING, STOP, PARK }
 
-    private NodeHandle _nodeHandle;
-    private Publisher<NavSatFix> _publisher;
-    private Subscriber<NavSatFix> _subscriber;
-    private bool _isRunning;
-    private AgentJob _job;
+    private ROSGenericSubscriber<StringMsg> _subscriber;
+    private ROSGenericPublisher _publisher;
 
-    ///<summary>
-    ///Starts advertising loop
-    ///</summary>
-    public override void StartAgent(AgentJob job)
+    public delegate void DataReceived(ROSBridgeMsg msg);
+    public event ROSLocomotionControlParams.DataReceived OnDataReceived;
+
+    public ROSLocomotionWaypointState(AgentJob job, ROSBridgeWebSocketConnection rosConnection, string topicName)
     {
-        base.StartAgent(job);
-        if (_isRunning) return;
-        _nodeHandle = new NodeHandle();
         if (job == AgentJob.Publisher)
-            _publisher = _nodeHandle.advertise<NavSatFix>(TOPIC, 1, false);
-        else if (job == AgentJob.Subscriber)
-            _subscriber = _nodeHandle.subscribe<NavSatFix>(TOPIC, 1, ReceivedData);
-        _job = job;
-        _isRunning = true;
-    }
-
-    ///<summary>
-    ///Stops advertising loop
-    ///</summary>
-    public void Stop() {
-        if (!_isRunning) return;
-        _nodeHandle.shutdown();
-        _publisher = null;
-        _nodeHandle = null;
-    }
-
-    public override void PublishData(object data)
-    {
-        if (_job != AgentJob.Publisher) return;
-        GeoPointWGS84 navToPoint = (GeoPointWGS84) data;
-        NavSatFix nav = new NavSatFix
         {
-            latitude = navToPoint.latitude,
-            longitude = navToPoint.longitude,
-            altitude = navToPoint.altitude,
-        };
+            _publisher = new ROSGenericPublisher(rosConnection, topicName, StringMsg.GetMessageType());
+            rosConnection.AddPublisher(_publisher);
+        }
+        else if (job == AgentJob.Subscriber)
+        {
+            _subscriber = new ROSGenericSubscriber<StringMsg>(rosConnection, topicName, StringMsg.GetMessageType(), (msg) => new StringMsg(msg));
+            _subscriber.OnDataReceived += (data) =>
+            {
+                if (OnDataReceived != null)
+                    OnDataReceived(data);
+            };
+            rosConnection.AddSubscriber(_subscriber);
+        }
+    }
 
-        _publisher.publish(nav);
+    protected override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void PublishData(RobotWaypointState data)
+    {
+        PublishData(data.ToString());
+    }
+
+    public void PublishData(string data)
+    {
+        if (_publisher == null) return;
+
+        StringMsg state = new StringMsg(data);
+        _publisher.PublishData(state);
     }
 
 }

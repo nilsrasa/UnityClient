@@ -73,11 +73,12 @@ public class RobotMasterController : MonoBehaviour
         if (_robotConfigs.TryGetValue(robotName, out config))
         {
             ROSBridgeWebSocketConnection rosBridge;
-            if (!_rosBridges.TryGetValue($"{config.RosMasterUri}:{config.RosMasterPort}", out rosBridge))
+            string path = string.Format("{0}:{1}", config.RosMasterUri, config.RosMasterPort);
+            if (!_rosBridges.TryGetValue(path, out rosBridge))
             {
                 rosBridge = new ROSBridgeWebSocketConnection(config.RosMasterUri, config.RosMasterPort);
                 rosBridge.Connect();
-                _rosBridges.Add($"{config.RosMasterUri}:{config.RosMasterPort}", rosBridge);
+                _rosBridges.Add(path, rosBridge);
             }
 
             GameObject robot = Instantiate(Resources.Load(_robotPrefabPath + robotName)) as GameObject;

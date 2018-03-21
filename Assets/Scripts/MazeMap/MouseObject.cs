@@ -23,24 +23,30 @@ public class MouseObject : MonoBehaviour
         else
         {
             _isHovered = true;
-            OnMouseHover?.Invoke();
+            if (OnMouseHover != null)
+                OnMouseHover();
         }
     }
 
     public virtual void Stayed()
     {
-        OnMouseStay?.Invoke();
+        if (OnMouseStay != null)
+            OnMouseStay();
     }
 
     public virtual void Exited()
     {
         if (_isHovered)
-            OnMouseExit?.Invoke();
+        {
+            if (OnMouseExit != null)
+                OnMouseExit();
+        }
         _isHovered = false;
     }
 
     public virtual void Clicked()
     {
-        OnMouseClick?.Invoke();
+        if (OnMouseClick != null)
+            OnMouseClick();
     }
 }

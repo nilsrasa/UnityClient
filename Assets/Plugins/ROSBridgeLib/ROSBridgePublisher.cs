@@ -1,32 +1,31 @@
-﻿using System.Collections;
-using SimpleJSON;
+﻿namespace ROSBridgeLib {
+	public abstract class ROSBridgePublisher : ROSAgent
+	{
+        public string GetMessageTopic()
+	    {
+	        return TopicName;
+	    }
 
-/**
- * This defines a publisher. There had better be a corresponding subscriber somewhere. This is really
- * just a holder for the message topic and message type.
- * 
- * Version History
- * 3.1 - changed methods to start with an upper case letter to be more consistent with c#
- * style.
- * 3.0 - modification from hand crafted version 2.0
- * 
- * @author Michael Jenkin, Robert Codd-Downey and Andrew Speers
- * @version 3.1
- */
+	    public string GetMessageType()
+	    {
+	        return MessageType;
+	    }
 
-namespace ROSBridgeLib {
-	public class ROSBridgePublisher {
-		
-		public static string GetMessageTopic() {
-			return null;
-		}  
-		
-		public static string GetMessageType() {
-			return null;
-		}
+	    public virtual void PublishData(ROSBridgeMsg msg)
+	    {
+	        if (ROSConnection.IsConnected)
+	        {
+	            ROSConnection.Publish(TopicName, msg);
+	        }
+	    }
 
-		public static string ToYAMLString() {
-			return null;
-		}
-	}
+	    protected sealed override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
+	    {
+	        TopicName = topicName;
+	        MessageType = messageType;
+	        ROSConnection = rosConnection;
+	        ROSConnection.AddPublisher(this);
+	    }
+
+    }
 }

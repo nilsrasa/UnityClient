@@ -1,6 +1,4 @@
 ﻿using System;
-using Messages;
-using Ros_CSharp;
 using UnityEngine;
 
 public class SensorRepresentation : MonoBehaviour {
