@@ -10,6 +10,7 @@ public class PlayerUIController : MonoBehaviour
     public static PlayerUIController Instance { get; private set; }
 
     private enum UIState { Navigation, Options, PlacingFiducial, UpdatingFiducial, DeletingFiducial, SorroundPhoto, Loading }
+    private enum RobotDrivingUIState { NoRobotSelected, RobotStopped, RobotDriving, RobotPaused }
     private enum WaypointMode { Point, Route }
 
     //Right Panel
@@ -141,6 +142,52 @@ public class PlayerUIController : MonoBehaviour
         }
     }
 
+    private RobotDrivingUIState CurrentRobotDrivingUIState
+    {
+        get { return _currentRobotDrivingUiState; }
+        set
+        {
+            _currentRobotDrivingUiState = value;
+            _driveRobot.interactable = false;
+            _pauseRobot.interactable = false;
+            _returnToBase.interactable = false;
+            switch (value)
+            {
+                case RobotDrivingUIState.NoRobotSelected:
+                    SetDriveMode(false);
+                    break;
+                case RobotDrivingUIState.RobotStopped:
+                    SetDriveMode(false);
+                    IsPaused = false;
+                    _driveRobot.interactable = true;
+                    _returnToBase.interactable = true;
+                    _driveRobot.colors = _driveRobotColorBlock;
+                    _driveRobotText.text = "Drive";
+                    _isDriving = false;
+                    break;
+                case RobotDrivingUIState.RobotDriving:
+                    SetDriveMode(true);
+                    IsPaused = false;
+                    _driveRobot.interactable = true;
+                    _pauseRobot.interactable = true;
+                    _returnToBase.interactable = true;
+                    _driveRobot.colors = _driveRobotStopColorBlock;
+                    _driveRobotText.text ="Stop";
+                    _isDriving = true;
+                    break;
+                case RobotDrivingUIState.RobotPaused:
+                    IsPaused = true;
+                    _driveRobot.interactable = true;
+                    _pauseRobot.interactable = true;
+                    _returnToBase.interactable = true;
+                    _driveRobot.colors = _driveRobotStopColorBlock;
+                    _driveRobotText.text = "Stop";
+                    _isDriving = true;
+                    break;
+            }
+        }
+    }
+
     private bool IsPaused
     {
         get { return _isPaused; }
@@ -152,8 +199,9 @@ public class PlayerUIController : MonoBehaviour
         }
     }
 
-    private WaypointMode _currentWaypointMode;
+    private WaypointMode _currentWaypointMode = WaypointMode.Point;
     private UIState _currentUIState = UIState.Loading;
+    private RobotDrivingUIState _currentRobotDrivingUiState = RobotDrivingUIState.NoRobotSelected;
     private ColorBlock _toggleWaypointPointColorBlock;
     private ColorBlock _toggleWaypointRouteColorBlock;
     private ColorBlock _driveRobotColorBlock;
@@ -161,10 +209,9 @@ public class PlayerUIController : MonoBehaviour
     private ColorBlock _pauseRobotColorBlock;
     private ColorBlock _resumeRobotColorBlock;
     private WaypointController _waypointController;
-    private ROSController _selectedRobot;
     private RectTransform _sliderTransform;
-    private bool _isDriving;
     private bool _isPaused;
+    private bool _isDriving;
     private Dictionary<float, TimeSliderPosition> _timeSliderPositions;
     private float _highlightedTimeSliderPosition;
     private Transform _fiducialToUpdate;
@@ -180,7 +227,7 @@ public class PlayerUIController : MonoBehaviour
         _driveRobot.onClick.AddListener(DriveRobotOnClick);
         _loadRoute.onClick.AddListener(LoadRouteClick);
         _saveRoute.onClick.AddListener(SaveRouteClick);
-        _pauseRobot.onClick.AddListener(PauseRobotOnClick);
+        _pauseRobot.onClick.AddListener(PauseRobotClick);
         _backFromSorroundPhoto.onClick.AddListener(BackFromSorroundPhotoClick);
         _timeSlider.onValueChanged.AddListener(OnTimeSliderValueChanged);
         _returnToBase.onClick.AddListener(ReturnRobotToBase);
@@ -237,6 +284,7 @@ public class PlayerUIController : MonoBehaviour
         _layerNumberText.text = MazeMapController.Instance.CurrentActiveLevel.ToString();
 
         CurrentUIState = UIState.Navigation;
+        CurrentRobotDrivingUIState = RobotDrivingUIState.NoRobotSelected;
         MazeMapController.Instance.OnFinishedGeneratingCampus += OnFinishedGeneratingCampus;
     }
 
@@ -313,38 +361,22 @@ public class PlayerUIController : MonoBehaviour
 
     private void ReturnRobotToBase()
     {
-        if (_selectedRobot == null) return;
         //TODO: Hardcoded
-        MazeMapController.Instance.GetPath(_selectedRobot.transform.position.ToUTM().ToWGS84(), new GeoPointWGS84() { latitude = 55.78268988306574, longitude = 12.514101387003798 });
+        MazeMapController.Instance.GetPath(RobotMasterController.SelectedRobot.transform.position.ToUTM().ToWGS84(), new GeoPointWGS84() { latitude = 55.78268988306574, longitude = 12.514101387003798 });
     }
 
     private void DriveRobotOnClick()
     {
-        if (_selectedRobot == null) return;
         if (_isDriving)
         {
-            _selectedRobot.StopRobot();
-            SetDriveMode(false);
+            RobotMasterController.SelectedRobot.StopRobot();
+            CurrentRobotDrivingUIState = RobotDrivingUIState.RobotStopped;
         }
         else
         {
             List<GeoPointWGS84> path = _waypointController.GetPath().Select(point => point.ToUTM().ToWGS84()).ToList();
-            _selectedRobot.MovePath(path);
-            SetPauseMode(true);
-            SetDriveMode(true);
-        }
-    }
-
-    private void PauseRobotOnClick()
-    {
-        if (_selectedRobot == null) return;
-        if (_isDriving)
-        {
-            if (IsPaused)
-                _selectedRobot.ResumePath();
-            else
-                _selectedRobot.PausePath();
-            IsPaused = !IsPaused;
+            RobotMasterController.SelectedRobot.MovePath(path);
+            CurrentRobotDrivingUIState = RobotDrivingUIState.RobotDriving;
         }
     }
 
@@ -474,6 +506,16 @@ public class PlayerUIController : MonoBehaviour
         }
     }
 
+    private void PauseRobotClick()
+    {
+        if (_isPaused)
+            RobotMasterController.SelectedRobot.PausePath();
+        else
+            RobotMasterController.SelectedRobot.ResumePath();
+
+        IsPaused = !IsPaused;
+    }
+
     #endregion
 
     #region OnValueChangeEvents
@@ -492,8 +534,7 @@ public class PlayerUIController : MonoBehaviour
 
     private void OnSelectedRobotValueChanged(int newIndex)
     {
-        if (newIndex > 0) 
-            _selectedRobot = RobotMasterController.Instance.LoadRobot(_selectRobot.options[newIndex].text);
+        UpdateUI(RobotMasterController.Instance.LoadRobot(_selectRobot.options[newIndex].text));
     }
 
     private void OnTimeSliderValueChanged(float newValue)
@@ -641,18 +682,6 @@ public class PlayerUIController : MonoBehaviour
         _pauseRobot.interactable = _isDriving;
     }
 
-    public void SetPauseMode(bool isPaused)
-    {
-        if (_selectedRobot == null) return;
-        _pauseRobot.interactable = _isDriving;
-        if (_isPaused)
-            _selectedRobot.PausePath();
-        else
-            _selectedRobot.ResumePath();
-        
-        IsPaused = isPaused;
-    }
-
     /// <summary>
     /// Updates loading bar
     /// </summary>
@@ -687,4 +716,18 @@ public class PlayerUIController : MonoBehaviour
         _timeSliderPositions = new Dictionary<float, TimeSliderPosition>();
     }
 
+    public void UpdateUI(ROSController robot)
+    {
+        if (robot.CurrenLocomotionType == ROSController.RobotLocomotionType.DIRECT)
+        {
+            CurrentRobotDrivingUIState = RobotDrivingUIState.RobotStopped;
+        }
+        else
+        {
+            if (robot.CurrentRobotLocomotionState == ROSController.RobotLocomotionState.MOVING)
+                CurrentRobotDrivingUIState = RobotDrivingUIState.RobotDriving;
+            else if (robot.CurrentRobotLocomotionState == ROSController.RobotLocomotionState.STOPPED)
+                CurrentRobotDrivingUIState = RobotDrivingUIState.RobotStopped;
+        }
+    }
 }

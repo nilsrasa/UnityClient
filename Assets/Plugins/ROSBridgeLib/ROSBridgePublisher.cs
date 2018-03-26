@@ -1,4 +1,6 @@
-﻿namespace ROSBridgeLib {
+﻿using UnityEngine;
+
+namespace ROSBridgeLib {
 	public abstract class ROSBridgePublisher : ROSAgent
 	{
         public string GetMessageTopic()
@@ -15,6 +17,7 @@
 	    {
 	        if (ROSConnection.IsConnected)
 	        {
+                Debug.Log("Publishing to Topic [" + TopicName + "] Message [" + msg.ToYAMLString() + "]");
 	            ROSConnection.Publish(TopicName, msg);
 	        }
 	    }

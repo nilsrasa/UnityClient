@@ -9,12 +9,7 @@ public class ArlobotROSController : ROSController {
     [SerializeField] private int _waypointStartIndex = 0;
     [SerializeField] private RawImage _cameraImage;
 
-    public enum RobotLocomotionState { MOVING, STOPPED }
-    public enum RobotLocomotionType { WAYPOINT, DIRECT }
-
     public static ArlobotROSController Instance { get; private set; }
-    public RobotLocomotionState CurrentRobotLocomotionState { get; private set; }
-    public RobotLocomotionType CurrenLocomotionType { get; private set; }
 
     private ROSLocomotionDirect _rosLocomotionDirect;
     private ROSLocomotionWaypoint _rosLocomotionWaypoint;
@@ -119,7 +114,8 @@ public class ArlobotROSController : ROSController {
     private void EndWaypointPath()
     {
         StopRobot();
-        PlayerUIController.Instance.SetDriveMode(false);
+        if (RobotMasterController.SelectedRobot == this)
+            PlayerUIController.Instance.UpdateUI(this);
     }
     /*
     private void HandleImage(ROSAgent sender, CompressedImageMsg compressedImage, CameraInfo info)

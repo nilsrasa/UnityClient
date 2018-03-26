@@ -189,6 +189,7 @@ namespace ROSBridgeLib
         public void Disconnect()
         {
             _myThread.Abort();
+            if (_ws == null) return;
             foreach (ROSBridgeSubscriber subscriber in _subscribers)
             {
                 _ws.Send(ROSBridgeMsg.UnSubscribe(subscriber.GetMessageTopic()));
@@ -204,9 +205,19 @@ namespace ROSBridgeLib
 
         private void Run()
         {
-            _ws = new WebSocket(_host + ":" + _port);
-            _ws.OnMessage += (sender, e) => this.OnMessage(e.Data);
-            _ws.Connect();
+            try
+            {
+                Debug.Log(_host + ":" + _port);
+                _ws = new WebSocket(_host + ":" + _port);
+                _ws.OnMessage += (sender, e) => this.OnMessage(e.Data);
+                _ws.Connect();
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+                return;
+            }
+            
             IsConnected = _ws.IsAlive;
 
             foreach (ROSBridgeSubscriber subscriber in _subscribers)

@@ -5,8 +5,14 @@ using UnityEngine;
 
 public abstract class ROSController : MonoBehaviour
 {
+    public enum RobotLocomotionState { MOVING, STOPPED }
+    public enum RobotLocomotionType { WAYPOINT, DIRECT }
+
     public delegate void RosStarted(ROSBridgeWebSocketConnection rosBridge);
     public event RosStarted OnRosStarted;
+
+    public RobotLocomotionState CurrentRobotLocomotionState { get; protected set; }
+    public RobotLocomotionType CurrenLocomotionType { get; protected set; }
 
     protected bool _robotModelInitialised;
     protected ROSBridgeWebSocketConnection _rosBridge;

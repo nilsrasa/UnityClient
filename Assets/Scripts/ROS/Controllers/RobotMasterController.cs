@@ -1,34 +1,45 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ROSBridgeLib;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class RobotMasterController : MonoBehaviour
 {
-    public static RobotMasterController Instance { get; set; }
+    public static RobotMasterController Instance { get; private set; }
 
-    [SerializeField] private List<ROSController> _activeRobots;
+    private static ROSController _selectedRobot;
+    public static ROSController SelectedRobot
+    {
+        get { return _selectedRobot; }
+        private set
+        {
+            if (_selectedRobot == null)
+            {
+                //PlayerUIController.Instance.SetDriveMode();
+            }
+
+            _selectedRobot = value;
+        }
+    }
 
     //Master URI, Corresponding Socket
     private readonly Dictionary<string, ROSBridgeWebSocketConnection> _rosBridges = new Dictionary<string, ROSBridgeWebSocketConnection>();
-    private int _selectedRobotIndex;
     private Dictionary<string, RobotConfigFile> _robotConfigs;
     private string _configPath;
     private string _robotPrefabPath;
+    private Dictionary<string, ROSController> _activeRobots;
 
     void Awake()
     {
         Instance = this;
         _configPath = Application.streamingAssetsPath + "/Config/Robots/";
         _robotPrefabPath = "Prefabs/Robots/";
-
     }
 
     void Start()
     {
+        _activeRobots = new Dictionary<string, ROSController>();
         Initialise();
     }
 
@@ -69,6 +80,11 @@ public class RobotMasterController : MonoBehaviour
 
     public ROSController LoadRobot(string robotName)
     {
+        if (robotName == "No Robot Selected")
+        {
+            SelectedRobot = null;
+            return null;
+        }
         RobotConfigFile config;
         if (_robotConfigs.TryGetValue(robotName, out config))
         {
@@ -76,16 +92,28 @@ public class RobotMasterController : MonoBehaviour
             string path = string.Format("{0}:{1}", config.RosMasterUri, config.RosMasterPort);
             if (!_rosBridges.TryGetValue(path, out rosBridge))
             {
-                rosBridge = new ROSBridgeWebSocketConnection(config.RosMasterUri, config.RosMasterPort);
+                string uri = config.RosMasterUri;
+                if (!uri.Contains("ws://"))
+                    uri = "ws://" + uri;
+                rosBridge = new ROSBridgeWebSocketConnection(uri, config.RosMasterPort);
                 rosBridge.Connect();
                 _rosBridges.Add(path, rosBridge);
             }
 
-            GameObject robot = Instantiate(Resources.Load(_robotPrefabPath + robotName)) as GameObject;
-            ROSController rosController = robot.GetComponent<ROSController>();
-            rosController.InitialiseRobot(rosBridge, config);
+            ROSController robot;
+            if (_activeRobots.TryGetValue(robotName, out robot))
+            {
+                SelectedRobot = robot;
+            }
+            else
+            {
+                ROSController rosController = (Instantiate(Resources.Load(_robotPrefabPath + robotName)) as GameObject).GetComponent<ROSController>();
+                rosController.InitialiseRobot(rosBridge, config);
+                _activeRobots.Add(robotName, rosController);
+                SelectedRobot = rosController;
+            }
 
-            return rosController;
+            return SelectedRobot;
         }
         else
         {

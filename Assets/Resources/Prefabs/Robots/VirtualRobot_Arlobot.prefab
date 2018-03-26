@@ -661,6 +661,7 @@ GameObject:
   - component: {fileID: 114319459520783330}
   - component: {fileID: 114403168990405010}
   - component: {fileID: 54849312916159806}
+  - component: {fileID: 114561066700090596}
   m_Layer: 0
   m_Name: VirtualRobot_Arlobot
   m_TagString: Untagged
@@ -2763,6 +2764,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hasMesh: 0
+--- !u!114 &114561066700090596
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1845785143678578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fb505235d439f549b464306673ccd35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _publishInterval: 0.2
 --- !u!114 &114652090169293322
 MonoBehaviour:
   m_ObjectHideFlags: 1

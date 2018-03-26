@@ -12,6 +12,7 @@ public class WaypointNavigation : MonoBehaviour
     [SerializeField] private float _publishInterval = 0.2f;
 
     private float _publishTimer = 0;
+    private bool _sentCommand;
 
     private float k_rho = 0.3f;
     private float k_alpha = 0.8f;
@@ -48,9 +49,16 @@ public class WaypointNavigation : MonoBehaviour
     {
         if (!goal_set)
         {
-            _rosLocomotionState.PublishData(new StringMsg(subState));
+            if (!_sentCommand)
+            {
+                _rosLocomotionState.PublishData(new StringMsg(subState));
+                _sentCommand = true;
+            }
             return;
         }
+        else
+            _sentCommand = false;
+
         angle = Vector3.SignedAngle(goal - transform.position, transform.forward, transform.up) * Mathf.Deg2Rad;
         distance = Vector3.Distance(transform.position, goal);
         switch (state)
