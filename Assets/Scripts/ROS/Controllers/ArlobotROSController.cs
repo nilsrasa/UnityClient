@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using Messages;
 using Messages.geometry_msgs;
 using Messages.nav_msgs;
@@ -203,6 +204,12 @@ public class ArlobotROSController : ROSController {
         //_rosCamera = new ROSCamera();
         //_rosCamera.StartAgent(ROSAgent.AgentJob.Subscriber);
         //_rosCamera.DataWasReceived += HandleImage;
+        //StartCoroutine(WaitToSend());
+    }
+
+    private IEnumerator WaitToSend()
+    {
+        yield return new WaitForSecondsRealtime(5);
 
         _rosLocomotionLinear.PublishData(_maxLinearSpeed);
         _rosLocomotionAngular.PublishData(_maxAngularSpeed);

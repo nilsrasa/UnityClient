@@ -1,4 +1,6 @@
-﻿using Ros_CSharp;
+﻿using System.Globalization;
+using Ros_CSharp;
+using UnityEngine;
 using String = Messages.std_msgs.String;
 
 public class ROSLocomotionControlParams : ROSAgent
@@ -39,13 +41,14 @@ public class ROSLocomotionControlParams : ROSAgent
 
     public void PublishData(float rho, float roll, float pitch, float yaw)
     {
-        PublishData($"{rho},{roll},{pitch},{yaw}");
+        PublishData($"{rho.ToString(CultureInfo.InvariantCulture)},{roll.ToString(CultureInfo.InvariantCulture)},{pitch.ToString(CultureInfo.InvariantCulture)},{yaw.ToString(CultureInfo.InvariantCulture)}");
     }
 
     public override void PublishData(object data)
     {
         if (_job != AgentJob.Publisher) return;
         String msg = new String((string)data);
+        Debug.Log("ASD : " + msg.data);
         _publisher.publish(msg);
         
     }
