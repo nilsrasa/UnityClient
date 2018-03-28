@@ -25,7 +25,7 @@ namespace ROSBridgeLib {
                 _orientation = q;
             }
 			
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "geometry_msgs/Pose";
 			}
 

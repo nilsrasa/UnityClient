@@ -24,8 +24,21 @@ namespace ROSBridgeLib {
 				_twist = new TwistWithCovarianceMsg(msg["twist"]);
 			}
 
-		    public OdometryMsg()
+		    public OdometryMsg(HeaderMsg header, string childFrameId, PoseWithCovarianceMsg pose,
+		        TwistWithCovarianceMsg twist)
 		    {
+		        _header = header;
+		        _child_frame_id = childFrameId;
+		        _pose = pose;
+		        _twist = twist;
+		    }
+
+		    public OdometryMsg(PoseWithCovarianceMsg pose)
+		    {
+		        _header = new HeaderMsg(0, new TimeMsg(0, 0), "0");
+		        _child_frame_id = "0";
+		        _pose = pose;
+		        _twist = new TwistWithCovarianceMsg(new TwistMsg(new Vector3Msg(0,0,0), new Vector3Msg(0,0,0)), new double[36]);
 		    }
 
 			public HeaderMsg GetHeader() {

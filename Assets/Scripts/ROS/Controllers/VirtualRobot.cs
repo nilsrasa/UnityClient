@@ -120,12 +120,12 @@ public class VirtualRobot : ROSController
         while (true)
         {
             GeoPointWGS84 wgs = transform.position.ToUTM().ToWGS84();
-            UnityEngine.Quaternion rot = transform.rotation;
+            Quaternion rot = transform.rotation;
             PoseMsg pose = new PoseMsg(new PointMsg(wgs.longitude, wgs.latitude, wgs.altitude),
                 new QuaternionMsg(rot.x, rot.y, rot.z, rot.w));
-            PoseWithCovarianceMsg poseWithCovariance = new PoseWithCovarianceMsg(pose, null);
+            PoseWithCovarianceMsg poseWithCovariance = new PoseWithCovarianceMsg(pose, new double[36]);
 
-            OdometryMsg odometry = new OdometryMsg();
+            OdometryMsg odometry = new OdometryMsg(poseWithCovariance);
             odometry._pose = poseWithCovariance;
             _rosOdometry.PublishData(odometry);
 

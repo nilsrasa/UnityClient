@@ -222,13 +222,13 @@ namespace ROSBridgeLib
 
             foreach (ROSBridgeSubscriber subscriber in _subscribers)
             {
-                _ws.Send(ROSBridgeMsg.Subscribe(subscriber.GetMessageTopic(), subscriber.GetMessageTopic()));
-                Debug.Log("Sending " + ROSBridgeMsg.Subscribe(subscriber.GetMessageTopic(), subscriber.GetMessageTopic()));
+                _ws.Send(ROSBridgeMsg.Subscribe(subscriber.GetMessageTopic(), subscriber.GetMessageType()));
+                Debug.Log("Sending " + ROSBridgeMsg.Subscribe(subscriber.GetMessageTopic(), subscriber.GetMessageType()));
             }
             foreach (ROSBridgePublisher publisher in _publishers)
             {
-                _ws.Send(ROSBridgeMsg.Subscribe(publisher.GetMessageTopic(), publisher.GetMessageTopic()));
-                Debug.Log("Sending " + ROSBridgeMsg.Advertise(publisher.GetMessageTopic(), publisher.GetMessageTopic()));
+                _ws.Send(ROSBridgeMsg.Subscribe(publisher.GetMessageTopic(), publisher.GetMessageType()));
+                Debug.Log("Sending " + ROSBridgeMsg.Advertise(publisher.GetMessageTopic(), publisher.GetMessageType()));
             }
             while (true)
             {
@@ -315,7 +315,7 @@ namespace ROSBridgeLib
             if (_ws != null)
             {
                 string s = ROSBridgeMsg.Publish(topic, msg.ToYAMLString());
-                //Debug.Log ("Sending " + s);
+                Debug.Log ("Sending " + s);
                 _ws.Send(s);
             }
         }
