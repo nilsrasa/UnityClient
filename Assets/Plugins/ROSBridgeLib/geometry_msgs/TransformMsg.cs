@@ -19,7 +19,7 @@ namespace ROSBridgeLib {
 			    _rotation = rotation;
 			}
 			
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "geometry_msgs/Transform";
 			}
 			

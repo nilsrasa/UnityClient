@@ -29,7 +29,7 @@ namespace ROSBridgeLib {
 			    _fiducial_area = fiducial_area;
 			}
 			
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "fiducial_msgs/FiducialTransform";
 			}
 			

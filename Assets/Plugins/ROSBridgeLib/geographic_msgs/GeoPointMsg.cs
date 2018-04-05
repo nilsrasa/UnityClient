@@ -28,7 +28,7 @@ namespace ROSBridgeLib {
 				_altitude = altitude;
 			}
 			
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "geographic_msgs/GeoPoint";
 			}
 			

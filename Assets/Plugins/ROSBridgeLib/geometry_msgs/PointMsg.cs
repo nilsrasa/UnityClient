@@ -28,7 +28,7 @@ namespace ROSBridgeLib {
 				_z = z;
 			}
 			
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "geometry_msgs/Point";
 			}
 			

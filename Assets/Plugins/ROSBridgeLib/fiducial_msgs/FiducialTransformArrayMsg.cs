@@ -28,7 +28,7 @@ namespace ROSBridgeLib {
 		        _transforms = transforms;
 		    }
 			
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "fiducial_msgs/FiducialTransformArray";
 			}
 			
@@ -43,12 +43,12 @@ namespace ROSBridgeLib {
 			    for (int i = 0; i < _transforms.Length; i++)
 			    {
 			        array = array + _transforms[i].ToYAMLString();
-			        if (_transforms.Length - i <= 1)
+			        if (i < _transforms.Length -1)
 			        array += ",";
 			    }
 			    array += "]";
 
-			    return "{\"header\" : " + _header + ",\"image_seq\" :" + _image_seq + ",\"transforms\" :" + array + "}";
+			    return "{\"header\" : " + _header.ToYAMLString() + ",\"image_seq\" :" + _image_seq + ",\"transforms\" :" + array + "}";
 			}
 		}
 	}

@@ -36,7 +36,7 @@ namespace ROSBridgeLib {
 		        _rz = rz;
 		    }
 			
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "fiducial_msgs/FiducialMapEntry";
 			}
 			

@@ -26,7 +26,7 @@ namespace ROSBridgeLib {
 				_longitude = longitude;
 			}
 
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "auv_msgs/DecimalLatLon";
 			}
 

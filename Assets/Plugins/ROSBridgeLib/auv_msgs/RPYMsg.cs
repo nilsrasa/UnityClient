@@ -28,7 +28,7 @@ namespace ROSBridgeLib {
 				_yaw = yaw;
 			}
 
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "auv_msgs/NED";
 			}
 

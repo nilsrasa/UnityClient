@@ -35,7 +35,7 @@ namespace ROSBridgeLib {
 			    for (int i = 0; i < _fiducials.Length; i++)
 			    {
 			        array = array + _fiducials[i].ToYAMLString();
-			        if (_fiducials.Length - i <= 1)
+			        if (i < _fiducials.Length - 1)
 			        array += ",";
 			    }
 			    array += "]";

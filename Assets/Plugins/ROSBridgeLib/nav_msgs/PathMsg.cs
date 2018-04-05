@@ -16,15 +16,20 @@ namespace ROSBridgeLib {
 	namespace nav_msgs {
 		public class PathMsg : ROSBridgeMsg {
 			public HeaderMsg _header;
-			public List<PoseStampedMsg> _poses;
+			public PoseStampedMsg[] _poses;
 			
 			public PathMsg(JSONNode msg) {
 				_header = new HeaderMsg(msg["header"]);
-                // Treat poses
                 for (int i = 0; i < msg["poses"].Count; i++ ) {
-					_poses.Add(new PoseStampedMsg(msg["poses"][i]));
+					_poses[i] = (new PoseStampedMsg(msg["poses"][i]));
 				}
 			}
+
+		    public PathMsg(HeaderMsg header, PoseStampedMsg[] poses)
+		    {
+		        _header = header;
+		        _poses = poses;
+		    }
 
 			public static string GetMessageType() {
 				return "nav_msgs/Path";
@@ -35,7 +40,7 @@ namespace ROSBridgeLib {
 			}
 
 			public PoseStampedMsg GetPoseStamped(int idx = 0) {
-				if (idx < _poses.Count) {
+				if (idx < _poses.Length) {
 					return _poses [idx];
 				} else {
 					return null;
@@ -44,9 +49,9 @@ namespace ROSBridgeLib {
 
 			public override string ToString() {
 				string array = "[";
-				for (int i = 0; i < _poses.Count; i++) {
+				for (int i = 0; i < _poses.Length; i++) {
 					array = array + _poses[i].ToString();
-					if (_poses.Count - i <= 1)
+					if (i < _poses.Length - 1)
 						array += ",";
 				}
 				array += "]";
@@ -56,13 +61,13 @@ namespace ROSBridgeLib {
 			}
 
 			public override string ToYAMLString() {
-				string array = "{";
-				for (int i = 0; i < _poses.Count; i++) {
+				string array = "[";
+				for (int i = 0; i < _poses.Length; i++) {
 					array = array + _poses[i].ToYAMLString();
-					if (_poses.Count - i <= 1)
-						array += ",";
-				}
-				array += "}";
+				    if (i < _poses.Length - 1)
+				        array += ",";
+                }
+				array += "]";
 				return "{\"header\" : " + _header.ToYAMLString() 
 					+ ", \"poses\" : " + array + "}";
 			}

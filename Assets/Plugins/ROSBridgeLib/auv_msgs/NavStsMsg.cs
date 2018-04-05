@@ -70,7 +70,7 @@ namespace ROSBridgeLib {
 				_status = status;
             }
 			
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "auv_msgs/NavSts ";
 			}
 

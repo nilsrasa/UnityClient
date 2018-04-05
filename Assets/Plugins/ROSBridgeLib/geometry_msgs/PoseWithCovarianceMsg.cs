@@ -30,6 +30,12 @@ namespace ROSBridgeLib {
 				_pose = pose;
 				_covariance = covariance;
 			}
+
+            public PoseWithCovarianceMsg(PoseMsg pose) {
+				_pose = pose;
+                _covariance = new double[36];
+
+            }
  			
 			public static string GetMessageType() {
 				return "geometry_msgs/PoseWithCovariance";
@@ -47,7 +53,8 @@ namespace ROSBridgeLib {
 				string array = "[";
                 for (int i = 0; i < _covariance.Length; i++) {
                     array = array + _covariance[i].ToString();
-                    if (_covariance.Length - i <= 1) array += ",";
+                    if (i < _covariance.Length - 1)
+                        array += ",";
                 }
                 array += "]";
 				return "PoseWithCovariance [pose=" + _pose.ToString() + ",  covariance=" + array + "]";
@@ -57,7 +64,8 @@ namespace ROSBridgeLib {
 				string array = "[";
                 for (int i = 0; i < _covariance.Length; i++) {
                     array = array + _covariance[i].ToString();
-                    if (_covariance.Length - i <= 1) array += ",";
+                    if (i < _covariance.Length - 1)
+                        array += ",";
                 }
                 array += "]";
 				return "{\"pose\" : " + _pose.ToYAMLString() + ", \"covariance\" : " + array + "}";

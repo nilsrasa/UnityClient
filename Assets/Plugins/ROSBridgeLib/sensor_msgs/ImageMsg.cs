@@ -36,6 +36,7 @@ namespace ROSBridgeLib {
                 _encoding = encoding;
                 _is_bigendian = is_bigendian;
                 _row_step = row_step;
+                _data = data;
             }
 
             public HeaderMsg GetHeader()
@@ -69,16 +70,19 @@ namespace ROSBridgeLib {
                     "width=" + _width +
                     "encoding=" + _encoding +
                     "is_bigendian=" + _is_bigendian +
-                    "row_step=" + _row_step + "]";
+                    "row_step=" + _row_step + 
+                       ", \"data\" : \"" + System.Convert.ToBase64String(_data) + "\"}";
             }
 
-            public override string ToYAMLString() {
-                return "{\"header\" :" + _header.ToYAMLString() +
-                    "\"height\" :" + _height +
-                    "\"width\" :" + _width +
-                    "\"encoding\" :" + _encoding +
-                    "\"is_bigendian\" :" + _is_bigendian +
-                    "\"row_step\" :" + _row_step + "}";
+            public override string ToYAMLString()
+            {
+                return "{\"header\" : " + _header.ToYAMLString() +
+                       ", \"height\" : " + _height +
+                       ", \"width\" : " + _width +
+                       ", \"encoding\" : \"" + _encoding +
+                       "\", \"is_bigendian\" : " + _is_bigendian.ToString().ToLower() +
+                       ", \"step\" : " + _row_step +
+                       ", \"data\" : \"" + System.Convert.ToBase64String(_data) + "\"}";
             }
         }
     }

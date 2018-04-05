@@ -28,7 +28,7 @@ namespace ROSBridgeLib {
 				_w = w;
 			}
 			
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "geometry_msgs/Quaternion";
 			}
 			

@@ -26,7 +26,7 @@ namespace ROSBridgeLib {
                 _data = data;
             }
 
-            public static string getMessageType() {
+            public static string GetMessageType() {
                 return "std_msgs/Int32MultiArray";
             }
 

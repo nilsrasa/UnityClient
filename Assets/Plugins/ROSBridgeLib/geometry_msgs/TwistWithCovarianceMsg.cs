@@ -30,6 +30,11 @@ namespace ROSBridgeLib {
 				_twist = twist;
 				_covariance = covariance;
 			}
+
+            public TwistWithCovarianceMsg(TwistMsg twist) {
+				_twist = twist;
+				_covariance = new double[36];
+			}
 			
 			public static string GetMessageType() {
 				return "geometry_msgs/TwistWithCovariance";
@@ -47,7 +52,8 @@ namespace ROSBridgeLib {
 				string array = "[";
                 for (int i = 0; i < _covariance.Length; i++) {
                     array = array + _covariance[i].ToString();
-                    if (_covariance.Length - i <= 1) array += ",";
+                    if (i < _covariance.Length - 1)
+                        array += ",";
                 }
                 array += "]";
 				return "TwistWithCovariance [twist=" + _twist.ToString() + ",  covariance=" + array + "]";
@@ -57,7 +63,8 @@ namespace ROSBridgeLib {
 				string array = "[";
                 for (int i = 0; i < _covariance.Length; i++) {
                     array = array + _covariance[i].ToString();
-                    if (_covariance.Length - i <= 1) array += ",";
+                    if (i < _covariance.Length - 1)
+                        array += ",";
                 }
                 array += "]";
 				return "{\"twist\" : " + _twist.ToYAMLString() + ", \"covariance\" : " + array + "}";

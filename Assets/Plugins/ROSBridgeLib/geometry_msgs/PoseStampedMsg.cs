@@ -13,7 +13,13 @@ namespace ROSBridgeLib {
 		public class PoseStampedMsg : ROSBridgeMsg {
 			public HeaderMsg _header;
 			public PoseMsg _pose;
-			
+
+		    public PoseStampedMsg(HeaderMsg header, PoseMsg pose)
+		    {
+		        _header = header;
+		        _pose = pose;
+		    }
+
 			public PoseStampedMsg(JSONNode msg) {
 				_header = new HeaderMsg(msg["header"]);
 				_pose = new PoseMsg(msg["pose"]);

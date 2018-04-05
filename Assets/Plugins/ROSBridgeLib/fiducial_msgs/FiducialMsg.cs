@@ -42,7 +42,7 @@ namespace ROSBridgeLib {
 			    _y3 = y3;
 			}
 			
-			public static string getMessageType() {
+			public static string GetMessageType() {
 				return "fiducial_msgs/Fiducial";
 			}
 			
