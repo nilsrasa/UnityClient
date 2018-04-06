@@ -1,4 +1,5 @@
 ﻿using SimpleJSON;
+using UnityEngine;
 
 namespace ROSBridgeLib {
 	public abstract class ROSBridgeSubscriber : ROSAgent
@@ -18,6 +19,7 @@ namespace ROSBridgeLib {
 
 	    public virtual void CallBack(ROSBridgeMsg msg)
 	    {
+            //Debug.Log("GOT MESSAGE " + msg.ToString());
 	        if (OnDataReceived != null)
 	            OnDataReceived(msg);
 	    }

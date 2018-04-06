@@ -39,7 +39,7 @@ public class ROSLocomotionWaypoint : ROSAgent
     {
         if (_publisher == null) return;
 
-        NavSatFixMsg navSatFix = new NavSatFixMsg(null, null, data.latitude, data.longitude, data.altitude, null, 0);
+        NavSatFixMsg navSatFix = new NavSatFixMsg(data.latitude, data.longitude, data.altitude);
         _publisher.PublishData(navSatFix);
     }
 

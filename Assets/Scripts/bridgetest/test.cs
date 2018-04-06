@@ -3,13 +3,10 @@ using NUnit.Framework.Constraints;
 using ROSBridgeLib;
 using ROSBridgeLib.auv_msgs;
 using ROSBridgeLib.fiducial_msgs;
-using ROSBridgeLib.geographic_msgs;
 using ROSBridgeLib.geometry_msgs;
 using ROSBridgeLib.nav_msgs;
-using ROSBridgeLib.sensor_msgs;
 using ROSBridgeLib.std_msgs;
 using UnityEngine;
-using UnityEngine.Networking;
 
 public class test : MonoBehaviour{
 
@@ -17,7 +14,7 @@ public class test : MonoBehaviour{
     private float timer;
     private float pollRate = 2;
     private ROSGenericPublisher _genericPub;
-    private ROSGenericSubscriber<UInt64MultiArrayMsg> _genericSub;
+    private ROSGenericSubscriber<PathMsg> _genericSub;
     private bool _running = false;
 
 
@@ -38,15 +35,26 @@ public class test : MonoBehaviour{
 	    {
 	        timer = pollRate;
 
-            //_genericPub.PublishData(msg);
+            PointMsg point = new PointMsg(1, 2, 3);
+            QuaternionMsg quat = new QuaternionMsg(1, 2, 3, 4);
+	        PoseMsg pose = new PoseMsg(point, quat);
+	        PoseWithCovarianceMsg posec = new PoseWithCovarianceMsg(pose);
+            Vector3Msg vec3 = new Vector3Msg(1, 2, 3);
+	        TwistMsg twist = new TwistMsg(vec3, vec3);
+	        TwistWithCovarianceMsg twistc = new TwistWithCovarianceMsg(twist, new double[36]);
+            HeaderMsg header = new HeaderMsg(1, new TimeMsg(1, 1), "0" );
+
+            PoseStampedMsg ps = new PoseStampedMsg(header, pose);
+            PathMsg msg = new PathMsg(header, new PoseStampedMsg[] { ps , ps , ps });
+            _genericPub.PublishData(msg);
         }
     }
 
     private void Initialise()
     {
         ros = new ROSBridgeWebSocketConnection("ws://192.168.255.40", 9090);
-        _genericPub = new ROSGenericPublisher(ros, "/u64a", UInt64MultiArrayMsg.GetMessageType());
-        _genericSub = new ROSGenericSubscriber<UInt64MultiArrayMsg>(ros, "/u64a", UInt64MultiArrayMsg.GetMessageType(), msg => new UInt64MultiArrayMsg(msg));
+        _genericPub = new ROSGenericPublisher(ros, "/pat", PathMsg.GetMessageType());
+        _genericSub = new ROSGenericSubscriber<PathMsg>(ros, "/pat", PathMsg.GetMessageType(), msg => new PathMsg(msg));
         _genericSub.OnDataReceived += OnDataReceived;
         ros.Connect();
         ros.Render();

@@ -72,8 +72,8 @@ namespace ROSBridgeLib {
 			
 			public override string ToYAMLString() {
 				return "{\"header\" : " + _header.ToYAMLString() 
-				  + ", \"child_frame_id\" : " + _child_frame_id
-				  + ", \"pose\" : " + _pose.ToYAMLString() 
+				  + ", \"child_frame_id\" : \"" + _child_frame_id
+				  + "\", \"pose\" : " + _pose.ToYAMLString() 
 				  + ", \"twist\" : " + _twist.ToYAMLString() + "}";
 			}
 		}

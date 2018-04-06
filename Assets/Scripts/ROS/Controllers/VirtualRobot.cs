@@ -91,14 +91,14 @@ public class VirtualRobot : ROSController
 
         if (_hasJoystickDataToConsume)
         {
-            _rigidbody.velocity = transform.forward * (float) _joystickDataToConsume._linear._x;
-            _rigidbody.angularVelocity = new Vector3(0, (float) -_joystickDataToConsume._angular._z, 0);
+            _rigidbody.velocity = transform.forward * (float) _joystickDataToConsume._linear._z;
+            _rigidbody.angularVelocity = new Vector3(0, (float) -_joystickDataToConsume._angular._x, 0);
             _hasJoystickDataToConsume = false;
         }
         if (_hasLocomotionDirectDataToConsume)
         {
-            _rigidbody.velocity = transform.forward * (float) _locomotionDirectDataToConsume._linear._x;
-            _rigidbody.angularVelocity = new Vector3(0, (float) -_locomotionDirectDataToConsume._angular._z, 0);
+            _rigidbody.velocity = transform.forward * (float) _locomotionDirectDataToConsume._linear._z;
+            _rigidbody.angularVelocity = new Vector3(0, (float) -_locomotionDirectDataToConsume._angular._x, 0);
             _hasLocomotionDirectDataToConsume = false;
         }
     }
@@ -179,17 +179,13 @@ public class VirtualRobot : ROSController
         _rosLocomotionWaypointState =
             new ROSLocomotionWaypointState(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/state");
         _rosLocomotionWaypoint = new ROSLocomotionWaypoint(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint");
-        _rosLocomotionLinear =
-            new ROSGenericPublisher(_rosBridge, "/waypoint/max_linear_speed", Float32Msg.GetMessageType());
-        _rosLocomotionAngular =
-            new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());
-        _rosLocomotionControlParams =
-            new ROSLocomotionControlParams(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/control_parameters");
+        _rosLocomotionLinear = new ROSGenericPublisher(_rosBridge, "/waypoint/max_linear_speed", Float32Msg.GetMessageType());
+        _rosLocomotionAngular = new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());
+        _rosLocomotionControlParams = new ROSLocomotionControlParams(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/control_parameters");
 
         _rosLocomotionLinear.PublishData(new Float32Msg(ConfigManager.ConfigFile.MaxLinearSpeed));
         _rosLocomotionAngular.PublishData(new Float32Msg(ConfigManager.ConfigFile.MaxAngularSpeed));
-        _rosLocomotionControlParams.PublishData(ConfigManager.ConfigFile.ControlParameterRho,
-            ConfigManager.ConfigFile.ControlParameterRoll,
+        _rosLocomotionControlParams.PublishData(ConfigManager.ConfigFile.ControlParameterRho, ConfigManager.ConfigFile.ControlParameterRoll,
             ConfigManager.ConfigFile.ControlParameterPitch, ConfigManager.ConfigFile.ControlParameterYaw);
     }
 

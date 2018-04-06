@@ -50,6 +50,17 @@ namespace ROSBridgeLib {
 			    _position_covariance = position_covariance;
 			    _position_covariance_type = position_covariance_type;
 			}
+
+		    public NavSatFixMsg(double latitude, double longitude, double altitude)
+		    {
+		        _header = new HeaderMsg(0, new TimeMsg(0,0), "0");
+                _status = new NavSatStatusMsg(0, 0);
+		        _latitude = latitude;
+		        _longitude = longitude;
+		        _altitude = altitude;
+                _position_covariance = new double[9];
+		        _position_covariance_type = 0;
+		    }
 			
 			public static string GetMessageType() {
 				return "sensor_msgs/NavSatFix";
