@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using NUnit.Framework.Constraints;
 using ROSBridgeLib;
 using ROSBridgeLib.auv_msgs;
 using ROSBridgeLib.fiducial_msgs;
@@ -16,7 +17,7 @@ public class test : MonoBehaviour{
     private float timer;
     private float pollRate = 2;
     private ROSGenericPublisher _genericPub;
-    private ROSGenericSubscriber<ImageMsg> _genericSub;
+    private ROSGenericSubscriber<UInt64MultiArrayMsg> _genericSub;
     private bool _running = false;
 
 
@@ -36,26 +37,16 @@ public class test : MonoBehaviour{
         if (timer <= 0)
 	    {
 	        timer = pollRate;
-            HeaderMsg header = new HeaderMsg(0, new TimeMsg(0, 0), "0" );
-            PointMsg point = new PointMsg(0, 1, 2);
-            QuaternionMsg quaternion = new QuaternionMsg(0, 1, 2, 3);
-	        PoseMsg pose = new PoseMsg(point, quaternion);
-            Vector3Msg vector = new Vector3Msg(0, 1, 2);
-            TwistMsg twist = new TwistMsg(vector, vector);
-            PoseWithCovarianceMsg poseCo = new PoseWithCovarianceMsg(pose);
-            PoseStampedMsg poseStamp = new PoseStampedMsg(header, pose);
 
-
-            ImageMsg msg = new ImageMsg(header, 0, 0, "ads", true, 0, new byte[100]);
-            _genericPub.PublishData(msg);
+            //_genericPub.PublishData(msg);
         }
     }
 
     private void Initialise()
     {
         ros = new ROSBridgeWebSocketConnection("ws://192.168.255.40", 9090);
-        _genericPub = new ROSGenericPublisher(ros, "/testImage3", ImageMsg.GetMessageType());
-        _genericSub = new ROSGenericSubscriber<ImageMsg>(ros, "/testImage3", ImageMsg.GetMessageType(), msg => new ImageMsg(msg));
+        _genericPub = new ROSGenericPublisher(ros, "/u64a", UInt64MultiArrayMsg.GetMessageType());
+        _genericSub = new ROSGenericSubscriber<UInt64MultiArrayMsg>(ros, "/u64a", UInt64MultiArrayMsg.GetMessageType(), msg => new UInt64MultiArrayMsg(msg));
         _genericSub.OnDataReceived += OnDataReceived;
         ros.Connect();
         ros.Render();

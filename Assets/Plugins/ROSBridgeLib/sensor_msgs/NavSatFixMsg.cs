@@ -41,11 +41,11 @@ namespace ROSBridgeLib {
                 _position_covariance_type = byte.Parse(msg["position_covariance_type"]);
             }
 			
-			public NavSatFixMsg(HeaderMsg header, NavSatStatusMsg status, double latitude, double longtitude, double altitude, double[] position_covariance, byte position_covariance_type) {
+			public NavSatFixMsg(HeaderMsg header, NavSatStatusMsg status, double latitude, double longitude, double altitude, double[] position_covariance, byte position_covariance_type) {
 				_header = header;
 			    _status = status;
 			    _latitude = latitude;
-			    _longitude = longtitude;
+			    _longitude = longitude;
 			    _altitude = altitude;
 			    _position_covariance = position_covariance;
 			    _position_covariance_type = position_covariance_type;
@@ -58,7 +58,7 @@ namespace ROSBridgeLib {
 			public override string ToString()
 			{
 			    return string.Format(
-			        "sensor_msgs/NavSatFix [header={0}][status={1}][latitude={2}][longtitude={3}][altitude={4}][position_covariance_type={5}]", 
+			        "sensor_msgs/NavSatFix [header={0}][status={1}][latitude={2}][longitude={3}][altitude={4}][position_covariance_type={5}]", 
                     _header, _status, _latitude, _longitude, _altitude, _position_covariance_type);
 			}
 
@@ -68,12 +68,12 @@ namespace ROSBridgeLib {
 		        for (int i = 0; i < _position_covariance.Length; i++)
 		        {
 		            array = array + _position_covariance[i];
-		            if (_position_covariance.Length - i <= 1)
+		            if (i < _position_covariance.Length - 1)
 		                array += ",";
 		        }
 		        array += "]";
 
-		        return "{\"header\" : " + _header + ",\"status\" :" + _status + ",\"latitude\" :" + _latitude + ",\"longitude\" :" + _longitude + ",\"altitude\" :" 
+		        return "{\"header\" : " + _header.ToYAMLString() + ",\"status\" :" + _status.ToYAMLString() + ",\"latitude\" :" + _latitude + ",\"longitude\" :" + _longitude + ",\"altitude\" :" 
                     + _altitude + ",\"position_covariance\" :" + array + ",\"position_covariance_type\" :" + _position_covariance_type + "}";
 		    }
         }

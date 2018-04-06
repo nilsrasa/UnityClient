@@ -21,7 +21,7 @@ namespace ROSBridgeLib {
                 }
             }
 
-            public void UInt64MultiArrayMsg(MultiArrayLayoutMsg layout, long[] data) {
+            public Int64MultiArrayMsg(MultiArrayLayoutMsg layout, long[] data) {
                 _layout = layout;
                 _data = data;
             }
@@ -42,7 +42,7 @@ namespace ROSBridgeLib {
                 string array = "[";
                 for (int i = 0; i < _data.Length; i++) {
                     array = array + _data[i];
-                    if (_data.Length - i <= 1)
+                    if (i < _data.Length - 1)
                         array += ",";
                 }
                 array += "]";
@@ -53,7 +53,7 @@ namespace ROSBridgeLib {
                 string array = "[";
                 for (int i = 0; i < _data.Length; i++) {
                     array = array + _data[i];
-                    if (_data.Length - i <= 1)
+                    if (i < _data.Length - 1)
                         array += ",";
                 }
                 array += "]";

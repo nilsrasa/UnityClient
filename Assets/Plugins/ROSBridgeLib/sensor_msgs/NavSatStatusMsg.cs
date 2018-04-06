@@ -37,7 +37,7 @@ namespace ROSBridgeLib {
             }
 			
 			public override string ToYAMLString() {
-				return "{\"status\" : " + "\"" + _status + "\", \"service\" : \"" + _service + "}";
+				return "{\"status\" : " + _status + ", \"service\" : " + _service + "}";
 			}
 		}
 	}

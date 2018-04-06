@@ -46,7 +46,7 @@ namespace ROSBridgeLib {
 			}
 			
 			public override string ToYAMLString() {
-                return "{\"label\" : " + _label + ",\"size\" :" + _size + ",\"stride\" :" + _stride + "}";
+                return "{\"label\" : \"" + _label + "\",\"size\" :" + _size + ",\"stride\" :" + _stride + "}";
 			}
 		}
 	}

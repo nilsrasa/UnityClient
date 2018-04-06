@@ -42,7 +42,7 @@ namespace ROSBridgeLib {
                 string array = "[";
                 for (int i = 0; i < _dim.Length; i++) {
                     array = array + _dim[i].ToString();
-                    if (_dim.Length - i <= 1)
+                    if (i < _dim.Length - 1)
                         array += ",";
                 }
                 array += "]";
@@ -53,7 +53,7 @@ namespace ROSBridgeLib {
                 string array = "[";
                 for (int i = 0; i < _dim.Length; i++) {
                     array = array + _dim[i].ToYAMLString();
-                    if (_dim.Length - i <= 1)
+                    if (i < _dim.Length - 1)
                         array += ",";
                 }
                 array += "]";

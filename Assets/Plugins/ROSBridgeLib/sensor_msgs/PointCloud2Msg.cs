@@ -109,10 +109,20 @@ namespace ROSBridgeLib {
 			}
 
 			public override string ToYAMLString() {
-				return "{\"header\" :" + _header.ToYAMLString() +
+			    string array = "[";
+			    for (int i = 0; i < _fields.Length; i++)
+			    {
+			        array = array + _fields[i].ToYAMLString();
+			        if (i < _fields.Length - 1)
+			            array += ",";
+			    }
+			    array += "]";
+
+
+                return "{\"header\" :" + _header.ToYAMLString() +
 						"\"height\" :" + _height +
 						"\"width\" :" + _width +
-						//"\"fields\" :" + _fields.ToYAMLString() +
+						"\"fields\" :" + array +
 						"\"is_bigendian\" :" + _is_bigendian +
 						"\"is_dense\" :" + _is_dense +
 						"\"point_step\" :" + _point_step +
