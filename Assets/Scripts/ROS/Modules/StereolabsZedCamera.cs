@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.InteropServices;
-using sl;
+//using sl;
 using UnityEngine;
-using Resolution = sl.Resolution;
+//using Resolution = sl.Resolution;
 
 public class StereolabsZedCamera : MonoBehaviour
 {
@@ -19,7 +19,7 @@ public class StereolabsZedCamera : MonoBehaviour
     //private const int HEIGHT = 376;
     private const int WIDTH = 384;
     private const int HEIGHT = 192;
-    private ZEDCamera _zedCamera;
+    //private ZEDCamera _zedCamera;
     private bool _running;
     private Color32[] _depthColors;
     private Resolution _resolution;
@@ -28,18 +28,20 @@ public class StereolabsZedCamera : MonoBehaviour
 
 	// Use this for initialization
 	void Start () {
-		_zedCamera = ZEDCamera.GetInstance();
-	    _resolution = new Resolution(WIDTH, HEIGHT);
+		//_zedCamera = ZEDCamera.GetInstance();
+	    //_resolution = new Resolution(WIDTH, HEIGHT);
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
+        /*
 	    if (_zedCamera.IsCameraReady && !_running)
 	    {
 	        _running = true;
 	        StartCoroutine(RenderDepthTexture());
 	    }
+        */
     }
 
     private IEnumerator RenderDepthTexture()
@@ -47,7 +49,7 @@ public class StereolabsZedCamera : MonoBehaviour
         yield return new WaitForSeconds(5);
         while (true)
         {
-            
+            /*
             Vector3[] depthValueBuffer = new Vector3[WIDTH * HEIGHT];
             ComputeBuffer cBuffer = new ComputeBuffer(depthValueBuffer.Length, 12, ComputeBufferType.Default);
             cBuffer.SetData(depthValueBuffer);
@@ -71,7 +73,7 @@ public class StereolabsZedCamera : MonoBehaviour
                 _depths[(int) v.x, (int) v.y] = v.z;
             }
             YES = true;
-            
+            */
         
         
             yield return new WaitForSeconds(0.2f);
