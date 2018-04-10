@@ -91,14 +91,14 @@ public class VirtualRobot : ROSController
 
         if (_hasJoystickDataToConsume)
         {
-            _rigidbody.velocity = transform.forward * (float) _joystickDataToConsume._linear._z;
-            _rigidbody.angularVelocity = new Vector3(0, (float) -_joystickDataToConsume._angular._x, 0);
+            _rigidbody.velocity = transform.forward * (float) _joystickDataToConsume._linear._x;
+            _rigidbody.angularVelocity = new Vector3(0, (float) -_joystickDataToConsume._angular._z, 0);
             _hasJoystickDataToConsume = false;
         }
         if (_hasLocomotionDirectDataToConsume)
         {
-            _rigidbody.velocity = transform.forward * (float) _locomotionDirectDataToConsume._linear._z;
-            _rigidbody.angularVelocity = new Vector3(0, (float) -_locomotionDirectDataToConsume._angular._x, 0);
+            _rigidbody.velocity = transform.forward * (float) _locomotionDirectDataToConsume._linear._x;
+            _rigidbody.angularVelocity = new Vector3(0, (float) -_locomotionDirectDataToConsume._angular._z, 0);
             _hasLocomotionDirectDataToConsume = false;
         }
     }
@@ -193,7 +193,7 @@ public class VirtualRobot : ROSController
     {
         if (CurrenLocomotionType != RobotLocomotionType.DIRECT)
             _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
-        _rosLocomotionDirect.PublishData(command);
+        _rosLocomotionDirect.PublishData(command.y, command.x);
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.MOVING;
     }
@@ -257,6 +257,6 @@ public class VirtualRobot : ROSController
     {
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
-        _rosLocomotionDirect.PublishData(Vector2.zero);
+        _rosLocomotionDirect.PublishData(0, 0);
     }
 }

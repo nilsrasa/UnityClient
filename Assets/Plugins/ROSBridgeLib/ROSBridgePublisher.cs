@@ -17,8 +17,8 @@ namespace ROSBridgeLib {
 	    {
 	        //if (ROSConnection.IsConnected)
 	        //{
-                Debug.Log("Publishing to Topic [" + TopicName + "] Message [" + msg.ToYAMLString() + "]");
-	            ROSConnection.Publish(TopicName, msg);
+            //Debug.Log("Publishing to Topic [" + TopicName + "] Message [" + msg.ToYAMLString() + "]");
+	        ROSConnection.Publish(TopicName, msg);
 	        //}
 	    }
 

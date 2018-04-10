@@ -151,7 +151,7 @@ public class WaypointNavigation : MonoBehaviour
 
     private void PublishVelocity(TwistMsg twist)
     {
-        _rosLocomotionDirect.PublishData(new Vector2((float)vel._angular._z, (float)vel._linear._x));
+        _rosLocomotionDirect.PublishData((float)twist._linear._x, (float)twist._angular._z);
     }
 
     private void ReceivedNavigationParameters(ROSBridgeMsg parameters)

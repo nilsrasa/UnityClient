@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ROSBridgeLib;
@@ -70,6 +71,7 @@ public class RobotMasterController : MonoBehaviour
             string robotFileJson = File.ReadAllText(path);
             RobotConfigFile robotFile = JsonUtility.FromJson<RobotConfigFile>(robotFileJson);
             _robotConfigs.Add(robotName, robotFile);
+            TestConnection(robotFile.RosMasterUri, robotFile.RosMasterPort);
         }
     }
 
@@ -119,6 +121,23 @@ public class RobotMasterController : MonoBehaviour
         {
             return null;
         }
+    }
+
+    public bool TestConnection(string uri, int port)
+    {
+        if (!uri.Contains("ws://"))
+            uri = "ws://" + uri;
+
+        try
+        {
+            ROSBridgeWebSocketConnection testBridge = new ROSBridgeWebSocketConnection(uri, port);
+            testBridge.Connect();
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+        }
+        return false;
     }
 
 }

@@ -58,7 +58,7 @@ public class FiducialController : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        SaveFiducials();
+        //SaveFiducials();
     }
 
     private void OnReceivedFiducialData(ROSBridgeMsg mapArray)
@@ -140,6 +140,7 @@ public class FiducialController : MonoBehaviour
     private GameObject InstantiateFiducial(FiducialMapEntryMsg entry)
     {
         GameObject newFiducial = Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _fiducials[_zeroLocation.FiducialId]) as GameObject;
+        Debug.Log(entry._x +", " + entry._y + ", " + entry._z);
         newFiducial.transform.localPosition = new Vector3((float)entry._x, 0, (float)entry._y);
         newFiducial.transform.localEulerAngles = new Vector3((float)entry._rx * Mathf.Rad2Deg, (float)entry._rz * Mathf.Rad2Deg, (float)entry._ry * Mathf.Rad2Deg);
         newFiducial.name = entry._fiducial_id.ToString();

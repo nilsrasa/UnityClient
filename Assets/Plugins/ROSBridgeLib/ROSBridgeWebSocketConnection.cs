@@ -177,9 +177,9 @@ namespace ROSBridgeLib
         /**
          * Connect to the remote ros environment.
          */
-        public void Connect()
+        public void Connect(Action<bool> callback = null)
         {
-            _myThread = new System.Threading.Thread(Run);
+            _myThread = new Thread(() => Run(callback));
             _myThread.Start();
         }
 
@@ -203,14 +203,14 @@ namespace ROSBridgeLib
             _ws.Close();
         }
 
-        private void Run()
+        private void Run(Action<bool> callback)
         {
             try
             {
-                Debug.Log(_host + ":" + _port);
                 _ws = new WebSocket(_host + ":" + _port);
                 _ws.OnMessage += (sender, e) => this.OnMessage(e.Data);
                 _ws.Connect();
+
             }
             catch (Exception e)
             {

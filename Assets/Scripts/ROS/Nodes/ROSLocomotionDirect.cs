@@ -35,13 +35,14 @@ public class ROSLocomotionDirect : ROSAgent
         throw new NotImplementedException();
     }
 
-    /// <param name="data">X: Angular speed in meter/s, Y: Linear speed in meter/s</param>
-    public void PublishData(Vector2 data)
+    /// <param name="linear">Linear movement speed in meter/second</param>
+    /// <param name="angular">Angular rotational speed in meter/second</param>
+    public void PublishData(float linear, float angular)
     {
         if (_publisher == null) return;
 
-        TwistMsg twist = new TwistMsg(new Vector3Msg(0, 0, data.x), 
-            new Vector3Msg(data.y, 0, 0));
+        TwistMsg twist = new TwistMsg(new Vector3Msg(linear, 0, 0), 
+            new Vector3Msg(0, 0, angular));
         _publisher.PublishData(twist);
     }
     

@@ -91,7 +91,7 @@ public class ArlobotROSController : ROSController {
     {
         if (CurrenLocomotionType != RobotLocomotionType.DIRECT)
             _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
-        _rosLocomotionDirect.PublishData(command);
+        _rosLocomotionDirect.PublishData(command.y, command.x);
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.MOVING;
     }
@@ -162,7 +162,7 @@ public class ArlobotROSController : ROSController {
     {
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
-        _rosLocomotionDirect.PublishData(Vector2.zero);
+        _rosLocomotionDirect.PublishData(0, 0);
     }
 
     public override void MoveToPoint(GeoPointWGS84 point)
