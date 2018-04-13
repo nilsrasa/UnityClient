@@ -9,7 +9,7 @@ public class PlayerUIController : MonoBehaviour
 {
     public static PlayerUIController Instance { get; private set; }
 
-    private enum UIState { Navigation, Options, PlacingFiducial, UpdatingFiducial, DeletingFiducial, SorroundPhoto, Loading }
+    private enum UIState { Navigation, Options, PlacingFiducial, UpdatingFiducial, DeletingFiducial, SorroundPhoto, Loading, RobotList }
     private enum RobotDrivingUIState { NoRobotSelected, RobotStopped, RobotDriving, RobotPaused }
     private enum WaypointMode { Point, Route }
 
@@ -24,6 +24,7 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Color _routeColorNormal;
     [SerializeField] private Color _routeColorHovered;
     [SerializeField] private Color _routeColorDown;
+    [SerializeField] private Button _robotList;
     [SerializeField] private Button _clearAllWaypoints;
     [SerializeField] private Button _returnToBase;
     [SerializeField] private Button _driveRobot;
@@ -147,6 +148,9 @@ public class PlayerUIController : MonoBehaviour
                 case UIState.Loading:
                     ActivatePanels(_loadingPanel);
                     break;
+                case UIState.RobotList:
+                    ActivatePanels(_rightPanel, _robotPanel);
+                    break;
             }
         }
     }
@@ -262,7 +266,7 @@ public class PlayerUIController : MonoBehaviour
         _doneCancel.onClick.AddListener(DoneCancelClick);
         _robotListClose.onClick.AddListener(RobotListCloseClick);
         _robotListRefreshList.onClick.AddListener(RobotListRefreshClick);
-
+        _robotList.onClick.AddListener(RobotListClick);
 
         _toggleWaypointPointColorBlock = _toggleWaypointMode.colors;
 
@@ -329,6 +333,7 @@ public class PlayerUIController : MonoBehaviour
         _loadingPanel.SetActive(false);
         _layerPanel.SetActive(false);
         _donePanel.SetActive(false);
+        _robotPanel.SetActive(false);
         HideInfoText();
     }
 
@@ -344,10 +349,7 @@ public class PlayerUIController : MonoBehaviour
     {
         _selectRobot.options = new List<Dropdown.OptionData>();
         _selectRobot.options.Add(new Dropdown.OptionData("No Robot Selected"));
-        foreach (string robotName in RobotMasterController.Instance.GetRobotNames(campusId))
-        {
-            _selectRobot.options.Add(new Dropdown.OptionData(robotName));
-        }
+        _selectRobot.RefreshShownValue();
         _selectRobot.interactable = true;
     }
 
@@ -548,6 +550,12 @@ public class PlayerUIController : MonoBehaviour
         IsPaused = !IsPaused;
     }
 
+    private void RobotListClick()
+    {
+        CurrentUIState = UIState.RobotList;
+        RobotListRefreshClick();
+    }
+
     private void RobotListRefreshClick()
     {
         _refreshingRobotList = true;
@@ -558,7 +566,18 @@ public class PlayerUIController : MonoBehaviour
 
     private void RobotListCloseClick()
     {
-        
+        CurrentUIState = UIState.Navigation;
+    }
+
+    private void RobotListConnectClick(bool shouldConnect, string uriPort)
+    {
+        if (shouldConnect)
+        {
+            RobotMasterController.Instance.ConnectToRobot(uriPort);
+
+        }
+        else
+            RobotMasterController.Instance.DisconnectRobot(uriPort);
     }
 
     #endregion
@@ -788,7 +807,8 @@ public class PlayerUIController : MonoBehaviour
         foreach (RobotMasterController.Robot robot in robots)
         {
             RobotListItem listItem = Instantiate(_robotListPrefab, _listContentsParent).GetComponent<RobotListItem>();
-            listItem.Initialise(robot.Name, robot.Uri, robot.Port);
+            listItem.Initialise(robot.Name, robot.Uri, robot.Port, robot.Connected);
+            listItem.OnConnectClicked += RobotListConnectClick;
             _robotListItems.Add(robot, listItem);
         }
     }
@@ -804,5 +824,22 @@ public class PlayerUIController : MonoBehaviour
     public void RobotRefreshed()
     {
         _robotsLeftToRefresh--;
+    }
+
+    public void AddRobotToList(string robotName)
+    {
+        _selectRobot.options.Add(new Dropdown.OptionData(robotName));
+    }
+
+    public void RemoveRobotFromList(string robotName)
+    {
+        for (int i = 0; i < _selectRobot.options.Count;)
+        {
+            if (_selectRobot.options[i].text == robotName)
+            {
+                _selectRobot.options.RemoveAt(i);
+                return;
+            }
+        }
     }
 }

@@ -38,7 +38,7 @@ GameObject:
   - component: {fileID: 4591577159848156}
   - component: {fileID: 114960283207841436}
   m_Layer: 0
-  m_Name: ArlobotController
+  m_Name: Arlobot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

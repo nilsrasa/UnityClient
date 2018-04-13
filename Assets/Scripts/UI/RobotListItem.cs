@@ -4,19 +4,22 @@ using UnityEngine.UI;
 public class RobotListItem : MonoBehaviour
 {
 
-    [SerializeField] private Text _robotName;
-    [SerializeField] private Text _uriPort;
+    [SerializeField] private Text _robotNameText;
+    [SerializeField] private Text _uriPortText;
     [SerializeField] private Button _connect;
     [SerializeField] private Text _connectText;
     [SerializeField] private Image _background;
 
+    [SerializeField] private Color _connectConnectNormal;
+    [SerializeField] private Color _connectConnectClick;
     [SerializeField] private Color _connectDisconnectNormal;
     [SerializeField] private Color _connectDisconnectClick;
     [SerializeField] private Color _notActiveBackgroundColor;
     [SerializeField] private Color _activeBackgroundColor;
     [SerializeField] private Color _connectedBackgroundColor;
+    [SerializeField] private Color _disabledColor;
 
-    public delegate void ConnectWasClicked(bool shouldConnect);
+    public delegate void ConnectWasClicked(bool shouldConnect, string uriPort);
     public event ConnectWasClicked OnConnectClicked;
 
     private bool _isActive;
@@ -52,10 +55,23 @@ public class RobotListItem : MonoBehaviour
         }
     }
 
+    private string _robotName;
+    private string _uriPort;
+
     void Awake()
     {
-        _connectColorBlock = _connect.colors;
-        _disconnectColorBlock = _connect.colors;
+        _connectColorBlock = new ColorBlock()
+        {
+            colorMultiplier = 1,
+            fadeDuration = 0.1f,
+            disabledColor = _disabledColor
+        };
+        _disconnectColorBlock = _connectColorBlock;
+
+        _connectColorBlock.normalColor = _connectConnectNormal;
+        _connectColorBlock.highlightedColor = _connectConnectNormal;
+        _connectColorBlock.pressedColor = _connectConnectClick;
+
         _disconnectColorBlock.normalColor = _connectDisconnectNormal;
         _disconnectColorBlock.highlightedColor = _connectDisconnectNormal;
         _disconnectColorBlock.pressedColor = _connectDisconnectClick;
@@ -68,13 +84,16 @@ public class RobotListItem : MonoBehaviour
     {
         ConnectDisconnect = !_connectDisconnect;
         if (OnConnectClicked != null)
-            OnConnectClicked(ConnectDisconnect);
+            OnConnectClicked(ConnectDisconnect, _uriPort);
     }
 
-    public void Initialise(string robotName, string uri, int port)
+    public void Initialise(string robotName, string uri, int port, bool connected)
     {
-        _robotName.text = robotName;
-        _uriPort.text = uri + ":" + port;
+        _robotNameText.text = robotName;
+        _uriPort = uri + ":" + port;
+        _uriPortText.text = _uriPort; 
+        _robotName = robotName;
+        ConnectDisconnect = connected;
     }
 
 }

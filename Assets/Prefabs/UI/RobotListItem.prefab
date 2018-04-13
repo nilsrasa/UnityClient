@@ -186,7 +186,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 11
+    m_FontSize: 9
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -423,7 +423,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 11
+    m_FontSize: 9
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -446,16 +446,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e0b4efb15bd49842aeb89110b349018, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _robotName: {fileID: 114028932109599612}
-  _uriPort: {fileID: 114662723946332920}
+  _robotNameText: {fileID: 114028932109599612}
+  _uriPortText: {fileID: 114662723946332920}
   _connect: {fileID: 114385600972583564}
   _connectText: {fileID: 114208824993648460}
   _background: {fileID: 114114951054927240}
+  _connectConnectNormal: {r: 0, g: 1, b: 0, a: 1}
+  _connectConnectClick: {r: 0, g: 0.63235295, b: 0, a: 1}
   _connectDisconnectNormal: {r: 1, g: 0, b: 0, a: 1}
   _connectDisconnectClick: {r: 0.6838235, g: 0, b: 0, a: 1}
   _notActiveBackgroundColor: {r: 1, g: 0, b: 0, a: 0.391}
   _activeBackgroundColor: {r: 1, g: 0, b: 0, a: 0}
   _connectedBackgroundColor: {r: 0, g: 1, b: 0, a: 0.391}
+  _disabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
 --- !u!114 &114999778952418744
 MonoBehaviour:
   m_ObjectHideFlags: 1

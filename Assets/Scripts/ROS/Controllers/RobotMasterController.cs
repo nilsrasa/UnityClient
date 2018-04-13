@@ -26,8 +26,7 @@ public class RobotMasterController : MonoBehaviour
 
     //Master URI:Port, Corresponding Robot
     public static Dictionary<string, Robot> Robots { get; private set; }
-    private Dictionary<string, RobotConfigFile> _robotConfigs;
-    private List<ROSController> _activeRobots;
+    private static Dictionary<string, ROSController> _activeRobots;
     private string _configPath;
     private string _robotPrefabPath;
 
@@ -66,15 +65,14 @@ public class RobotMasterController : MonoBehaviour
     {
         if (_activeRobots != null)
         {
-            foreach (ROSController robot in _activeRobots)
+            foreach (KeyValuePair<string, ROSController> pair in _activeRobots)
             {
-                robot.Destroy();
+                pair.Value.Destroy();
             }
         }
 
-        _activeRobots = new List<ROSController>();
+        _activeRobots = new Dictionary<string, ROSController>();
         Robots = new Dictionary<string, Robot>();
-        _robotConfigs = new Dictionary<string, RobotConfigFile>();
         string[] robotConfigPaths = Directory.GetFiles(_configPath, "*.json");
         foreach (string path in robotConfigPaths)
         {
@@ -84,8 +82,6 @@ public class RobotMasterController : MonoBehaviour
 
             if (!robotFile.Campuses.Contains(campusId)) continue;
 
-            _robotConfigs.Add(robotName, robotFile);
-
             string uri = robotFile.RosMasterUri;
             if (!uri.Contains("ws://"))
                 uri = "ws://" + uri;
@@ -93,7 +89,7 @@ public class RobotMasterController : MonoBehaviour
             
             ROSBridgeWebSocketConnection rosBridge = new ROSBridgeWebSocketConnection(uri, robotFile.RosMasterPort);
 
-            Robot robot = new Robot(robotFile.Campuses, rosBridge, robotName, uri, robotFile.RosMasterPort, false);
+            Robot robot = new Robot(robotFile.Campuses, rosBridge, robotName, uri, robotFile.RosMasterPort, false, robotFile);
             Robots.Add(uriPort, robot);
             robot.RosBridge.Connect(ConnectionResult);
         }
@@ -105,11 +101,23 @@ public class RobotMasterController : MonoBehaviour
     {
         Robots[uriPort].IsActive = isAlive;
         PlayerUIController.Instance.RobotRefreshed();
+        if (isAlive)
+            Robots[uriPort].RosBridge.Disconnect();
+    }
+
+    private Robot GetRobotFromName(int campusId, string robotName)
+    {
+        foreach (KeyValuePair<string, Robot> pair in Robots)
+        {
+            if (pair.Value.Name == robotName && pair.Value.Campuses.Contains(campusId))
+                return pair.Value;
+        }
+        return null;
     }
 
     public List<string> GetRobotNames(int campusId)
     {
-        return _robotConfigs.Where(pair => pair.Value.Campuses.Contains(campusId)).Select(pair => pair.Key).ToList();
+        return Robots.Where(pair => pair.Value.Campuses.Contains(campusId)).Select(pair => pair.Value.Name).ToList();
     }
 
     public void RobotLostConnection(ROSController robot)
@@ -131,6 +139,25 @@ public class RobotMasterController : MonoBehaviour
         }
     }
 
+    public void ConnectToRobot(string uriPort)
+    {
+        Robots[uriPort].Connected = true;
+        Robot robot = Robots[uriPort];
+        GameObject robotObject = Instantiate(Resources.Load(_robotPrefabPath + robot.Name)) as GameObject;
+        ROSController rosController = robotObject.GetComponent<ROSController>();
+        rosController.InitialiseRobot(robot.RosBridge, robot.RobotConfig);
+        _activeRobots.Add(uriPort, rosController);
+
+        PlayerUIController.Instance.AddRobotToList(robot.Name);
+    }
+
+    public void DisconnectRobot(string uriPort)
+    {
+        Robots[uriPort].Connected = false;
+        _activeRobots[uriPort].Destroy();
+        _activeRobots.Remove(uriPort);
+    }
+
     public class Robot
     {
         public int[] Campuses;
@@ -139,8 +166,10 @@ public class RobotMasterController : MonoBehaviour
         public string Uri;
         public int Port;
         public bool IsActive;
+        public bool Connected;
+        public RobotConfigFile RobotConfig;
 
-        public Robot(int[] campuses, ROSBridgeWebSocketConnection rosBridge, string name, string uri, int port, bool isActive)
+        public Robot(int[] campuses, ROSBridgeWebSocketConnection rosBridge, string name, string uri, int port, bool isActive, RobotConfigFile robotConfig)
         {
             Campuses = campuses;
             RosBridge = rosBridge;
@@ -148,6 +177,7 @@ public class RobotMasterController : MonoBehaviour
             Uri = uri;
             Port = port;
             IsActive = isActive;
+            RobotConfig = robotConfig;
         }
     }
 
