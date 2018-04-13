@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class SorroundPhotoController : MonoBehaviour
@@ -74,7 +75,7 @@ public class SorroundPhotoController : MonoBehaviour
             string[] split = dirInfo.Name.Split('_');
 
             int id = int.Parse(split[0]); 
-            DateTime timestamp = DateTime.Parse(split[1]);
+            DateTime timestamp = DateTime.ParseExact(split[1], "dd-MM-yyyy", CultureInfo.InvariantCulture);
 
             SorroundPictureMeta metaData = JsonUtility.FromJson<SorroundPictureMeta>(File.ReadAllText(directory+"/meta.json"));
 
