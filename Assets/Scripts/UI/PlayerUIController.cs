@@ -92,6 +92,15 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Button _doneAccept;
     [SerializeField] private Button _doneCancel;
 
+    [Header("Robot Panel")]
+    [SerializeField] private GameObject _robotPanel;
+    [SerializeField] private Button _robotListRefreshList;
+    [SerializeField] private Button _robotListClose;
+    [SerializeField] private Text _robotRefreshText;
+    [SerializeField] private RectTransform _listContentsParent;
+    [SerializeField] private GameObject _robotListPrefab;
+    [SerializeField] private RefreshButton _refreshButton;
+
     private WaypointMode CurrentWaypointMode
     {
         get { return _currentWaypointMode; }
@@ -215,6 +224,9 @@ public class PlayerUIController : MonoBehaviour
     private Dictionary<float, TimeSliderPosition> _timeSliderPositions;
     private float _highlightedTimeSliderPosition;
     private Transform _fiducialToUpdate;
+    private Dictionary<RobotMasterController.Robot, RobotListItem> _robotListItems = new Dictionary<RobotMasterController.Robot, RobotListItem>();
+    private bool _refreshingRobotList;
+    private int _robotsLeftToRefresh;
 
     void Awake()
     {
@@ -248,6 +260,8 @@ public class PlayerUIController : MonoBehaviour
         _deleteFiducial.onClick.AddListener(DeleteFiducialClick);
         _doneAccept.onClick.AddListener(DoneAcceptClick);
         _doneCancel.onClick.AddListener(DoneCancelClick);
+        _robotListClose.onClick.AddListener(RobotListCloseClick);
+        _robotListRefreshList.onClick.AddListener(RobotListRefreshClick);
 
 
         _toggleWaypointPointColorBlock = _toggleWaypointMode.colors;
@@ -286,6 +300,24 @@ public class PlayerUIController : MonoBehaviour
         CurrentUIState = UIState.Navigation;
         CurrentRobotDrivingUIState = RobotDrivingUIState.NoRobotSelected;
         MazeMapController.Instance.OnFinishedGeneratingCampus += OnFinishedGeneratingCampus;
+    }
+
+    void Update()
+    {
+        if (_refreshingRobotList)
+        {
+            UpdateRobotList();
+            if (_robotsLeftToRefresh <= 0)
+            {
+                _robotRefreshText.text = "Refresh";
+                _refreshingRobotList = false;
+                _refreshButton.ShouldRotate = false;
+            }
+            else
+            {
+                _robotRefreshText.text = "Refreshing: " + _robotsLeftToRefresh + "/" + RobotMasterController.Robots.Count + "...";
+            }
+        }
     }
 
     private void HideAllPanels()
@@ -516,6 +548,19 @@ public class PlayerUIController : MonoBehaviour
         IsPaused = !IsPaused;
     }
 
+    private void RobotListRefreshClick()
+    {
+        _refreshingRobotList = true;
+        _robotsLeftToRefresh = RobotMasterController.Robots.Count;
+        _refreshButton.ShouldRotate = true;
+        RobotMasterController.Instance.RefreshRobotConnections();
+    }
+
+    private void RobotListCloseClick()
+    {
+        
+    }
+
     #endregion
 
     #region OnValueChangeEvents
@@ -534,7 +579,8 @@ public class PlayerUIController : MonoBehaviour
 
     private void OnSelectedRobotValueChanged(int newIndex)
     {
-        UpdateUI(RobotMasterController.Instance.LoadRobot(_selectRobot.options[newIndex].text));
+        //TODO: Update once new system in place
+        //UpdateUI(RobotMasterController.Instance.LoadRobot(_selectRobot.options[newIndex].text));
     }
 
     private void OnTimeSliderValueChanged(float newValue)
@@ -729,5 +775,34 @@ public class PlayerUIController : MonoBehaviour
             else if (robot.CurrentRobotLocomotionState == ROSController.RobotLocomotionState.STOPPED)
                 CurrentRobotDrivingUIState = RobotDrivingUIState.RobotStopped;
         }
+    }
+
+    public void LoadRobots(List<RobotMasterController.Robot> robots)
+    {
+        foreach (KeyValuePair<RobotMasterController.Robot, RobotListItem> pair in _robotListItems)
+        {
+            Destroy(pair.Value.gameObject);
+        }
+        _robotListItems = new Dictionary<RobotMasterController.Robot, RobotListItem>();
+
+        foreach (RobotMasterController.Robot robot in robots)
+        {
+            RobotListItem listItem = Instantiate(_robotListPrefab, _listContentsParent).GetComponent<RobotListItem>();
+            listItem.Initialise(robot.Name, robot.Uri, robot.Port);
+            _robotListItems.Add(robot, listItem);
+        }
+    }
+
+    public void UpdateRobotList()
+    {
+        foreach (KeyValuePair<string, RobotMasterController.Robot> pair in RobotMasterController.Robots)
+        {
+            _robotListItems[pair.Value].IsActive = pair.Value.IsActive;
+        }
+    }
+
+    public void RobotRefreshed()
+    {
+        _robotsLeftToRefresh--;
     }
 }

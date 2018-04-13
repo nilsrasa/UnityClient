@@ -24,55 +24,87 @@ public class RobotMasterController : MonoBehaviour
         }
     }
 
-    //Master URI, Corresponding Socket
-    private readonly Dictionary<string, ROSBridgeWebSocketConnection> _rosBridges = new Dictionary<string, ROSBridgeWebSocketConnection>();
+    //Master URI:Port, Corresponding Robot
+    public static Dictionary<string, Robot> Robots { get; private set; }
     private Dictionary<string, RobotConfigFile> _robotConfigs;
+    private List<ROSController> _activeRobots;
     private string _configPath;
     private string _robotPrefabPath;
-    private Dictionary<string, ROSController> _activeRobots;
 
     void Awake()
     {
         Instance = this;
+        Robots = new Dictionary<string, Robot>();
         _configPath = Application.streamingAssetsPath + "/Config/Robots/";
         _robotPrefabPath = "Prefabs/Robots/";
     }
 
     void Start()
     {
-        _activeRobots = new Dictionary<string, ROSController>();
-        Initialise();
+        MazeMapController.Instance.OnFinishedGeneratingCampus += LoadRobotsFromCampus;
     }
 
     void Update()
     {
-        foreach (KeyValuePair<string, ROSBridgeWebSocketConnection> bridge in _rosBridges)
+        foreach (KeyValuePair<string, Robot> bridge in Robots)
         {
-            bridge.Value.Render();
+            if (bridge.Value.IsActive)
+                bridge.Value.RosBridge.Render();
         }
     }
 
     void OnApplicationQuit()
     {
-        foreach (KeyValuePair<string, ROSBridgeWebSocketConnection> bridge in _rosBridges)
+        foreach (KeyValuePair<string, Robot> bridge in Robots)
         {
-            bridge.Value.Disconnect();    
+            if (bridge.Value.IsActive)
+                bridge.Value.RosBridge.Disconnect();
         }
     }
 
-    private void Initialise()
+    private void LoadRobotsFromCampus(int campusId)
     {
+        if (_activeRobots != null)
+        {
+            foreach (ROSController robot in _activeRobots)
+            {
+                robot.Destroy();
+            }
+        }
+
+        _activeRobots = new List<ROSController>();
+        Robots = new Dictionary<string, Robot>();
         _robotConfigs = new Dictionary<string, RobotConfigFile>();
         string[] robotConfigPaths = Directory.GetFiles(_configPath, "*.json");
-
         foreach (string path in robotConfigPaths)
         {
             string robotName = Path.GetFileNameWithoutExtension(path);
             string robotFileJson = File.ReadAllText(path);
             RobotConfigFile robotFile = JsonUtility.FromJson<RobotConfigFile>(robotFileJson);
+
+            if (!robotFile.Campuses.Contains(campusId)) continue;
+
             _robotConfigs.Add(robotName, robotFile);
-            TestConnection(robotFile.RosMasterUri, robotFile.RosMasterPort);
+
+            string uri = robotFile.RosMasterUri;
+            if (!uri.Contains("ws://"))
+                uri = "ws://" + uri;
+            string uriPort = string.Format("{0}:{1}", uri, robotFile.RosMasterPort);
+            
+            ROSBridgeWebSocketConnection rosBridge = new ROSBridgeWebSocketConnection(uri, robotFile.RosMasterPort);
+
+            Robot robot = new Robot(robotFile.Campuses, rosBridge, robotName, uri, robotFile.RosMasterPort, false);
+            Robots.Add(uriPort, robot);
+            robot.RosBridge.Connect(ConnectionResult);
         }
+
+        PlayerUIController.Instance.LoadRobots(Robots.Select( robot => robot.Value).ToList());
+    }
+
+    private void ConnectionResult(string uriPort, bool isAlive)
+    {
+        Robots[uriPort].IsActive = isAlive;
+        PlayerUIController.Instance.RobotRefreshed();
     }
 
     public List<string> GetRobotNames(int campusId)
@@ -80,64 +112,43 @@ public class RobotMasterController : MonoBehaviour
         return _robotConfigs.Where(pair => pair.Value.Campuses.Contains(campusId)).Select(pair => pair.Key).ToList();
     }
 
-    public ROSController LoadRobot(string robotName)
+    public void RobotLostConnection(ROSController robot)
     {
-        if (robotName == "No Robot Selected")
+        Debug.LogError("Robot [" + robot.gameObject.name + "] lost connection!");
+    }
+
+    public void RefreshRobotConnections()
+    {
+        foreach (KeyValuePair<string, Robot> pair in Robots)
         {
-            SelectedRobot = null;
-            return null;
-        }
-        RobotConfigFile config;
-        if (_robotConfigs.TryGetValue(robotName, out config))
-        {
-            ROSBridgeWebSocketConnection rosBridge;
-            string path = string.Format("{0}:{1}", config.RosMasterUri, config.RosMasterPort);
-            if (!_rosBridges.TryGetValue(path, out rosBridge))
+            if (pair.Value.IsActive)
             {
-                string uri = config.RosMasterUri;
-                if (!uri.Contains("ws://"))
-                    uri = "ws://" + uri;
-                rosBridge = new ROSBridgeWebSocketConnection(uri, config.RosMasterPort);
-                rosBridge.Connect();
-                _rosBridges.Add(path, rosBridge);
+                PlayerUIController.Instance.RobotRefreshed();
+                continue;
             }
 
-            ROSController robot;
-            if (_activeRobots.TryGetValue(robotName, out robot))
-            {
-                SelectedRobot = robot;
-            }
-            else
-            {
-                ROSController rosController = (Instantiate(Resources.Load(_robotPrefabPath + robotName)) as GameObject).GetComponent<ROSController>();
-                rosController.InitialiseRobot(rosBridge, config);
-                _activeRobots.Add(robotName, rosController);
-                SelectedRobot = rosController;
-            }
-
-            return SelectedRobot;
-        }
-        else
-        {
-            return null;
+            pair.Value.RosBridge.Connect(ConnectionResult);
         }
     }
 
-    public bool TestConnection(string uri, int port)
+    public class Robot
     {
-        if (!uri.Contains("ws://"))
-            uri = "ws://" + uri;
+        public int[] Campuses;
+        public ROSBridgeWebSocketConnection RosBridge;
+        public string Name;
+        public string Uri;
+        public int Port;
+        public bool IsActive;
 
-        try
+        public Robot(int[] campuses, ROSBridgeWebSocketConnection rosBridge, string name, string uri, int port, bool isActive)
         {
-            ROSBridgeWebSocketConnection testBridge = new ROSBridgeWebSocketConnection(uri, port);
-            testBridge.Connect();
+            Campuses = campuses;
+            RosBridge = rosBridge;
+            Name = name;
+            Uri = uri;
+            Port = port;
+            IsActive = isActive;
         }
-        catch (Exception e)
-        {
-            Debug.Log(e);
-        }
-        return false;
     }
 
 }

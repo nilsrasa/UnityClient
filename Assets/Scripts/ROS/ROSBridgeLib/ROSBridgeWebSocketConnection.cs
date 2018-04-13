@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
-using System.Reflection;
 using System;
 using WebSocketSharp;
-using WebSocketSharp.Net;
-using WebSocketSharp.Server;
 using SimpleJSON;
 using UnityEngine;
 
@@ -60,6 +57,9 @@ namespace ROSBridgeLib
                 return _topic;
             }
         }
+
+        public delegate void WasDisconnected(bool wasClean);
+        public event WasDisconnected OnDisconnect;
 
         public bool IsConnected { get; private set; }
 
@@ -174,10 +174,12 @@ namespace ROSBridgeLib
             _publishers.Add(publisher);
         }
 
-        /**
-         * Connect to the remote ros environment.
-         */
-        public void Connect(Action<bool> callback = null)
+        /// <summary>
+        /// Connects to ROSBridge
+        /// </summary>
+        /// <param name="callback">Callback on connection success</param>
+        /// <returns></returns>
+        public void Connect(Action<string, bool> callback = null)
         {
             _myThread = new Thread(() => Run(callback));
             _myThread.Start();
@@ -203,14 +205,15 @@ namespace ROSBridgeLib
             _ws.Close();
         }
 
-        private void Run(Action<bool> callback)
+        private void Run(Action<string, bool> callback)
         {
             try
             {
                 _ws = new WebSocket(_host + ":" + _port);
                 _ws.OnMessage += (sender, e) => this.OnMessage(e.Data);
                 _ws.Connect();
-
+                if (callback != null)
+                    callback(string.Format("{0}:{1}", _host, _port),_ws.IsAlive);
             }
             catch (Exception e)
             {
@@ -219,6 +222,7 @@ namespace ROSBridgeLib
             }
             
             IsConnected = _ws.IsAlive;
+            _ws.OnClose += (sender, args) => { if (OnDisconnect != null) OnDisconnect(args.WasClean); };
 
             foreach (ROSBridgeSubscriber subscriber in _subscribers)
             {

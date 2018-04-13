@@ -25,7 +25,28 @@ public abstract class ROSController : MonoBehaviour
 
     protected abstract void StartROS();
 
-    protected virtual void StopROS() { }
+    /// <summary>
+    /// Disconnects from rosbridge.
+    /// </summary>
+    protected virtual void StopROS()
+    {
+        _rosBridge.Disconnect();
+    }
+
+    protected virtual void LostConnection()
+    {
+        RobotMasterController.Instance.RobotLostConnection(this);
+        Destroy();
+    }
+
+    /// <summary>
+    /// Disconnects from rosbridge and destroys robot gameobject.
+    /// </summary>
+    public void Destroy()
+    {
+        StopROS();
+        Destroy(gameObject);
+    }
 
     public abstract void MoveDirect(Vector2 movementCommand);
 
@@ -42,6 +63,7 @@ public abstract class ROSController : MonoBehaviour
     public virtual void InitialiseRobot(ROSBridgeWebSocketConnection rosBridge, RobotConfigFile robotConfig)
     {
         _rosBridge = rosBridge;
+        _rosBridge.OnDisconnect += clean => { if (!clean) LostConnection(); };
         _robotConfig = robotConfig;
         StartROS();
         if (OnRosStarted != null)
