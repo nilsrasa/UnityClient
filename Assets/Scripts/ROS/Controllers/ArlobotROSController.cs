@@ -36,7 +36,6 @@ public class ArlobotROSController : ROSController {
     private float _controlParameterRoll;
     private float _controlParameterPitch;
     private float _controlParameterYaw;
-    private List<GeoPointWGS84> _waypoints;
 
     void Awake()
     {
@@ -61,7 +60,7 @@ public class ArlobotROSController : ROSController {
             //Waypoint reached
             if (Vector3.Distance(transform.position, _currentWaypoint) < _waypointDistanceThreshhold)
             {
-                if (_waypointIndex < _waypoints.Count - 1)
+                if (_waypointIndex < Waypoints.Count - 1)
                     MoveToNextWaypoint();
                 else
                 {
@@ -100,14 +99,14 @@ public class ArlobotROSController : ROSController {
     {
         _waypointIndex = _waypointStartIndex;
         CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
-        _currentWaypoint =_waypoints[_waypointIndex].ToUTM().ToUnity();
+        _currentWaypoint = Waypoints[_waypointIndex].ToUTM().ToUnity();
         Move(_currentWaypoint);
     }
 
     private void MoveToNextWaypoint()
     {
         _waypointIndex++;
-        _currentWaypoint = _waypoints[_waypointIndex].ToUTM().ToUnity();
+        _currentWaypoint = Waypoints[_waypointIndex].ToUTM().ToUnity();
         Move(_currentWaypoint);
     }
 
@@ -165,16 +164,26 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionDirect.PublishData(0, 0);
     }
 
+    public override void OnSelected()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void OnDeselected()
+    {
+        throw new System.NotImplementedException();
+    }
+
     public override void MoveToPoint(GeoPointWGS84 point)
     {
-        _waypoints.Clear();
-        _waypoints.Add(point);
+        Waypoints.Clear();
+        Waypoints.Add(point);
         _waypointIndex = 0;
     }
 
     public override void MovePath(List<GeoPointWGS84> waypoints) 
     {
-        _waypoints = waypoints;
+        Waypoints = waypoints;
         StartWaypointRoute();
     }
 

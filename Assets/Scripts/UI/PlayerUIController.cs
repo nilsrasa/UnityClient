@@ -221,7 +221,6 @@ public class PlayerUIController : MonoBehaviour
     private ColorBlock _driveRobotStopColorBlock;
     private ColorBlock _pauseRobotColorBlock;
     private ColorBlock _resumeRobotColorBlock;
-    private WaypointController _waypointController;
     private RectTransform _sliderTransform;
     private bool _isPaused;
     private bool _isDriving;
@@ -298,7 +297,6 @@ public class PlayerUIController : MonoBehaviour
 
     void Start()
     {
-        _waypointController = PlayerController.Instance.WaypointController;
         _layerNumberText.text = MazeMapController.Instance.CurrentActiveLevel.ToString();
 
         CurrentUIState = UIState.Navigation;
@@ -385,12 +383,12 @@ public class PlayerUIController : MonoBehaviour
     private void ToggleWaypointModeOnClick()
     {
         CurrentWaypointMode = CurrentWaypointMode == WaypointMode.Point ? WaypointMode.Route : WaypointMode.Point;
-        _waypointController.ToggleWaypointMode();
+        WaypointController.Instance.ToggleWaypointMode();
     }
 
     private void ClearAllWaypointsOnClick()
     {
-        _waypointController.ClearAllWaypoints();
+        WaypointController.Instance.ClearAllWaypoints();
     }
 
     private void ReturnRobotToBase()
@@ -408,7 +406,7 @@ public class PlayerUIController : MonoBehaviour
         }
         else
         {
-            List<GeoPointWGS84> path = _waypointController.GetPath().Select(point => point.ToUTM().ToWGS84()).ToList();
+            List<GeoPointWGS84> path = WaypointController.Instance.GetPath().Select(point => point.ToUTM().ToWGS84()).ToList();
             RobotMasterController.SelectedRobot.MovePath(path);
             CurrentRobotDrivingUIState = RobotDrivingUIState.RobotDriving;
         }
@@ -569,15 +567,15 @@ public class PlayerUIController : MonoBehaviour
         CurrentUIState = UIState.Navigation;
     }
 
-    private void RobotListConnectClick(bool shouldConnect, string uriPort)
+    private void RobotListConnectClick(bool shouldConnect, string uri)
     {
         if (shouldConnect)
         {
-            RobotMasterController.Instance.ConnectToRobot(uriPort);
+            RobotMasterController.Instance.ConnectToRobot(uri);
 
         }
         else
-            RobotMasterController.Instance.DisconnectRobot(uriPort);
+            RobotMasterController.Instance.DisconnectRobot(uri);
     }
 
     #endregion
@@ -598,8 +596,9 @@ public class PlayerUIController : MonoBehaviour
 
     private void OnSelectedRobotValueChanged(int newIndex)
     {
-        //TODO: Update once new system in place
-        //UpdateUI(RobotMasterController.Instance.LoadRobot(_selectRobot.options[newIndex].text));
+        ROSController selectedRobot = RobotMasterController.Instance.GetRosControllerFromName(MazeMapController.Instance.CampusId, _selectRobot.options[newIndex].text);
+        UpdateUI(selectedRobot);
+        RobotMasterController.Instance.SelectRobot(selectedRobot);
     }
 
     private void OnTimeSliderValueChanged(float newValue)
@@ -783,16 +782,24 @@ public class PlayerUIController : MonoBehaviour
 
     public void UpdateUI(ROSController robot)
     {
-        if (robot.CurrenLocomotionType == ROSController.RobotLocomotionType.DIRECT)
+        //TODO: Load path of selected robot if moving
+        if (robot == null)
         {
-            CurrentRobotDrivingUIState = RobotDrivingUIState.RobotStopped;
+            CurrentRobotDrivingUIState = RobotDrivingUIState.NoRobotSelected;
         }
         else
         {
-            if (robot.CurrentRobotLocomotionState == ROSController.RobotLocomotionState.MOVING)
-                CurrentRobotDrivingUIState = RobotDrivingUIState.RobotDriving;
-            else if (robot.CurrentRobotLocomotionState == ROSController.RobotLocomotionState.STOPPED)
+            if (robot.CurrenLocomotionType == ROSController.RobotLocomotionType.DIRECT)
+            {
                 CurrentRobotDrivingUIState = RobotDrivingUIState.RobotStopped;
+            }
+            else
+            {
+                if (robot.CurrentRobotLocomotionState == ROSController.RobotLocomotionState.MOVING)
+                    CurrentRobotDrivingUIState = RobotDrivingUIState.RobotDriving;
+                else if (robot.CurrentRobotLocomotionState == ROSController.RobotLocomotionState.STOPPED)
+                    CurrentRobotDrivingUIState = RobotDrivingUIState.RobotStopped;
+            }
         }
     }
 
@@ -833,7 +840,7 @@ public class PlayerUIController : MonoBehaviour
 
     public void RemoveRobotFromList(string robotName)
     {
-        for (int i = 0; i < _selectRobot.options.Count;)
+        for (int i = 0; i < _selectRobot.options.Count; i++)
         {
             if (_selectRobot.options[i].text == robotName)
             {

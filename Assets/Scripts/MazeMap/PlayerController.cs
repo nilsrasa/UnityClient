@@ -20,8 +20,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _mouseClickSpeed = 0.1f;
     [SerializeField] private Transform _triggerFloor;
 
-    public WaypointController WaypointController { get; private set; }
-
     private PlayerState _currentPlayerState;
     public PlayerState CurrentPlayerState
     {
@@ -55,7 +53,6 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         _camera = GetComponentInChildren<Camera>();
-        WaypointController = GetComponent<WaypointController>();
         CurrentPlayerState = PlayerState.Normal;
         Instance = this;
     }
@@ -183,12 +180,12 @@ public class PlayerController : MonoBehaviour
             WaypointMarker marker = hit.collider.GetComponent<WaypointMarker>();
             if (marker != null)
             {
-                WaypointController.DeleteMarker(marker);
+                WaypointController.Instance.DeleteMarker(marker);
                 return;
             }
             if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Floor")) return;
             
-            WaypointController.CreateWaypoint(hit.point);
+            WaypointController.Instance.CreateWaypoint(hit.point);
         }
     }
 

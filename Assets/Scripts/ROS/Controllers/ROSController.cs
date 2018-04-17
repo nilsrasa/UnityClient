@@ -13,10 +13,11 @@ public abstract class ROSController : MonoBehaviour
 
     public RobotLocomotionState CurrentRobotLocomotionState { get; protected set; }
     public RobotLocomotionType CurrenLocomotionType { get; protected set; }
+    public RobotConfigFile RobotConfig;
 
     protected bool _robotModelInitialised;
     protected ROSBridgeWebSocketConnection _rosBridge;
-    protected RobotConfigFile _robotConfig;
+    protected List<GeoPointWGS84> Waypoints;
 
     protected virtual void OnApplicationQuit()
     {
@@ -36,7 +37,7 @@ public abstract class ROSController : MonoBehaviour
     protected virtual void LostConnection()
     {
         RobotMasterController.Instance.RobotLostConnection(this);
-        Destroy();
+        StopROS();
     }
 
     /// <summary>
@@ -60,11 +61,15 @@ public abstract class ROSController : MonoBehaviour
 
     public abstract void StopRobot();
 
+    public abstract void OnSelected();
+
+    public abstract void OnDeselected();
+
     public virtual void InitialiseRobot(ROSBridgeWebSocketConnection rosBridge, RobotConfigFile robotConfig)
     {
         _rosBridge = rosBridge;
         _rosBridge.OnDisconnect += clean => { if (!clean) LostConnection(); };
-        _robotConfig = robotConfig;
+        RobotConfig = robotConfig;
         StartROS();
         if (OnRosStarted != null)
             OnRosStarted(rosBridge);

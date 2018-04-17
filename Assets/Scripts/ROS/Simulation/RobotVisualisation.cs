@@ -81,6 +81,16 @@ public class RobotVisualisation : ROSController
         throw new NotImplementedException();
     }
 
+    public override void OnSelected()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void OnDeselected()
+    {
+        throw new NotImplementedException();
+    }
+
     protected override void StartROS()
     {
         _rosJoystick = new ROSGenericSubscriber<TwistMsg>(_rosBridge, "/teleop_velocity_smoother/raw_cmd_vel", TwistMsg.GetMessageType(), (msg) => new TwistMsg(msg));

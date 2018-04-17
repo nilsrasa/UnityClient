@@ -39,10 +39,8 @@ public class VirtualRobot : ROSController
 
     //Navigation
     private Vector3 _currentWaypoint;
-
     private int _waypointIndex;
     private float _waypointDistanceThreshhold = 0.1f;
-    private List<GeoPointWGS84> _waypoints;
 
     void Awake()
     {
@@ -80,7 +78,7 @@ public class VirtualRobot : ROSController
             //Waypoint reached
             if (Vector3.Distance(transform.position, _currentWaypoint) < _waypointDistanceThreshhold)
             {
-                if (_waypointIndex < _waypoints.Count - 1)
+                if (_waypointIndex < Waypoints.Count - 1)
                     MoveToNextWaypoint();
                 else
                 {
@@ -147,6 +145,7 @@ public class VirtualRobot : ROSController
 
     protected override void StopROS()
     {
+        base.StopROS();
         StopCoroutine(_transformUpdateCoroutine);
     }
 
@@ -202,14 +201,14 @@ public class VirtualRobot : ROSController
     {
         _waypointIndex = 0;
         CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
-        _currentWaypoint = _waypoints[_waypointIndex].ToUTM().ToUnity();
+        _currentWaypoint = Waypoints[_waypointIndex].ToUTM().ToUnity();
         Move(_currentWaypoint);
     }
 
     private void MoveToNextWaypoint()
     {
         _waypointIndex++;
-        _currentWaypoint = _waypoints[_waypointIndex].ToUTM().ToUnity();
+        _currentWaypoint = Waypoints[_waypointIndex].ToUTM().ToUnity();
         Move(_currentWaypoint);
     }
 
@@ -232,14 +231,14 @@ public class VirtualRobot : ROSController
 
     public override void MoveToPoint(GeoPointWGS84 point)
     {
-        _waypoints.Clear();
-        _waypoints.Add(point);
+        Waypoints.Clear();
+        Waypoints.Add(point);
         _waypointIndex = 0;
     }
 
     public override void MovePath(List<GeoPointWGS84> waypoints)
     {
-        _waypoints = waypoints;
+        Waypoints = waypoints;
         StartWaypointRoute();
     }
 
@@ -258,5 +257,15 @@ public class VirtualRobot : ROSController
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
         _rosLocomotionDirect.PublishData(0, 0);
+    }
+
+    public override void OnSelected()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void OnDeselected()
+    {
+        throw new NotImplementedException();
     }
 }

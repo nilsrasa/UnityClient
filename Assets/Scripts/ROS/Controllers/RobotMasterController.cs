@@ -24,7 +24,7 @@ public class RobotMasterController : MonoBehaviour
         }
     }
 
-    //Master URI:Port, Corresponding Robot
+    //Master Robot hostname, Corresponding Robot
     public static Dictionary<string, Robot> Robots { get; private set; }
     private static Dictionary<string, ROSController> _activeRobots;
     private string _configPath;
@@ -85,27 +85,26 @@ public class RobotMasterController : MonoBehaviour
             string uri = robotFile.RosMasterUri;
             if (!uri.Contains("ws://"))
                 uri = "ws://" + uri;
-            string uriPort = string.Format("{0}:{1}", uri, robotFile.RosMasterPort);
             
             ROSBridgeWebSocketConnection rosBridge = new ROSBridgeWebSocketConnection(uri, robotFile.RosMasterPort);
 
             Robot robot = new Robot(robotFile.Campuses, rosBridge, robotName, uri, robotFile.RosMasterPort, false, robotFile);
-            Robots.Add(uriPort, robot);
+            Robots.Add(uri, robot);
             robot.RosBridge.Connect(ConnectionResult);
         }
 
         PlayerUIController.Instance.LoadRobots(Robots.Select( robot => robot.Value).ToList());
     }
 
-    private void ConnectionResult(string uriPort, bool isAlive)
+    private void ConnectionResult(string uri, bool isAlive)
     {
-        Robots[uriPort].IsActive = isAlive;
+        Robots[uri].IsActive = isAlive;
         PlayerUIController.Instance.RobotRefreshed();
         if (isAlive)
-            Robots[uriPort].RosBridge.Disconnect();
+            Robots[uri].RosBridge.Disconnect();
     }
 
-    private Robot GetRobotFromName(int campusId, string robotName)
+    public Robot GetRobotFromName(int campusId, string robotName)
     {
         foreach (KeyValuePair<string, Robot> pair in Robots)
         {
@@ -113,6 +112,21 @@ public class RobotMasterController : MonoBehaviour
                 return pair.Value;
         }
         return null;
+    }
+
+    public ROSController GetRosControllerFromName(int campusId, string robotName)
+    {
+        Robot robot = GetRobotFromName(campusId, robotName);
+        if (robot == null)
+            return null;
+        ROSController rosController = null;
+        if (_activeRobots.TryGetValue(robot.Uri, out rosController))
+        {
+            return rosController;
+        }
+        else
+            return null;
+
     }
 
     public List<string> GetRobotNames(int campusId)
@@ -123,6 +137,8 @@ public class RobotMasterController : MonoBehaviour
     public void RobotLostConnection(ROSController robot)
     {
         Debug.LogError("Robot [" + robot.gameObject.name + "] lost connection!");
+        DisconnectRobot(robot.RobotConfig.RosMasterUri);
+        PlayerUIController.Instance.UpdateRobotList();
     }
 
     public void RefreshRobotConnections()
@@ -139,23 +155,31 @@ public class RobotMasterController : MonoBehaviour
         }
     }
 
-    public void ConnectToRobot(string uriPort)
+    public void ConnectToRobot(string uri)
     {
-        Robots[uriPort].Connected = true;
-        Robot robot = Robots[uriPort];
+        Robots[uri].Connected = true;
+        Robots[uri].RosBridge.Connect();
+        Robot robot = Robots[uri];
         GameObject robotObject = Instantiate(Resources.Load(_robotPrefabPath + robot.Name)) as GameObject;
         ROSController rosController = robotObject.GetComponent<ROSController>();
         rosController.InitialiseRobot(robot.RosBridge, robot.RobotConfig);
-        _activeRobots.Add(uriPort, rosController);
+        _activeRobots.Add(uri, rosController);
 
         PlayerUIController.Instance.AddRobotToList(robot.Name);
     }
 
-    public void DisconnectRobot(string uriPort)
+    public void DisconnectRobot(string uri)
     {
-        Robots[uriPort].Connected = false;
-        _activeRobots[uriPort].Destroy();
-        _activeRobots.Remove(uriPort);
+        Robots[uri].Connected = false;
+        _activeRobots[uri].Destroy();
+        _activeRobots.Remove(uri);
+
+        PlayerUIController.Instance.RemoveRobotFromList(Robots[uri].Name);
+    }
+
+    public void SelectRobot(ROSController rosController)
+    {
+        SelectedRobot = rosController;
     }
 
     public class Robot

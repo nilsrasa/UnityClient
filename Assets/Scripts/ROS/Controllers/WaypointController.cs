@@ -16,19 +16,36 @@ public class WaypointController : MonoBehaviour {
 
     private WaypointMode _currentWaypointMode = WaypointMode.Single;
     private List<WaypointMarker> _waypointMarkers;
-    private LineRenderer _lineRenderer;
+    private LineRenderer _lineRendererRoute;
+    private LineRenderer _lineRendererRobot;
     private readonly Dictionary<string, List<GeoPointWGS84>> _savedRoutes = new Dictionary<string, List<GeoPointWGS84>>();
 
     void Awake()
     {
         Instance = this;
         _waypointMarkers = new List<WaypointMarker>();
-        _lineRenderer = GetComponent<LineRenderer>();
+        _lineRendererRoute = GetComponent<LineRenderer>();
+        _lineRendererRobot = transform.GetChild(0).GetComponent<LineRenderer>();
     }
 
     void Start()
     {
         LoadInPathsFromConfig();
+    }
+
+    void Update()
+    {
+        if (_waypointMarkers.Count <= 0)
+        {
+            _lineRendererRobot.positionCount = 0;
+            return;
+        }
+        else
+        {
+            _lineRendererRobot.positionCount = 2;
+            _lineRendererRobot.SetPositions(new Vector3[] {RobotMasterController.SelectedRobot.transform.position, _waypointMarkers[0].transform.position});
+        }
+
     }
 
     private void LoadInPathsFromConfig()
@@ -59,8 +76,8 @@ public class WaypointController : MonoBehaviour {
         {
             foreach (WaypointMarker marker in _waypointMarkers)
                 marker.SetLock(true);
-            _lineRenderer.positionCount++;
-            _lineRenderer.SetPosition(_lineRenderer.positionCount-1, waypointPosition + new Vector3(0, _lineYOffset, 0));
+            _lineRendererRoute.positionCount++;
+            _lineRendererRoute.SetPosition(_lineRendererRoute.positionCount-1, waypointPosition + new Vector3(0, _lineYOffset, 0));
         }
 
         WaypointMarker waypoint = Instantiate(_waypointMarkerPrefab, waypointPosition, Quaternion.identity).GetComponent<WaypointMarker>();
@@ -76,16 +93,16 @@ public class WaypointController : MonoBehaviour {
             if (_waypointMarkers.Count > 0)
             {
                 _waypointMarkers[0].SetColour(_waypointRouteColor);
-                _lineRenderer.positionCount = 1;
-                _lineRenderer.SetPosition(0, _waypointMarkers[0].transform.position);
+                _lineRendererRoute.positionCount = 1;
+                _lineRendererRoute.SetPosition(0, _waypointMarkers[0].transform.position);
             }
         }
     }
 
     public void DeleteMarker(WaypointMarker toDelete)
     {
-        if (_lineRenderer.positionCount > 0)
-            _lineRenderer.positionCount--;
+        if (_lineRendererRoute.positionCount > 0)
+            _lineRendererRoute.positionCount--;
         Destroy(_waypointMarkers[_waypointMarkers.Count - 1].gameObject);
         _waypointMarkers.RemoveAt(_waypointMarkers.Count-1);
     }
@@ -99,7 +116,7 @@ public class WaypointController : MonoBehaviour {
         foreach (WaypointMarker marker in _waypointMarkers)
             Destroy(marker.gameObject);
         _waypointMarkers = new List<WaypointMarker>();
-        _lineRenderer.positionCount = 0;
+        _lineRendererRoute.positionCount = 0;
     }
 
     public void LoadRoute(string routeName)

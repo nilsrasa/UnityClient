@@ -61,11 +61,11 @@ namespace ROSBridgeLib
         public delegate void WasDisconnected(bool wasClean);
         public event WasDisconnected OnDisconnect;
 
+        public WebSocket WebSocket { get; private set; }
         public bool IsConnected { get; private set; }
 
         private string _host;
         private int _port;
-        private WebSocket _ws;
         private System.Threading.Thread _myThread;
         private List<ROSBridgeSubscriber> _subscribers; // our subscribers
         private List<ROSBridgePublisher> _publishers; //our publishers
@@ -191,29 +191,31 @@ namespace ROSBridgeLib
         public void Disconnect()
         {
             _myThread.Abort();
-            if (_ws == null) return;
+            if (WebSocket == null) return;
             foreach (ROSBridgeSubscriber subscriber in _subscribers)
             {
-                _ws.Send(ROSBridgeMsg.UnSubscribe(subscriber.GetMessageTopic()));
+                WebSocket.Send(ROSBridgeMsg.UnSubscribe(subscriber.GetMessageTopic()));
                 Debug.Log("Sending " + ROSBridgeMsg.UnSubscribe(subscriber.GetMessageTopic()));
             }
             foreach (ROSBridgePublisher publisher in _publishers)
             {
-                _ws.Send(ROSBridgeMsg.UnAdvertise(publisher.GetMessageTopic()));
+                WebSocket.Send(ROSBridgeMsg.UnAdvertise(publisher.GetMessageTopic()));
                 Debug.Log("Sending " + ROSBridgeMsg.UnAdvertise(publisher.GetMessageTopic()));
             }
-            _ws.Close();
+            _subscribers = new List<ROSBridgeSubscriber>();
+            _publishers = new List<ROSBridgePublisher>();
+            WebSocket.Close();
         }
 
         private void Run(Action<string, bool> callback)
         {
             try
             {
-                _ws = new WebSocket(_host + ":" + _port);
-                _ws.OnMessage += (sender, e) => this.OnMessage(e.Data);
-                _ws.Connect();
+                WebSocket = new WebSocket(_host + ":" + _port);
+                WebSocket.OnMessage += (sender, e) => this.OnMessage(e.Data);
+                WebSocket.Connect();
                 if (callback != null)
-                    callback(string.Format("{0}:{1}", _host, _port),_ws.IsAlive);
+                    callback(_host, WebSocket.IsAlive);
             }
             catch (Exception e)
             {
@@ -221,17 +223,17 @@ namespace ROSBridgeLib
                 return;
             }
             
-            IsConnected = _ws.IsAlive;
-            _ws.OnClose += (sender, args) => { if (OnDisconnect != null) OnDisconnect(args.WasClean); };
+            IsConnected = WebSocket.IsAlive;
+            WebSocket.OnClose += (sender, args) => { if (OnDisconnect != null) OnDisconnect(args.WasClean); };
 
             foreach (ROSBridgeSubscriber subscriber in _subscribers)
             {
-                _ws.Send(ROSBridgeMsg.Subscribe(subscriber.GetMessageTopic(), subscriber.GetMessageType()));
+                WebSocket.Send(ROSBridgeMsg.Subscribe(subscriber.GetMessageTopic(), subscriber.GetMessageType()));
                 Debug.Log("Sending " + ROSBridgeMsg.Subscribe(subscriber.GetMessageTopic(), subscriber.GetMessageType()));
             }
             foreach (ROSBridgePublisher publisher in _publishers)
             {
-                _ws.Send(ROSBridgeMsg.Subscribe(publisher.GetMessageTopic(), publisher.GetMessageType()));
+                WebSocket.Send(ROSBridgeMsg.Subscribe(publisher.GetMessageTopic(), publisher.GetMessageType()));
                 Debug.Log("Sending " + ROSBridgeMsg.Advertise(publisher.GetMessageTopic(), publisher.GetMessageType()));
             }
             while (true)
@@ -316,21 +318,21 @@ namespace ROSBridgeLib
 
         public void Publish(String topic, ROSBridgeMsg msg)
         {
-            if (_ws != null)
+            if (WebSocket != null)
             {
                 string s = ROSBridgeMsg.Publish(topic, msg.ToYAMLString());
                 //Debug.Log ("Sending " + s);
-                _ws.Send(s);
+                WebSocket.Send(s);
             }
         }
 
         public void CallService(string service, string args)
         {
-            if (_ws != null)
+            if (WebSocket != null)
             {
                 string s = ROSBridgeMsg.CallService(service, args);
                 Debug.Log("Sending " + s);
-                _ws.Send(s);
+                WebSocket.Send(s);
             }
         }
     }
