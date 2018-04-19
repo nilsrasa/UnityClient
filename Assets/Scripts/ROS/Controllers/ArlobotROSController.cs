@@ -7,7 +7,6 @@ using UnityEngine.UI;
 
 public class ArlobotROSController : ROSController {
 
-    [SerializeField] private int _waypointStartIndex = 0;
     [SerializeField] private RawImage _cameraImage;
 
     public static ArlobotROSController Instance { get; private set; }
@@ -99,7 +98,7 @@ public class ArlobotROSController : ROSController {
 
     private void StartWaypointRoute()
     {
-        _waypointIndex = _waypointStartIndex;
+        _waypointIndex = 0;
         CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
         _currentWaypoint = Waypoints[_waypointIndex].ToUTM().ToUnity();
         Move(_currentWaypoint);

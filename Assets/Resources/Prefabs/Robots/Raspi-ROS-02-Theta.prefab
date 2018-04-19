@@ -464,7 +464,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4591577159848156}
   - component: {fileID: 114960283207841436}
-  - component: {fileID: 114782569489429842}
+  - component: {fileID: 114353793824166440}
   m_Layer: 0
   m_Name: Raspi-ROS-02-Theta
   m_TagString: Untagged
@@ -518,7 +518,7 @@ GameObject:
   - component: {fileID: 33226550453761288}
   - component: {fileID: 23393287853638106}
   - component: {fileID: 82150467559573130}
-  - component: {fileID: 114096930692215092}
+  - component: {fileID: 114062285666791196}
   m_Layer: 8
   m_Name: InvertedSphere
   m_TagString: Untagged
@@ -2458,6 +2458,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hasMesh: 0
+--- !u!114 &114062285666791196
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1753801888632788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcbdc6592c825e443bfe0fb71eaa82d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _primarySphere: {fileID: 23393287853638106}
+  _icoSphere: {fileID: 0}
+  _useDummyImage: 0
+  _dummyImage: {fileID: 0}
+  _text: {fileID: 0}
 --- !u!114 &114088438090282308
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2470,22 +2486,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hasMesh: 0
---- !u!114 &114096930692215092
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1753801888632788}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d696b99e68bec1740a85b155b242056f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _primarySphere: {fileID: 23393287853638106}
-  _icoSphere: {fileID: 0}
-  _useDummyImage: 0
-  _dummyImage: {fileID: 2800000, guid: 253a12babca9f6847b91b58aedba7377, type: 3}
-  _text: {fileID: 0}
 --- !u!114 &114133430761231630
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2570,6 +2570,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hasMesh: 1
+--- !u!114 &114353793824166440
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1712530943647056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 111529dc3255cac4d868aa0f0da06797, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _publishingInterval: 0.2
+  _portId: 5
+  _linearCoefficient: -0.05
+  _angularCoefficient: -0.02
+  _wheelbase: 0.3
 --- !u!114 &114425288532902846
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2630,30 +2646,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hasMesh: 0
---- !u!114 &114782569489429842
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1712530943647056}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fbb35185fe87e54c871cf4a1b49adc1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ControlledRobotType: 2
-  SpeedCurve:
-    serializedVersion: 2
-    m_Curve: []
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  _motorMaxSpeed: 255
-  _motorMinSpeed: 60
-  _commandTimer: 50
-  _portNumber: 5
-  baudRate: 9600
-  dataBits: 8
 --- !u!114 &114809011698621610
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2769,7 +2761,9 @@ MonoBehaviour:
     MaxAngularSpeed: 0
     LinearSpeedParameter: 0
     AngularSpeedParameter: 0
-  _waypointStartIndex: 0
+  _robotModules:
+  - {fileID: 114353793824166440}
+  - {fileID: 114062285666791196}
   _cameraImage: {fileID: 0}
 --- !u!114 &114968380683949536
 MonoBehaviour:
@@ -2800,7 +2794,7 @@ MonoBehaviour:
   disableFading: 0
   disableDistortion: 0
   layerType: 0
-  eyeCameraPrototype: {fileID: 2083830, guid: 8fc0f481b62e1bc4b9713a4322a1f7ef, type: 2}
+  eyeCameraPrototype: {fileID: 2083830, guid: 8dc1a329f780cf540af9a46b13cabbeb, type: 2}
   useCameraPrefab: 1
   leftEyeOverride: {fileID: 0}
   rightEyeOverride: {fileID: 0}

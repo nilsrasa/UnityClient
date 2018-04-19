@@ -107,6 +107,7 @@ namespace ROSBridgeLib
         /// <returns></returns>
         public void Connect(Action<string, bool> callback = null)
         {
+            Debug.Log("COnnect! " + _host);
             _myThread = new Thread(() => Run(callback));
             _myThread.Start();
         }
@@ -116,6 +117,7 @@ namespace ROSBridgeLib
         /// </summary>
         public void Disconnect()
         {
+            Debug.Log("Disconnect! " + _host);
             _myThread.Abort();
             if (WebSocket == null) return;
             foreach (ROSBridgeSubscriber subscriber in _subscribers)

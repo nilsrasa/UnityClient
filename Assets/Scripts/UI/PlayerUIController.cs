@@ -370,13 +370,11 @@ public class PlayerUIController : MonoBehaviour
         _robotList.interactable = true;
         _goToBuilding.interactable = true;
         _buildingName.interactable = true;
-        _toggleWaypointMode.interactable = true;
-        _clearAllWaypoints.interactable = true;
-        _routeName.interactable = true;
-        _loadRoute.interactable = true;
-        _saveRoute.interactable = true;
         _layerUp.interactable = true;
         _layerDown.interactable = true;
+        _addFiducial.interactable = true;
+        _updateFiducial.interactable = true;
+        _deleteFiducial.interactable = true;
     }
 
     private void Cleanup()
@@ -861,9 +859,21 @@ public class PlayerUIController : MonoBehaviour
         {
             CurrentRobotDrivingUIState = RobotDrivingUIState.NoRobotSelected;
             WaypointController.Instance.ClearAllWaypoints();
+            _overrideRobotPosition.interactable = false;
+            _toggleWaypointMode.interactable = false;
+            _clearAllWaypoints.interactable = false;
+            _routeName.interactable = false;
+            _loadRoute.interactable = false;
+            _saveRoute.interactable = false;
         }
         else
         {
+            _overrideRobotPosition.interactable = true;
+            _toggleWaypointMode.interactable = true;
+            _clearAllWaypoints.interactable = true;
+            _routeName.interactable = true;
+            _loadRoute.interactable = true;
+            _saveRoute.interactable = true;
             if (robot.CurrenLocomotionType == ROSController.RobotLocomotionType.DIRECT)
             {
                 CurrentRobotDrivingUIState = RobotDrivingUIState.RobotStopped;

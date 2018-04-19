@@ -13,7 +13,9 @@ public abstract class ROSController : MonoBehaviour
 
     public RobotLocomotionState CurrentRobotLocomotionState { get; protected set; }
     public RobotLocomotionType CurrenLocomotionType { get; protected set; }
-    public RobotConfigFile RobotConfig;
+    [HideInInspector] public RobotConfigFile RobotConfig;
+
+    [SerializeField] public List<RobotModule> _robotModules;
 
     protected bool _robotModelInitialised;
     protected ROSBridgeWebSocketConnection _rosBridge;
@@ -77,6 +79,12 @@ public abstract class ROSController : MonoBehaviour
         _rosBridge.OnDisconnect += clean => { if (!clean) LostConnection(); };
         RobotConfig = robotConfig;
         StartROS();
+
+        foreach (RobotModule module in _robotModules)
+        {
+            module.Initialise(rosBridge);
+        }
+
         if (OnRosStarted != null)
             OnRosStarted(rosBridge);
 

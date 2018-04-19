@@ -1,6 +1,6 @@
 {
 	"Campuses": [ 89, 88 ],
-	"RosMasterUri": "Raspi-ROS-02REMOVETHIS",
+	"RosMasterUri": "Raspiros02",
 	"RosMasterPort": 9090,
 	"WaypointDistanceThreshold": 0.44999998807907107,
 	"MaxLinearSpeed": 1.0,
