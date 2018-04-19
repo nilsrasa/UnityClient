@@ -43,7 +43,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4591577159848156
 Transform:
   m_ObjectHideFlags: 1
@@ -123,5 +123,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cbcd9a32b91c484fb5d14881b09dd54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  RobotConfig:
+    Campuses: 
+    RosMasterUri: 
+    RosMasterPort: 0
+    WaypointDistanceThreshold: 0
+    MaxLinearSpeed: 0
+    MaxAngularSpeed: 0
+    LinearSpeedParameter: 0
+    AngularSpeedParameter: 0
   _waypointStartIndex: 0
   _cameraImage: {fileID: 0}

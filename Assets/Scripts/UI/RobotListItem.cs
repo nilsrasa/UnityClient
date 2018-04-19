@@ -29,9 +29,12 @@ public class RobotListItem : MonoBehaviour
         set
         {
             _isActive = value;
-            _background.color = value ? _activeBackgroundColor : _notActiveBackgroundColor;
+            if (Connected)
+                _background.color = _connectedBackgroundColor;
+            else
+                _background.color = value ? _activeBackgroundColor : _notActiveBackgroundColor;
             if (value)
-                _connectText.text = _connectDisconnect ? "Disconnect" : "Connect";
+                _connectText.text = _connected ? "Disconnect" : "Connect";
             else
                 _connectText.text = "Not Active";
 
@@ -42,16 +45,19 @@ public class RobotListItem : MonoBehaviour
     private ColorBlock _disconnectColorBlock;
     private ColorBlock _connectColorBlock;
 
-    private bool _connectDisconnect;
-    private bool ConnectDisconnect
+    private bool _connected;
+    private bool Connected
     {
-        get { return _connectDisconnect; }
+        get { return _connected; }
         set
         {
-            _connectDisconnect = value;
+            _connected = value;
             _connect.colors = value ? _disconnectColorBlock : _connectColorBlock;
             _connectText.text = value ? "Disconnect" : "Connect";
-            _background.color = value ? _connectedBackgroundColor : _activeBackgroundColor;
+            if (value)
+                _background.color = _connectedBackgroundColor;
+            else
+                _background.color = IsActive ? _activeBackgroundColor : _notActiveBackgroundColor;
         }
     }
 
@@ -75,16 +81,16 @@ public class RobotListItem : MonoBehaviour
         _disconnectColorBlock.normalColor = _connectDisconnectNormal;
         _disconnectColorBlock.highlightedColor = _connectDisconnectNormal;
         _disconnectColorBlock.pressedColor = _connectDisconnectClick;
-        ConnectDisconnect = false;
+        Connected = false;
         IsActive = false;
         _connect.onClick.AddListener(OnConnectClick);
     }
 
     private void OnConnectClick()
     {
-        ConnectDisconnect = !_connectDisconnect;
+        Connected = !_connected;
         if (OnConnectClicked != null)
-            OnConnectClicked(ConnectDisconnect, _uri);
+            OnConnectClicked(Connected, _uri);
     }
 
     public void Initialise(string robotName, string uri, int port, bool connected)
@@ -93,7 +99,7 @@ public class RobotListItem : MonoBehaviour
         _uri = uri;
         _uriPortText.text = uri + ":" + port;
         _robotName = robotName;
-        ConnectDisconnect = connected;
+        Connected = connected;
     }
 
 }

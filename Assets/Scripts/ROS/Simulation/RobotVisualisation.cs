@@ -81,6 +81,11 @@ public class RobotVisualisation : ROSController
         throw new NotImplementedException();
     }
 
+    public override void OverridePositionAndOrientation(Vector3 position, Quaternion orientation)
+    {
+        throw new NotImplementedException();
+    }
+
     public override void OnSelected()
     {
         throw new NotImplementedException();

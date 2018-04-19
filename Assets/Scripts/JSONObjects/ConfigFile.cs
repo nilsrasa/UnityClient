@@ -18,7 +18,7 @@ public class ConfigFile
     public float FloorLineWidth;
     public int UtmZone;
     public bool IsUtmNorth;
-    public Fiducial ZeroFiducial;
+    public FiducialData ZeroFiducial;
     public List<WaypointRoute> Routes;
 
     [Serializable]

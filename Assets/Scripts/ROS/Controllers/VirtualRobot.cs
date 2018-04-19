@@ -39,7 +39,6 @@ public class VirtualRobot : ROSController
 
     //Navigation
     private Vector3 _currentWaypoint;
-    private int _waypointIndex;
     private float _waypointDistanceThreshhold = 0.1f;
 
     void Awake()
@@ -78,7 +77,7 @@ public class VirtualRobot : ROSController
             //Waypoint reached
             if (Vector3.Distance(transform.position, _currentWaypoint) < _waypointDistanceThreshhold)
             {
-                if (_waypointIndex < Waypoints.Count - 1)
+                if (Waypoints.Count > 1)
                     MoveToNextWaypoint();
                 else
                 {
@@ -199,17 +198,18 @@ public class VirtualRobot : ROSController
 
     private void StartWaypointRoute()
     {
-        _waypointIndex = 0;
+        if (Waypoints.Count == 0) return;
         CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
-        _currentWaypoint = Waypoints[_waypointIndex].ToUTM().ToUnity();
+        _currentWaypoint = Waypoints[0].ToUTM().ToUnity();
         Move(_currentWaypoint);
     }
 
     private void MoveToNextWaypoint()
     {
-        _waypointIndex++;
-        _currentWaypoint = Waypoints[_waypointIndex].ToUTM().ToUnity();
+        Waypoints = Waypoints.GetRange(1, Waypoints.Count - 1);
+        _currentWaypoint = Waypoints[0].ToUTM().ToUnity();
         Move(_currentWaypoint);
+        WaypointController.Instance.CreateRoute(Waypoints);
     }
 
     private void EndWaypointPath()
@@ -217,6 +217,8 @@ public class VirtualRobot : ROSController
         StopRobot();
         if (RobotMasterController.SelectedRobot == this)
             PlayerUIController.Instance.UpdateUI(this);
+        Waypoints = new List<GeoPointWGS84>();
+        WaypointController.Instance.ClearAllWaypoints();
     }
 
     private void Move(Vector3 position)
@@ -233,7 +235,6 @@ public class VirtualRobot : ROSController
     {
         Waypoints.Clear();
         Waypoints.Add(point);
-        _waypointIndex = 0;
     }
 
     public override void MovePath(List<GeoPointWGS84> waypoints)
@@ -259,13 +260,13 @@ public class VirtualRobot : ROSController
         _rosLocomotionDirect.PublishData(0, 0);
     }
 
-    public override void OnSelected()
+    public override void OverridePositionAndOrientation(Vector3 newPosition, Quaternion newOrientation)
     {
-        throw new NotImplementedException();
+        transform.SetPositionAndRotation(newPosition, newOrientation);
     }
 
     public override void OnDeselected()
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 }

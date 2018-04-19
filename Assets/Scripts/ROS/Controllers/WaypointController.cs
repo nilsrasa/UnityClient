@@ -12,7 +12,6 @@ public class WaypointController : MonoBehaviour {
     [Header("Rendering")]
     [SerializeField] private Color32 _singleWaypointColor;
     [SerializeField] private Color32 _waypointRouteColor;
-    [SerializeField] private float _lineYOffset = 0.4f;
 
     private WaypointMode _currentWaypointMode = WaypointMode.Single;
     private List<WaypointMarker> _waypointMarkers;
@@ -57,6 +56,13 @@ public class WaypointController : MonoBehaviour {
         }
     }
 
+    public void CreateRoute(List<GeoPointWGS84> route)
+    {
+        if (route.Count <= 0) return;
+        List<Vector3> routeTransformed = route.Select(point => point.ToUTM().ToUnity()).ToList();
+        CreateRoute(routeTransformed);
+    }
+
     public void CreateRoute(List<Vector3> route)
     {
         ClearAllWaypoints();
@@ -77,7 +83,7 @@ public class WaypointController : MonoBehaviour {
             foreach (WaypointMarker marker in _waypointMarkers)
                 marker.SetLock(true);
             _lineRendererRoute.positionCount++;
-            _lineRendererRoute.SetPosition(_lineRendererRoute.positionCount-1, waypointPosition + new Vector3(0, _lineYOffset, 0));
+            _lineRendererRoute.SetPosition(_lineRendererRoute.positionCount-1, waypointPosition);
         }
 
         WaypointMarker waypoint = Instantiate(_waypointMarkerPrefab, waypointPosition, Quaternion.identity).GetComponent<WaypointMarker>();
@@ -97,6 +103,7 @@ public class WaypointController : MonoBehaviour {
                 _lineRendererRoute.SetPosition(0, _waypointMarkers[0].transform.position);
             }
         }
+        PlayerUIController.Instance.SetRouteStatus(_currentWaypointMode == WaypointMode.Route);
     }
 
     public void DeleteMarker(WaypointMarker toDelete)
@@ -145,4 +152,5 @@ public class WaypointController : MonoBehaviour {
         }
         ConfigManager.SaveRoute(routeName, route);
     }
+
 }

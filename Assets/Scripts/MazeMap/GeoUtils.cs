@@ -86,6 +86,18 @@ public static class GeoUtils {
         return mercator;
     }
 
+    public static GeoRotation ToGeoRotation(this Vector3 unityRotation)
+    {
+        GeoRotation geoRotation = new GeoRotation(unityRotation.y, unityRotation.z, unityRotation.x);
+        return geoRotation;
+    }
+
+    public static Vector3 ToUnity(this GeoRotation geoRotation)
+    {
+        Vector3 unityRotation = new Vector3(x: (float)geoRotation.east, y: (float)geoRotation.heading, z: (float)geoRotation.north);
+        return unityRotation;
+    }
+
     public static GeoPointUTM UtmOrigin
     {
         get { return _utmOrigin; }

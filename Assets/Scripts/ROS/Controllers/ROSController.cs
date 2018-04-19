@@ -17,7 +17,7 @@ public abstract class ROSController : MonoBehaviour
 
     protected bool _robotModelInitialised;
     protected ROSBridgeWebSocketConnection _rosBridge;
-    protected List<GeoPointWGS84> Waypoints;
+    protected List<GeoPointWGS84> Waypoints = new List<GeoPointWGS84>();
 
     protected virtual void OnApplicationQuit()
     {
@@ -61,7 +61,13 @@ public abstract class ROSController : MonoBehaviour
 
     public abstract void StopRobot();
 
-    public abstract void OnSelected();
+    public abstract void OverridePositionAndOrientation(Vector3 position, Quaternion orientation);
+
+    public virtual void OnSelected()
+    {
+        if (Waypoints != null)
+            WaypointController.Instance.CreateRoute(Waypoints);
+    }
 
     public abstract void OnDeselected();
 

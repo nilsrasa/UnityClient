@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ROSBridgeLib.geometry_msgs;
 using ROSBridgeLib.nav_msgs;
 using ROSBridgeLib.std_msgs;
 using UnityEngine;
@@ -19,6 +20,7 @@ public class ArlobotROSController : ROSController {
     private ROSLocomotionControlParams _rosLocomotionControlParams;
     private ROSGenericSubscriber<StringMsg> _rosUltrasound;
     private ROSGenericSubscriber<OdometryMsg> _rosOdometry;
+    private ROSGenericPublisher _rosOdometryOverride;
 
     private bool _hasOdometryDataToConsume;
     private OdometryData _odometryDataToConsume;
@@ -135,6 +137,7 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionControlParams = new ROSLocomotionControlParams(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/control_parameters");
         _rosLocomotionLinear = new ROSGenericPublisher(_rosBridge, "/waypoint/max_linear_speed", Float32Msg.GetMessageType());
         _rosLocomotionAngular = new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());
+        _rosOdometryOverride = new ROSGenericPublisher(_rosBridge, "/odo_calib_pose", OdometryMsg.GetMessageType());
 
         _rosUltrasound = new ROSGenericSubscriber<StringMsg>(_rosBridge, "/ultrasonic_data", StringMsg.GetMessageType(), (msg) => new StringMsg(msg));
         _rosUltrasound.OnDataReceived += ReceivedUltrasoundUpdata;
@@ -148,7 +151,6 @@ public class ArlobotROSController : ROSController {
 
     private void Move(Vector3 position)
     {
-        Debug.Log(position);
         GeoPointWGS84 point = position.ToUTM().ToWGS84();
         _rosLocomotionWaypoint.PublishData(point);
         _currentWaypoint = position;
@@ -164,14 +166,10 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionDirect.PublishData(0, 0);
     }
 
-    public override void OnSelected()
-    {
-        throw new System.NotImplementedException();
-    }
 
     public override void OnDeselected()
     {
-        throw new System.NotImplementedException();
+        //throw new System.NotImplementedException();
     }
 
     public override void MoveToPoint(GeoPointWGS84 point)
@@ -209,10 +207,10 @@ public class ArlobotROSController : ROSController {
             altitude = nav._pose._pose._position.GetZ(),
         };
         Quaternion orientation = new Quaternion(
-            x: (float)nav._pose._pose._orientation.GetX(), 
-            y: (float)nav._pose._pose._orientation.GetY(), 
-            z: (float)nav._pose._pose._orientation.GetZ(), 
-            w: (float)nav._pose._pose._orientation.GetW()
+            x: nav._pose._pose._orientation.GetX(), 
+            z: nav._pose._pose._orientation.GetY(), 
+            y: nav._pose._pose._orientation.GetZ(), 
+            w: nav._pose._pose._orientation.GetW()
         );
         _odometryDataToConsume = new OdometryData
         {
@@ -236,6 +234,20 @@ public class ArlobotROSController : ROSController {
         //TODO: Not implemented yet
 
         StringMsg s = (StringMsg) data;
+    }
+
+    public override void OverridePositionAndOrientation(Vector3 newPosition, Quaternion newOrientation)
+    {
+        GeoPointWGS84 wgs84 = newPosition.ToUTM().ToWGS84();
+
+        PoseWithCovarianceMsg pose = new PoseWithCovarianceMsg(
+            new PoseMsg(
+                new PointMsg(wgs84.longitude, wgs84.latitude, wgs84.altitude), 
+                new QuaternionMsg(newOrientation.x, newOrientation.z, newOrientation.y, newOrientation.w)
+            ));
+
+        OdometryMsg odometryOverride = new OdometryMsg(pose);
+        _rosOdometryOverride.PublishData(odometryOverride);
     }
 
     private struct OdometryData

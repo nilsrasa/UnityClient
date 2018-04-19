@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -9,7 +10,7 @@ public class PlayerUIController : MonoBehaviour
 {
     public static PlayerUIController Instance { get; private set; }
 
-    private enum UIState { Navigation, Options, PlacingFiducial, UpdatingFiducial, DeletingFiducial, SorroundPhoto, Loading, RobotList }
+    private enum UIState { Navigation, Options, PlacingFiducial, UpdatingFiducial, DeletingFiducial, SorroundPhoto, Loading, RobotList, SetRobotPosition, SetRobotOrientation}
     private enum RobotDrivingUIState { NoRobotSelected, RobotStopped, RobotDriving, RobotPaused }
     private enum WaypointMode { Point, Route }
 
@@ -69,6 +70,7 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Button _addFiducial;
     [SerializeField] private Button _updateFiducial;
     [SerializeField] private Button _deleteFiducial;
+    [SerializeField] private Button _overrideRobotPosition;
     [SerializeField] private Button _exitApplication;
     [SerializeField] private Button _closeOptions;
 
@@ -151,6 +153,14 @@ public class PlayerUIController : MonoBehaviour
                 case UIState.RobotList:
                     ActivatePanels(_rightPanel, _robotPanel);
                     break;
+                case UIState.SetRobotPosition:
+                    ActivatePanels(_donePanel);
+                    SetInfoText("Click to set the position of the robot");
+                    break;
+                case UIState.SetRobotOrientation:
+                    ActivatePanels(_donePanel);
+                    SetInfoText("Click to set robot orientation (Robot will face this point)");
+                    break;
             }
         }
     }
@@ -230,6 +240,9 @@ public class PlayerUIController : MonoBehaviour
     private Dictionary<RobotMasterController.Robot, RobotListItem> _robotListItems = new Dictionary<RobotMasterController.Robot, RobotListItem>();
     private bool _refreshingRobotList;
     private int _robotsLeftToRefresh;
+    private bool _shouldUpdateRobotList;
+    private Vector3 _robotOverridePosition;
+    private Quaternion _robotOverrideOrientation;
 
     void Awake()
     {
@@ -266,6 +279,7 @@ public class PlayerUIController : MonoBehaviour
         _robotListClose.onClick.AddListener(RobotListCloseClick);
         _robotListRefreshList.onClick.AddListener(RobotListRefreshClick);
         _robotList.onClick.AddListener(RobotListClick);
+        _overrideRobotPosition.onClick.AddListener(OverrideRobotPositionClick);
 
         _toggleWaypointPointColorBlock = _toggleWaypointMode.colors;
 
@@ -308,7 +322,6 @@ public class PlayerUIController : MonoBehaviour
     {
         if (_refreshingRobotList)
         {
-            UpdateRobotList();
             if (_robotsLeftToRefresh <= 0)
             {
                 _robotRefreshText.text = "Refresh";
@@ -319,6 +332,11 @@ public class PlayerUIController : MonoBehaviour
             {
                 _robotRefreshText.text = "Refreshing: " + _robotsLeftToRefresh + "/" + RobotMasterController.Robots.Count + "...";
             }
+        }
+        if (_shouldUpdateRobotList)
+        {
+            UpdateRobotList();
+            _shouldUpdateRobotList = false;
         }
     }
 
@@ -346,18 +364,39 @@ public class PlayerUIController : MonoBehaviour
     private void OnFinishedGeneratingCampus(int campusId)
     {
         _selectRobot.options = new List<Dropdown.OptionData>();
-        _selectRobot.options.Add(new Dropdown.OptionData("No Robot Selected"));
+        _selectRobot.options.Add(new Dropdown.OptionData("None"));
         _selectRobot.RefreshShownValue();
         _selectRobot.interactable = true;
+        _robotList.interactable = true;
+        _goToBuilding.interactable = true;
+        _buildingName.interactable = true;
+        _toggleWaypointMode.interactable = true;
+        _clearAllWaypoints.interactable = true;
+        _routeName.interactable = true;
+        _loadRoute.interactable = true;
+        _saveRoute.interactable = true;
+        _layerUp.interactable = true;
+        _layerDown.interactable = true;
     }
 
-    #region ButtonClickEvents
-    private void GenerateCampusButtonOnClick()
+    private void Cleanup()
     {
         MazeMapController.Instance.ClearAll();
+        WaypointController.Instance.ClearAllWaypoints();
+        RobotMasterController.Instance.DisconnectAllRobots();
+        _selectRobot.value = 0;
+        _selectRobot.RefreshShownValue();
+        OnSelectedRobotValueChanged(0);
+    }
+
+    private IEnumerator GenerateCampus()
+    {
+        Cleanup();
         int id = -1;
         _loadingFill.fillAmount = 0;
         CurrentUIState = UIState.Loading;
+
+        yield return new WaitForSeconds(2);
         if (int.TryParse(_campusId.text, out id))
         {
             MazeMapController.Instance.GenerateCampus(id);
@@ -366,6 +405,12 @@ public class PlayerUIController : MonoBehaviour
         {
             Debug.LogError("Cannot parse CampusId to int");
         }
+    }
+
+    #region ButtonClickEvents
+    private void GenerateCampusButtonOnClick()
+    {
+        StartCoroutine(GenerateCampus());
     }
 
     private void GoToBuildingOnClick()
@@ -505,7 +550,7 @@ public class PlayerUIController : MonoBehaviour
         switch (CurrentUIState)
         {
             case UIState.UpdatingFiducial:
-                FiducialController.Instance.CancelUpdate();
+                FiducialController.Instance.FinalizeUpdate();
                 UnregisterMouseClick();
                 CurrentUIState = UIState.Navigation;
                 FiducialController.Instance.SetFiducialColliders(false);
@@ -514,6 +559,10 @@ public class PlayerUIController : MonoBehaviour
                 FiducialController.Instance.FinalizeDelete();
                 UnregisterMouseClick();
                 FiducialController.Instance.SetFiducialColliders(false);
+                CurrentUIState = UIState.Navigation;
+                break;
+            case UIState.SetRobotPosition:
+            case UIState.SetRobotOrientation:
                 CurrentUIState = UIState.Navigation;
                 break;
         }
@@ -533,6 +582,10 @@ public class PlayerUIController : MonoBehaviour
                 FiducialController.Instance.CancelDelete();
                 UnregisterMouseClick();
                 FiducialController.Instance.SetFiducialColliders(false);
+                CurrentUIState = UIState.Navigation;
+                break;
+            case UIState.SetRobotPosition:
+            case UIState.SetRobotOrientation:
                 CurrentUIState = UIState.Navigation;
                 break;
         }
@@ -576,6 +629,12 @@ public class PlayerUIController : MonoBehaviour
         }
         else
             RobotMasterController.Instance.DisconnectRobot(uri);
+    }
+
+    private void OverrideRobotPositionClick()
+    {
+        CurrentUIState = UIState.SetRobotPosition;
+        RegisterMouseClick();
     }
 
     #endregion
@@ -671,6 +730,14 @@ public class PlayerUIController : MonoBehaviour
                     break;
                 case UIState.Loading:
                     break;
+                case UIState.SetRobotPosition:
+                    _robotOverridePosition = hit.point;
+                    CurrentUIState = UIState.SetRobotOrientation;
+                    break;
+                case UIState.SetRobotOrientation:
+                    _robotOverrideOrientation = Quaternion.LookRotation(hit.point - _robotOverridePosition, Vector3.up);
+                    FinalizeRobotPositionOverride();
+                    break;
             }
         }
     }
@@ -736,6 +803,13 @@ public class PlayerUIController : MonoBehaviour
         _infoPanel.SetActive(false);
     }
 
+    private void FinalizeRobotPositionOverride()
+    {
+        RobotMasterController.SelectedRobot.OverridePositionAndOrientation(_robotOverridePosition, _robotOverrideOrientation);
+        UnregisterMouseClick();
+        CurrentUIState = UIState.Navigation;
+    }
+
     public void SetDriveMode(bool isDriving)
     {
         _driveRobot.colors = isDriving ? _driveRobotStopColorBlock : _driveRobotColorBlock;
@@ -786,6 +860,7 @@ public class PlayerUIController : MonoBehaviour
         if (robot == null)
         {
             CurrentRobotDrivingUIState = RobotDrivingUIState.NoRobotSelected;
+            WaypointController.Instance.ClearAllWaypoints();
         }
         else
         {
@@ -831,11 +906,13 @@ public class PlayerUIController : MonoBehaviour
     public void RobotRefreshed()
     {
         _robotsLeftToRefresh--;
+        _shouldUpdateRobotList = true;
     }
 
     public void AddRobotToList(string robotName)
     {
         _selectRobot.options.Add(new Dropdown.OptionData(robotName));
+        _selectRobot.RefreshShownValue();
     }
 
     public void RemoveRobotFromList(string robotName)
@@ -845,8 +922,36 @@ public class PlayerUIController : MonoBehaviour
             if (_selectRobot.options[i].text == robotName)
             {
                 _selectRobot.options.RemoveAt(i);
+                if (i == _selectRobot.value)
+                {
+                    int robotValue = RobotMasterController.ActiveRobots.Count > 0 ? 1 : 0;
+
+                    _selectRobot.value = robotValue;
+                    _selectRobot.RefreshShownValue();
+                    OnSelectedRobotValueChanged(robotValue);
+                }
                 return;
             }
         }
+        _selectRobot.RefreshShownValue();
+    }
+
+    public void SetRouteStatus(bool isRoute)
+    {
+        CurrentWaypointMode = isRoute ? WaypointMode.Route : WaypointMode.Point;
+    }
+
+    public void SelectDefaultRobot()
+    {
+        if (_selectRobot.options.Count > 1)
+        {
+            _selectRobot.value = 1;
+        }
+        else
+        {
+            _selectRobot.value = 0;
+        }
+        _selectRobot.RefreshShownValue();
+
     }
 }

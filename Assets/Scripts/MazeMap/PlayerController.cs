@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _mouseMovementSpeed = 5;
     [SerializeField] private float _mouseScrollSpeed = 10;
     [SerializeField] private float _mouseClickSpeed = 0.1f;
+    [SerializeField] private float _cameraFocusDistance = 10;
     [SerializeField] private Transform _triggerFloor;
 
     private PlayerState _currentPlayerState;
@@ -185,13 +186,18 @@ public class PlayerController : MonoBehaviour
             }
             if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Floor")) return;
             
-            WaypointController.Instance.CreateWaypoint(hit.point);
+            if (RobotMasterController.SelectedRobot != null)
+                WaypointController.Instance.CreateWaypoint(hit.point);
         }
     }
 
     public void FocusCameraOn(Transform target)
     {
-        Vector3 pos = target.position - _camera.transform.forward * target.position.y;
-        transform.position = new Vector3(pos.x, transform.position.y, pos.z);
+        Vector3 cameraPoint = transform.position + _camera.transform.forward * _cameraFocusDistance;
+        Vector3 offset =  target.position - cameraPoint;
+        transform.position += offset;
+
+        //Vector3 pos = target.position - _camera.transform.forward * target.position.y;
+        //transform.position = new Vector3(pos.x, transform.position.y, pos.z);
     }
 }
