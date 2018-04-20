@@ -3,8 +3,6 @@ using ROSBridgeLib.geometry_msgs;
 using ROSBridgeLib.sensor_msgs;
 using ROSBridgeLib.std_msgs;
 using UnityEngine;
-using Time = UnityEngine.Time;
-using Vector3 = UnityEngine.Vector3;
 
 public class WaypointNavigation : MonoBehaviour
 {

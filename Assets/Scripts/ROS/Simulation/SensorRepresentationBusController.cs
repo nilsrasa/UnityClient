@@ -38,6 +38,7 @@ class SensorRepresentationBusController {
 
     //TODO: Change to subscriber/publisher pattern, using topics as keys
     public void Register<T>(SensorRepresentation sensorRepresentation) where T : SensorRepresentationBus {
+        /*
         for (int i = 0; i < SensorRepresentationsBusses.Count; i++) {
             SensorRepresentationBus b = SensorRepresentationsBusses[i];
             if (b.GetType().ToString().Contains(typeof(T).ToString())) {
@@ -51,5 +52,6 @@ class SensorRepresentationBusController {
         sensorBus.Register(sensorRepresentation);
         SensorRepresentationsBusses.Add(sensorBus);
         RobotVisualisation.Instance.StartAgent(sensorBus.ROSAgentType);
+        */
     }
 }

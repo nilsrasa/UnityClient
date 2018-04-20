@@ -13,6 +13,7 @@ public class ROSLocomotionDirect : ROSAgent
 
     public ROSLocomotionDirect(AgentJob job, ROSBridgeWebSocketConnection rosConnection, string topicName)
     {
+        Debug.Log(topicName);
         if (job == AgentJob.Publisher)
         {
             _publisher = new ROSGenericPublisher(rosConnection, topicName, TwistMsg.GetMessageType());
@@ -32,7 +33,7 @@ public class ROSLocomotionDirect : ROSAgent
 
     protected override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 
     /// <param name="linear">Linear movement speed in meter/second</param>

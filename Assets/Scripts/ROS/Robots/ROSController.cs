@@ -53,8 +53,6 @@ public abstract class ROSController : MonoBehaviour
 
     public abstract void MoveDirect(Vector2 movementCommand);
 
-    public abstract void MoveToPoint(GeoPointWGS84 point);
-
     public abstract void MovePath(List<GeoPointWGS84> waypoints);
 
     public abstract void PausePath();

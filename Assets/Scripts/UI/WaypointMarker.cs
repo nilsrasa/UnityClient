@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class WaypointMarker : MonoBehaviour
 {
@@ -15,7 +13,6 @@ public class WaypointMarker : MonoBehaviour
     [SerializeField] private AnimationCurve _bobbingCurve;
 
     //Animation
-    private float _startY;
     private float _scaleCurveIndex;
     private float _bobbingCurveIndex;
     private Vector3 _startLocation;
@@ -29,7 +26,6 @@ public class WaypointMarker : MonoBehaviour
 
     void Start()
     {
-        _startY = _top.position.y;
         _startLocation = _top.localPosition;
     }
 
@@ -59,4 +55,5 @@ public class WaypointMarker : MonoBehaviour
     {
         _collider.enabled = !isLocked;
     }
+
 }

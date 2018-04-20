@@ -231,12 +231,6 @@ public class VirtualRobot : ROSController
         CurrentRobotLocomotionState = RobotLocomotionState.MOVING;
     }
 
-    public override void MoveToPoint(GeoPointWGS84 point)
-    {
-        Waypoints.Clear();
-        Waypoints.Add(point);
-    }
-
     public override void MovePath(List<GeoPointWGS84> waypoints)
     {
         Waypoints = waypoints;
