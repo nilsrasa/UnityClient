@@ -36,21 +36,12 @@ public class ConfigManager
         ConfigFile userConfigFile = JsonUtility.FromJson<ConfigFile>(userFileJson);
         ConfigFile def = new ConfigFile();
 
-        if (def.RosMasterUri != userConfigFile.RosMasterUri) ConfigFile.RosMasterUri = userConfigFile.RosMasterUri;
-        if (def.RosMasterPort != userConfigFile.RosMasterPort) ConfigFile.RosMasterPort = userConfigFile.RosMasterPort;
-        if (def.WaypointDistanceThreshold != userConfigFile.WaypointDistanceThreshold) ConfigFile.WaypointDistanceThreshold = userConfigFile.WaypointDistanceThreshold;
-        if (def.MaxLinearSpeed != userConfigFile.MaxLinearSpeed) ConfigFile.MaxLinearSpeed = userConfigFile.MaxLinearSpeed;
-        if (def.MaxAngularSpeed != userConfigFile.MaxAngularSpeed) ConfigFile.MaxAngularSpeed = userConfigFile.MaxAngularSpeed;
-        if (def.ControlParameterRho != userConfigFile.ControlParameterRho) ConfigFile.ControlParameterRho = userConfigFile.ControlParameterRho;
-        if (def.ControlParameterRoll != userConfigFile.ControlParameterRoll) ConfigFile.ControlParameterRoll = userConfigFile.ControlParameterRoll;
-        if (def.ControlParameterPitch != userConfigFile.ControlParameterPitch) ConfigFile.ControlParameterPitch = userConfigFile.ControlParameterPitch;
-        if (def.ControlParameterYaw != userConfigFile.ControlParameterYaw) ConfigFile.ControlParameterYaw = userConfigFile.ControlParameterYaw;
         if (def.FloorHeightAboveGround != userConfigFile.FloorHeightAboveGround) ConfigFile.FloorHeightAboveGround = userConfigFile.FloorHeightAboveGround;
         if (def.FloorLineWidth != userConfigFile.FloorLineWidth) ConfigFile.FloorLineWidth = userConfigFile.FloorLineWidth;
         if (def.UtmZone != userConfigFile.UtmZone) ConfigFile.UtmZone = userConfigFile.UtmZone;
         if (def.IsUtmNorth != userConfigFile.IsUtmNorth) ConfigFile.IsUtmNorth = userConfigFile.IsUtmNorth;
         if (def.ZeroFiducial != userConfigFile.ZeroFiducial) ConfigFile.ZeroFiducial = userConfigFile.ZeroFiducial;
-        if (def.Routes != userConfigFile.Routes) ConfigFile.RosMasterUri = userConfigFile.RosMasterUri;
+        if (def.Routes != userConfigFile.Routes) ConfigFile.Routes = userConfigFile.Routes;
     }
 
     private static void SaveUserConfig()

@@ -32,21 +32,13 @@ public class ArlobotROSController : ROSController {
     private float _waypointDistanceThreshhold = 0.1f;
     private float _maxLinearSpeed;
     private float _maxAngularSpeed;
-    private float _controlParameterRho;
-    private float _controlParameterRoll;
-    private float _controlParameterPitch;
-    private float _controlParameterYaw;
 
     void Awake()
     {
         Instance = this;
-        _waypointDistanceThreshhold = ConfigManager.ConfigFile.WaypointDistanceThreshold;
-        _maxLinearSpeed = ConfigManager.ConfigFile.MaxLinearSpeed;
-        _maxAngularSpeed = ConfigManager.ConfigFile.MaxAngularSpeed;
-        _controlParameterRho = ConfigManager.ConfigFile.ControlParameterRho;
-        _controlParameterRoll = ConfigManager.ConfigFile.ControlParameterRoll;
-        _controlParameterPitch = ConfigManager.ConfigFile.ControlParameterPitch;
-        _controlParameterYaw = ConfigManager.ConfigFile.ControlParameterYaw;
+        _waypointDistanceThreshhold = RobotConfig.WaypointDistanceThreshold;
+        _maxLinearSpeed = RobotConfig.MaxLinearSpeed;
+        _maxAngularSpeed = RobotConfig.MaxAngularSpeed;
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
 
@@ -147,7 +139,7 @@ public class ArlobotROSController : ROSController {
 
         _rosLocomotionLinear.PublishData(new Float32Msg(_maxLinearSpeed));
         _rosLocomotionAngular.PublishData(new Float32Msg(_maxAngularSpeed));
-        _rosLocomotionControlParams.PublishData(_controlParameterRho, _controlParameterRoll, _controlParameterPitch, _controlParameterYaw);
+        _rosLocomotionControlParams.PublishData(RobotConfig.LinearSpeedParameter, RobotConfig.RollSpeedParameter, RobotConfig.PitchSpeedParameter, RobotConfig.AngularSpeedParameter);
     }
 
     private void Move(Vector3 position)

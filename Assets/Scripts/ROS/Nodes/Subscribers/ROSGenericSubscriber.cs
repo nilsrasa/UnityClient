@@ -25,7 +25,6 @@ public class ROSGenericSubscriber<T> : ROSBridgeSubscriber where T : ROSBridgeMs
     public void Stop()
     {
         _isRunning = false;
-        //Unsubscribe? q
     }
 
     public override ROSBridgeMsg ParseMessage(JSONNode msg)

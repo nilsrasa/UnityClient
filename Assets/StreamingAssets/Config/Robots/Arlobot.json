@@ -6,5 +6,7 @@
 	"MaxLinearSpeed": 1.0,
 	"MaxAngularSpeed": 1.0,
 	"LinearSpeedParameter": 2.0,
-	"AngularSpeedParameter": 1.0
+	"AngularSpeedParameter": 1.0,
+	"PitchSpeedParameter": 1.0,
+	"RollSpeedParameter": 1.0
 }

@@ -49,7 +49,7 @@ public class VirtualRobot : ROSController
         _waypointNavigationModule = GetComponent<WaypointNavigation>();
         OnRosStarted += _waypointNavigationModule.InitialiseRos;
 
-        _waypointDistanceThreshhold = ConfigManager.ConfigFile.WaypointDistanceThreshold;
+        _waypointDistanceThreshhold = RobotConfig.WaypointDistanceThreshold;
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
     }
@@ -181,10 +181,9 @@ public class VirtualRobot : ROSController
         _rosLocomotionAngular = new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());
         _rosLocomotionControlParams = new ROSLocomotionControlParams(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/control_parameters");
 
-        _rosLocomotionLinear.PublishData(new Float32Msg(ConfigManager.ConfigFile.MaxLinearSpeed));
-        _rosLocomotionAngular.PublishData(new Float32Msg(ConfigManager.ConfigFile.MaxAngularSpeed));
-        _rosLocomotionControlParams.PublishData(ConfigManager.ConfigFile.ControlParameterRho, ConfigManager.ConfigFile.ControlParameterRoll,
-            ConfigManager.ConfigFile.ControlParameterPitch, ConfigManager.ConfigFile.ControlParameterYaw);
+        _rosLocomotionLinear.PublishData(new Float32Msg(RobotConfig.MaxLinearSpeed));
+        _rosLocomotionAngular.PublishData(new Float32Msg(RobotConfig.MaxAngularSpeed));
+        _rosLocomotionControlParams.PublishData(RobotConfig.LinearSpeedParameter, RobotConfig.RollSpeedParameter, RobotConfig.PitchSpeedParameter, RobotConfig.AngularSpeedParameter);
     }
 
     public override void MoveDirect(Vector2 command)

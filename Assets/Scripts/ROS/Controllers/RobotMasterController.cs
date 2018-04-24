@@ -83,14 +83,14 @@ public class RobotMasterController : MonoBehaviour
 
             if (!robotFile.Campuses.Contains(campusId)) continue;
 
-            if (!robotFile.RosMasterUri.Contains("ws://"))
-                robotFile.RosMasterUri = "ws://" + robotFile.RosMasterUri;
+            if (!robotFile.RosBridgeUri.Contains("ws://"))
+                robotFile.RosBridgeUri = "ws://" + robotFile.RosBridgeUri;
             ;
 
-            ROSBridgeWebSocketConnection rosBridge = new ROSBridgeWebSocketConnection(robotFile.RosMasterUri, robotFile.RosMasterPort);
+            ROSBridgeWebSocketConnection rosBridge = new ROSBridgeWebSocketConnection(robotFile.RosBridgeUri, robotFile.RosBridgePort);
 
-            Robot robot = new Robot(robotFile.Campuses, rosBridge, robotName, robotFile.RosMasterUri, robotFile.RosMasterPort, false, robotFile);
-            Robots.Add(robotFile.RosMasterUri, robot);
+            Robot robot = new Robot(robotFile.Campuses, rosBridge, robotName, robotFile.RosBridgeUri, robotFile.RosBridgePort, false, robotFile);
+            Robots.Add(robotFile.RosBridgeUri, robot);
         }
 
         PlayerUIController.Instance.LoadRobots(Robots.Select( robot => robot.Value).ToList());
@@ -137,7 +137,7 @@ public class RobotMasterController : MonoBehaviour
     public void RobotLostConnection(ROSController robot)
     {
         Debug.LogError("Robot [" + robot.gameObject.name + "] lost connection!");
-        DisconnectRobot(robot.RobotConfig.RosMasterUri);
+        DisconnectRobot(robot.RobotConfig.RosBridgeUri);
         PlayerUIController.Instance.UpdateRobotList();
         if (ActiveRobots.Count > 0)
             SelectRobot(ActiveRobots.First().Value);
@@ -183,7 +183,7 @@ public class RobotMasterController : MonoBehaviour
         PlayerUIController.Instance.RemoveRobotFromList(Robots[uri].Name);
 
         if (SelectedRobot != null)
-            if (SelectedRobot.RobotConfig.RosMasterUri == uri)
+            if (SelectedRobot.RobotConfig.RosBridgeUri == uri)
             {
                 SelectedRobot = null;
                 WaypointController.Instance.ClearAllWaypoints();
