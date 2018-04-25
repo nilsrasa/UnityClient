@@ -56,7 +56,6 @@ public class RobotInterface : MonoBehaviour {
     }
 
     private void SendCommandToRobot(Vector2 controlOutput) {
-        Debug.Log(controlOutput);
         Vector2 movement = new Vector2(controlOutput.y, - controlOutput.x);
         _rosLocomotionDirect.PublishData(movement.x, movement.y);
         _isStopped = false;
