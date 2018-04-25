@@ -1,4 +1,5 @@
 ﻿using System;
+using ROSBridgeLib;
 //using System.IO.Ports;
 using UnityEngine;
 
@@ -17,64 +18,33 @@ public class RobotInterface : MonoBehaviour {
         ParkingBrakeDisengaged,
         StopRobot 
     }
-    public enum RobotType { Telerobot, LegoRobot, Arlobot }
     public static RobotInterface Instance { get; private set; }
     public bool Parked { get; private set; }
     
-    [Header("Robot Control Parameters")]
-    public RobotType ControlledRobotType = RobotType.LegoRobot;
     public bool IsConnected { get; private set; }
     public AnimationCurve SpeedCurve;
 
-    
     [SerializeField] private int _motorMaxSpeed = 255;
     [SerializeField] private int _motorMinSpeed = 60;
     [SerializeField] private float _commandTimer = 50;
-
-    [Header("Serialport Parameters")]
-    [SerializeField] private int _portNumber;
-    [SerializeField] private int baudRate = 9600;
-    [SerializeField] private int dataBits = 8;
 
     private float _timer = 0;
     private string _portName;
    // private SerialPort HWPort;
     private bool _left, _right, _forward, _reverse;
 
+    private bool _isStopped;
+
+    private ROSLocomotionDirect _rosLocomotionDirect;
+    private ROSBridgeWebSocketConnection _rosBridge;
+
     void Awake() {
         Instance = this;
-        if (_portNumber > 9)
-            _portName += @"\\.\";
-        _portName += "COM" + _portNumber;
-    }
-
-    void Start() {
-        switch (ControlledRobotType)
-        {
-            case RobotType.Telerobot:
-            case RobotType.LegoRobot:
-                try {
-                    Debug.Log("Trying to open port to robot control on port: " + _portName);
-                    //HWPort = new SerialPort(_portName, baudRate);
-                    //HWPort.Open();
-                    Debug.Log("Success open serial port to robot control ");
-                    Connect();
-                }
-                catch (Exception ex) {
-                    Debug.Log("Serial port to robot control error: " + ex.Message.ToString());
-                }
-                break;
-            case RobotType.Arlobot:
-                Connect();
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-        
     }
 
     void OnApplicationQuit() {
-        //HWPort.Close();     
+        if (_rosBridge != null)
+            _rosBridge.Disconnect();
     }
 
     private string GetMotorSpeedString(float speed) {
@@ -86,78 +56,17 @@ public class RobotInterface : MonoBehaviour {
     }
 
     private void SendCommandToRobot(Vector2 controlOutput) {
-        switch (ControlledRobotType)
-        {
-            case RobotType.Telerobot:
-            case RobotType.LegoRobot:
-                int leftMotorDrive, rightMotorDrive;
-                leftMotorDrive = rightMotorDrive = 1;
-                float leftMotorSpeed, rightMotorSpeed;
-                leftMotorSpeed = rightMotorSpeed = 0;
-
-                string commandString = "DK00";
-                if (controlOutput == Vector2.zero)
-                    leftMotorDrive = rightMotorDrive = 2;
-                else if (controlOutput.x == 0) {
-                    if (controlOutput.y > 0)
-                        leftMotorDrive = rightMotorDrive = 2;
-                    else
-                        leftMotorDrive = rightMotorDrive = 0;
-                    leftMotorSpeed = rightMotorSpeed = controlOutput.y;
-                }
-                else if (controlOutput.y == 0) {
-                    if (controlOutput.x > 0) {
-                        leftMotorDrive = 0;
-                        rightMotorDrive = 2;
-                    }
-                    else {
-                        leftMotorDrive = 2;
-                        rightMotorDrive = 0;
-                    }
-                    leftMotorSpeed = rightMotorSpeed = controlOutput.x;
-                }
-                else {
-                    if (controlOutput.x < 0) {
-                        leftMotorSpeed = controlOutput.y * 0.75f;
-                        rightMotorSpeed = (Mathf.Abs(controlOutput.x) + 1) / 2;
-                    }
-                    else if (controlOutput.x > 0) {
-                        rightMotorSpeed = controlOutput.y * 0.75f;
-                        leftMotorSpeed = (Mathf.Abs(controlOutput.x) + 1) / 2;
-                    }
-                    leftMotorDrive = rightMotorDrive = controlOutput.y > 0 ? 2 : 0;
-                }
-
-                commandString += "" + leftMotorDrive + GetMotorSpeedString(leftMotorSpeed) + rightMotorDrive +
-                                 GetMotorSpeedString(rightMotorSpeed);
-
-               // if (HWPort.IsOpen)
-                 //   HWPort.Write(commandString);
-                break;
-            case RobotType.Arlobot:
-                Vector2 movement = new Vector2(-controlOutput.x, controlOutput.y);
-                ArlobotROSController.Instance.MoveDirect(movement);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-        
-    }
+        Debug.Log(controlOutput);
+        Vector2 movement = new Vector2(controlOutput.y, - controlOutput.x);
+        _rosLocomotionDirect.PublishData(movement.x, movement.y);
+        _isStopped = false;
+    }   
 
     public void StopRobot()
     {
-        switch (ControlledRobotType)
-        {
-            case RobotType.Telerobot:
-                break;
-            case RobotType.LegoRobot:
-                break;
-            case RobotType.Arlobot:
-                ArlobotROSController.Instance.StopRobot();
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        if (!IsConnected || _isStopped) return;
+        _rosLocomotionDirect.PublishData(0, 0);
+        _isStopped = true;
     }
 
     public void SendCommand(Vector2 controlOutput) {
@@ -194,6 +103,9 @@ public class RobotInterface : MonoBehaviour {
     }
 
     public void Connect() {
+        _rosBridge = new ROSBridgeWebSocketConnection("ws://Raspi-ROS-02", 9090);
+        _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Publisher, _rosBridge, "/cmd_vel");
+        _rosBridge.Connect(((s, b) => {Debug.Log(s + " - " + b);}));
         IsConnected = true;
     }
 }

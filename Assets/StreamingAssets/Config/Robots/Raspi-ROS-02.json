@@ -1,7 +1,7 @@
 {
 	"Campuses": [ 89, 88 ],
-	"RosMasterUri": "asdRaspi-ROS-02",
-	"RosMasterPort": 9090,
+	"RosBridgeUri": "asdRaspi-ROS-02",
+	"RosBridgePort": 9090,
 	"WaypointDistanceThreshold": 0.44999998807907107,
 	"MaxLinearSpeed": 1.0,
 	"MaxAngularSpeed": 1.0,

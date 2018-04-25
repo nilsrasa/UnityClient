@@ -13,7 +13,6 @@ public class ROSLocomotionDirect : ROSAgent
 
     public ROSLocomotionDirect(AgentJob job, ROSBridgeWebSocketConnection rosConnection, string topicName)
     {
-        Debug.Log(topicName);
         if (job == AgentJob.Publisher)
         {
             _publisher = new ROSGenericPublisher(rosConnection, topicName, TwistMsg.GetMessageType());
