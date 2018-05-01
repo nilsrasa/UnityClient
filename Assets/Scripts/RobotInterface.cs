@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using ROSBridgeLib;
 //using System.IO.Ports;
 using UnityEngine;
@@ -18,6 +19,9 @@ public class RobotInterface : MonoBehaviour {
         ParkingBrakeDisengaged,
         StopRobot 
     }
+
+    private string _telerobotConfigPath;
+
     public static RobotInterface Instance { get; private set; }
     public bool Parked { get; private set; }
     
@@ -32,14 +36,20 @@ public class RobotInterface : MonoBehaviour {
     private string _portName;
    // private SerialPort HWPort;
     private bool _left, _right, _forward, _reverse;
-
     private bool _isStopped;
-
     private ROSLocomotionDirect _rosLocomotionDirect;
     private ROSBridgeWebSocketConnection _rosBridge;
+    private Telerobot_ThetaFile _telerobotConfigFile;
 
     void Awake() {
         Instance = this;
+        _telerobotConfigPath = Application.streamingAssetsPath + "/Config/Telerobot_ThetaS.json";
+    }
+
+    void Start()
+    {
+        string robotFileJson = File.ReadAllText(_telerobotConfigPath);
+        _telerobotConfigFile = JsonUtility.FromJson<Telerobot_ThetaFile>(robotFileJson);
     }
 
     void OnApplicationQuit() {
@@ -102,7 +112,7 @@ public class RobotInterface : MonoBehaviour {
     }
 
     public void Connect() {
-        _rosBridge = new ROSBridgeWebSocketConnection("ws://Raspi-ROS-02", 9090);
+        _rosBridge = new ROSBridgeWebSocketConnection(_telerobotConfigFile.ROSBridgeUri, _telerobotConfigFile.ROSBridgePort);
         _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Publisher, _rosBridge, "/cmd_vel");
         _rosBridge.Connect(((s, b) => {Debug.Log(s + " - " + b);}));
         IsConnected = true;
