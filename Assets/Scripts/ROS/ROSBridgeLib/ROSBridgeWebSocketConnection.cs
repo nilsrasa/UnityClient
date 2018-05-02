@@ -93,11 +93,29 @@ namespace ROSBridgeLib
         public void AddSubscriber(ROSBridgeSubscriber subscriber)
         {
             _subscribers.Add(subscriber);
+            if (IsConnected)
+                WebSocket.Send(ROSBridgeMsg.Subscribe(subscriber.GetMessageTopic(), subscriber.GetMessageType()));
         }
 
         public void AddPublisher(ROSBridgePublisher publisher)
         {
             _publishers.Add(publisher);
+            if (IsConnected)
+                WebSocket.Send(ROSBridgeMsg.Advertise(publisher.GetMessageTopic(), publisher.GetMessageType()));
+        }
+
+        public void RemoveSubcriber(ROSBridgeSubscriber subscriber)
+        {
+            _subscribers.Remove(subscriber);
+            if (IsConnected)
+                WebSocket.Send(ROSBridgeMsg.UnSubscribe(subscriber.GetMessageTopic()));
+        }
+
+        public void RemovePublisher(ROSBridgePublisher publisher)
+        {
+            _publishers.Remove(publisher);
+            if (IsConnected)
+                WebSocket.Send(ROSBridgeMsg.UnAdvertise(publisher.GetMessageTopic()));
         }
 
         /// <summary>
@@ -133,6 +151,7 @@ namespace ROSBridgeLib
             _subscribers = new List<ROSBridgeSubscriber>();
             _publishers = new List<ROSBridgePublisher>();
             WebSocket.Close();
+            IsConnected = false;
         }
 
         private void Run(Action<string, bool> callback)

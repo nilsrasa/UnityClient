@@ -14,10 +14,10 @@ public class FiducialController : MonoBehaviour
     private const string FIDUCIAL_RESOURCE_NAME = "FiducialMarker";
 
     [SerializeField] private float _publishInterval = 3;
-    [SerializeField] private bool _publishInGps = true;
     [SerializeField] private bool _saveFiducials;
 
-    private ROSBridgeWebSocketConnection _rosConnection;
+    private ROSBridgeWebSocketConnection _rosBridge;
+    private ROSGenericPublisher _rosFiducialMapPublisher;
     private Dictionary<int, FiducialObject> _fiducialObjects = new Dictionary<int, FiducialObject>();
     private Dictionary<int, Fiducial> _fiducials = new Dictionary<int, Fiducial>();
     private string _fiducialSavePath;
@@ -29,6 +29,7 @@ public class FiducialController : MonoBehaviour
     private Fiducial _tempFiducial;
     private Transform _fiducialToUpdate;
     private List<int> _fiducialsToDelete;
+    private Coroutine _publishLoop;
 
     void Awake()
     {
@@ -93,6 +94,9 @@ public class FiducialController : MonoBehaviour
         _fiducials[entry._fiducial_id].transform.localEulerAngles = new Vector3((float)entry._rx * Mathf.Rad2Deg, (float)entry._rz * Mathf.Rad2Deg, (float)entry._ry * Mathf.Rad2Deg);
     }
 
+    /// <summary>
+    /// Serializes FiducialMap into json file and saves files to AppData/LocalLow/DTU-R3 folder.
+    /// </summary>
     private void SaveFiducials()
     {
         if (_fiducialObjects.Count == 0) return;
@@ -141,7 +145,6 @@ public class FiducialController : MonoBehaviour
                     foreach (FiducialObject fiducialObject in collection.SavedFiducials)
                     {
                         if (fiducialObject.Id == _zeroLocation.FiducialId) continue;
-                        //TODO: Use once markers are place correctly
 
                         InstantiateFiducial(fiducialObject);
                         _fiducialObjects.Add(fiducialObject.Id, fiducialObject);
@@ -153,35 +156,26 @@ public class FiducialController : MonoBehaviour
     }
 
     /// <summary>
-    /// Publishes known fiducials to corresponding topic
+    /// Creates entire FiducialMapEntryArrayMsg to be published.
     /// </summary>
-    /// <param name="inGps">true: Publishes fiducials in WGS84 coordinates.
-    /// false: Publishes fiducials in fiducial space.</param>
-    private FiducialMapEntryArrayMsg GetFiducialMapForPublish(bool inGps)
+    private FiducialMapEntryArrayMsg GetFiducialMapForPublish()
     {
-        /*
         FiducialMapEntryMsg[] mapEntries = new FiducialMapEntryMsg[_fiducialObjects.Count];
         for (int i = 0; i < _fiducialObjects.Count; i++)
         {
             FiducialObject f = _fiducialObjects.ElementAt(i).Value;
-            if (inGps)
-            {
-                mapEntries[i] = new FiducialMapEntryMsg(f.Id, f.Position.latitude, f.Position.longitude, f.Position.altitude, f.FiducialSpaceData.RX, f.FiducialSpaceData.RY, f.FiducialSpaceData.RZ);
-            }
-            else
-            {
-                mapEntries[i] = new FiducialMapEntryMsg(f.Id, f.FiducialSpaceData.X, f.FiducialSpaceData.Y, f.FiducialSpaceData.Z, f.FiducialSpaceData.RX, f.FiducialSpaceData.RY, f.FiducialSpaceData.RZ);
-            }
+            mapEntries[i] = CreateFiducialMapEntryMessage(f.Id, f.Position, f.Rotation);
         }
-        FiducialMapEntryArrayMsg mapEntryArray = new FiducialMapEntryArrayMsg(mapEntries);
-        */
-        return null;
+        return new FiducialMapEntryArrayMsg(mapEntries);
     }
 
-    public void Initialise(ROSBridgeWebSocketConnection rosConnection)
+    private IEnumerator PublishLoop(float interval)
     {
-        _rosConnection = rosConnection;
-        Initialise();
+        while (_rosBridge != null)
+        {
+            _rosFiducialMapPublisher.PublishData(GetFiducialMapForPublish());
+            yield return new WaitForSeconds(interval);
+        }
     }
 
     public int PlaceOrUpdateNewFiducial(int id, Vector3 position, Vector3 rotation)
@@ -240,6 +234,9 @@ public class FiducialController : MonoBehaviour
         return highestId + 1;
     }
 
+    /// <summary>
+    /// Enables colliders on all fiducials for click events.
+    /// </summary>
     public void SetFiducialColliders(bool isActive)
     {
         foreach (KeyValuePair<int, Fiducial> fiducial in _fiducials)
@@ -321,6 +318,39 @@ public class FiducialController : MonoBehaviour
         _fiducialToUpdate = null;
     }
 
+    /// <summary>
+    /// Transforms WGS84 coordinate and GeoRotation into fiducialEntryMessage.
+    /// </summary>
+    public FiducialMapEntryMsg CreateFiducialMapEntryMessage(int fiducialId, GeoPointWGS84 wgsPoint, GeoRotation geoRotation)
+    {
+        return new FiducialMapEntryMsg(fiducial_id: fiducialId, x: wgsPoint.longitude, y: wgsPoint.latitude, z: wgsPoint.altitude,
+            rx: geoRotation.east, ry: geoRotation.north, rz: geoRotation.heading);
+    }
+
+    /// <summary>
+    /// Register rosbridge and start publishing FiducialMapEntryArrayMsg to bridge.
+    /// </summary>
+    public void Register(ROSBridgeWebSocketConnection rosBridge)
+    {
+        if (_rosBridge != null)
+        {
+            Unregister(_rosBridge);
+        }
+        _rosBridge = rosBridge;
+        _rosFiducialMapPublisher = new ROSGenericPublisher(rosBridge, "/fiducial_map_gps", FiducialMapEntryArrayMsg.GetMessageType());
+        _publishLoop = StartCoroutine(PublishLoop(_publishInterval));
+    }
+
+    /// <summary>
+    /// Unregister rosbridge to stop receiving FiducialMapEntryArrayMsgs on bridge.
+    /// </summary>
+    public void Unregister(ROSBridgeWebSocketConnection rosBridge)
+    {
+        if (_rosBridge != rosBridge) return;
+        StopCoroutine(_publishLoop);
+        _rosFiducialMapPublisher.Stop();
+        _rosBridge = null;
+    }
 }
 
 [Serializable]

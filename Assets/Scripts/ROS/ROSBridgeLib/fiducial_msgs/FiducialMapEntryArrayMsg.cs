@@ -4,20 +4,20 @@ namespace ROSBridgeLib {
 	namespace fiducial_msgs {
 		public class FiducialMapEntryArrayMsg : ROSBridgeMsg
 		{
-		    public FiducialMapEntryMsg[] _fiducials;
+		    public FiducialMapEntryMsg[] Fiducials;
 
             public FiducialMapEntryArrayMsg(JSONNode msg)
             {
-                _fiducials = new FiducialMapEntryMsg[msg["fiducials"].Count];
-                for (int i = 0; i < _fiducials.Length; i++)
+                Fiducials = new FiducialMapEntryMsg[msg["fiducials"].Count];
+                for (int i = 0; i < Fiducials.Length; i++)
                 {
-                    _fiducials[i] = new FiducialMapEntryMsg(msg["fiducials"][i]);
+                    Fiducials[i] = new FiducialMapEntryMsg(msg["fiducials"][i]);
                 }
             }
 
 		    public FiducialMapEntryArrayMsg(FiducialMapEntryMsg[] fiducials)
 		    {
-		        _fiducials = fiducials;
+		        Fiducials = fiducials;
 		    }
 			
 			public static string GetMessageType() {
@@ -26,16 +26,16 @@ namespace ROSBridgeLib {
 			
 			public override string ToString()
 			{
-			    return string.Format("fiducial_msgs/FiducialMapEntryArray [fiducials length={0}]", _fiducials.Length);
+			    return string.Format("fiducial_msgs/FiducialMapEntryArray [fiducials length={0}]", Fiducials.Length);
 			}
 					
 			public override string ToYAMLString()
 			{
 			    string array = "[";
-			    for (int i = 0; i < _fiducials.Length; i++)
+			    for (int i = 0; i < Fiducials.Length; i++)
 			    {
-			        array = array + _fiducials[i].ToYAMLString();
-			        if (i < _fiducials.Length - 1)
+			        array = array + Fiducials[i].ToYAMLString();
+			        if (i < Fiducials.Length - 1)
 			        array += ",";
 			    }
 			    array += "]";

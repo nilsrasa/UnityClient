@@ -32,70 +32,59 @@ public static class GeoUtils {
         _utmOrigin = default(GeoPointUTM);
     }
 
-    public static GeoPointWGS84 ToWGS84(this GeoPointMercator geoPoint) 
+    #region Geo Transformations
+    public static GeoPointWGS84 ToWGS84(this GeoPointMercator geoPoint)
     {
         GeoPointWGS84 wgs84 = new GeoPointWGS84(_transformationFromMercatorToWGS84.MathTransform.Transform(geoPoint.ToArray()))
-            {
-                altitude = geoPoint.altitude
-            };
+        {
+            altitude = geoPoint.altitude
+        };
         return wgs84;
     }
 
     public static GeoPointWGS84 ToWGS84(this GeoPointUTM geoPoint)
     {
         GeoPointWGS84 wgs84 = new GeoPointWGS84(_transformationFromUTMToUGS84.MathTransform.Transform(geoPoint.ToArray()))
-            {
-                altitude = geoPoint.altitude
-            };
+        {
+            altitude = geoPoint.altitude
+        };
         return wgs84;
     }
 
     public static GeoPointUTM ToUTM(this GeoPointWGS84 geoPoint)
     {
         GeoPointUTM utm = new GeoPointUTM(_transformationFromWGS84ToUTM.MathTransform.Transform(geoPoint.ToArray()))
-            {
-                altitude = geoPoint.altitude
-            };
+        {
+            altitude = geoPoint.altitude
+        };
         return utm;
     }
 
     public static GeoPointUTM ToUTM(this GeoPointMercator geoPoint)
     {
         GeoPointUTM utm = new GeoPointUTM(_transformationFromMercatorToUTM.MathTransform.Transform(geoPoint.ToArray()))
-            {
-                altitude = geoPoint.altitude
-            };
+        {
+            altitude = geoPoint.altitude
+        };
         return utm;
     }
 
     public static GeoPointMercator ToMercator(this GeoPointUTM geoPoint)
     {
         GeoPointMercator mercator = new GeoPointMercator(_transformationFromUTMToMercator.MathTransform.Transform(geoPoint.ToArray()))
-            {
-                altitude = geoPoint.altitude
-            };
+        {
+            altitude = geoPoint.altitude
+        };
         return mercator;
     }
 
     public static GeoPointMercator ToMercator(this GeoPointWGS84 geoPoint)
     {
         GeoPointMercator mercator = new GeoPointMercator(_transformationFromWGS84ToMercator.MathTransform.Transform(geoPoint.ToArray()))
-            {
-                altitude = geoPoint.altitude
-            };
+        {
+            altitude = geoPoint.altitude
+        };
         return mercator;
-    }
-
-    public static GeoRotation ToGeoRotation(this Vector3 unityRotation)
-    {
-        GeoRotation geoRotation = new GeoRotation(unityRotation.y, unityRotation.z, unityRotation.x);
-        return geoRotation;
-    }
-
-    public static Vector3 ToUnity(this GeoRotation geoRotation)
-    {
-        Vector3 unityRotation = new Vector3(x: (float)geoRotation.east, y: (float)geoRotation.heading, z: (float)geoRotation.north);
-        return unityRotation;
     }
 
     public static GeoPointUTM UtmOrigin
@@ -110,7 +99,8 @@ public static class GeoUtils {
 
     public static GeoPointUTM ToUTM(this Vector3 position)
     {
-        return _utmOrigin + new GeoPointUTM {
+        return _utmOrigin + new GeoPointUTM
+        {
             latitude = position.z,
             longitude = position.x,
             altitude = position.y,
@@ -122,4 +112,22 @@ public static class GeoUtils {
         GeoPointUTM ucs = geoPoint - _utmOrigin;
         return new Vector3(x: (float)ucs.longitude, y: (float)ucs.altitude, z: (float)ucs.latitude);
     }
+    #endregion
+
+    #region Coordinate Systems
+
+    public static GeoRotation ToGeoRotation(this Vector3 unityRotation)
+    {
+        GeoRotation geoRotation = new GeoRotation(unityRotation.y, unityRotation.z, unityRotation.x);
+        return geoRotation;
+    }
+
+    public static Vector3 ToUnity(this GeoRotation geoRotation)
+    {
+        Vector3 unityRotation = new Vector3(x: (float)geoRotation.east, y: (float)geoRotation.heading, z: (float)geoRotation.north);
+        return unityRotation;
+    }
+
+    #endregion
+
 }

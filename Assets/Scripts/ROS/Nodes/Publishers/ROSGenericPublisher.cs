@@ -15,13 +15,4 @@ public class ROSGenericPublisher : ROSBridgePublisher {
         StartAgent(rosConnection, topicName, messageType);
     }
     
-    ///<summary>
-    ///Stops advertising loop
-    ///</summary>
-    public void Stop()
-    {
-        _isRunning = false;
-        //Unsubscribe? q
-    }
-
 }

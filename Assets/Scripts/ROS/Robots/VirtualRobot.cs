@@ -49,7 +49,6 @@ public class VirtualRobot : ROSController
         _waypointNavigationModule = GetComponent<WaypointNavigation>();
         OnRosStarted += _waypointNavigationModule.InitialiseRos;
 
-        _waypointDistanceThreshhold = RobotConfig.WaypointDistanceThreshold;
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
     }
@@ -180,6 +179,8 @@ public class VirtualRobot : ROSController
         _rosLocomotionLinear = new ROSGenericPublisher(_rosBridge, "/waypoint/max_linear_speed", Float32Msg.GetMessageType());
         _rosLocomotionAngular = new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());
         _rosLocomotionControlParams = new ROSLocomotionControlParams(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/control_parameters");
+
+        _waypointDistanceThreshhold = RobotConfig.WaypointDistanceThreshold;
 
         _rosLocomotionLinear.PublishData(new Float32Msg(RobotConfig.MaxLinearSpeed));
         _rosLocomotionAngular.PublishData(new Float32Msg(RobotConfig.MaxAngularSpeed));

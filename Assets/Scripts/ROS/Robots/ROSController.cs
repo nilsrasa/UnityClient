@@ -63,14 +63,27 @@ public abstract class ROSController : MonoBehaviour
 
     public abstract void OverridePositionAndOrientation(Vector3 position, Quaternion orientation);
 
+    /// <summary>
+    /// When robot is selected on the "Select Robot" dropdown menu. 
+    /// Subscribes to relevant scripts and updates UI.
+    /// </summary>
     public virtual void OnSelected()
     {
         if (Waypoints != null)
             WaypointController.Instance.CreateRoute(Waypoints);
     }
 
-    public abstract void OnDeselected();
+    /// <summary>
+    /// When robot is deselected from the "Select Robot" dropdown menu.
+    /// Ubsubscribes from relevant scripts and updates UI.
+    /// </summary>
+    public virtual void OnDeselected() { }
 
+    /// <summary>
+    /// Initialises robot and ROS Bridge connections and starts all attached modules.
+    /// </summary>
+    /// <param name="rosBridge">Ros bridge connection.</param>
+    /// <param name="robotConfig">Config file that contains robot parameters.</param>
     public virtual void InitialiseRobot(ROSBridgeWebSocketConnection rosBridge, RobotConfigFile robotConfig)
     {
         _rosBridge = rosBridge;

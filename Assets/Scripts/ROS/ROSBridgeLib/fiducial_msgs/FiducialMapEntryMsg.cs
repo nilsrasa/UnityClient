@@ -1,11 +1,9 @@
-﻿using ROSBridgeLib.std_msgs;
-using SimpleJSON;
+﻿using SimpleJSON;
 
 namespace ROSBridgeLib {
 	namespace fiducial_msgs {
 		public class FiducialMapEntryMsg : ROSBridgeMsg
 		{
-
 		    public int _fiducial_id;
 		    public double _x;
 		    public double _y;

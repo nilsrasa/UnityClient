@@ -36,9 +36,6 @@ public class ArlobotROSController : ROSController {
     void Awake()
     {
         Instance = this;
-        _waypointDistanceThreshhold = RobotConfig.WaypointDistanceThreshold;
-        _maxLinearSpeed = RobotConfig.MaxLinearSpeed;
-        _maxAngularSpeed = RobotConfig.MaxAngularSpeed;
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
 
@@ -137,9 +134,14 @@ public class ArlobotROSController : ROSController {
         _rosOdometry = new ROSGenericSubscriber<OdometryMsg>(_rosBridge, "/robot_gps_pose", OdometryMsg.GetMessageType(), (msg) => new OdometryMsg(msg));
         _rosOdometry.OnDataReceived += ReceivedOdometryUpdate;
 
+        _waypointDistanceThreshhold = RobotConfig.WaypointDistanceThreshold;
+        _maxLinearSpeed = RobotConfig.MaxLinearSpeed;
+        _maxAngularSpeed = RobotConfig.MaxAngularSpeed;
+
         _rosLocomotionLinear.PublishData(new Float32Msg(_maxLinearSpeed));
         _rosLocomotionAngular.PublishData(new Float32Msg(_maxAngularSpeed));
         _rosLocomotionControlParams.PublishData(RobotConfig.LinearSpeedParameter, RobotConfig.RollSpeedParameter, RobotConfig.PitchSpeedParameter, RobotConfig.AngularSpeedParameter);
+
     }
 
     private void Move(Vector3 position)
@@ -159,10 +161,16 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionDirect.PublishData(0, 0);
     }
 
+    public override void OnSelected()
+    {
+        base.OnSelected();
+        FiducialController.Instance.Register(_rosBridge);
+    }
 
     public override void OnDeselected()
     {
-        //throw new System.NotImplementedException();
+        base.OnDeselected();
+        FiducialController.Instance.Unregister(_rosBridge);
     }
     
     public override void MovePath(List<GeoPointWGS84> waypoints) 

@@ -24,5 +24,11 @@
 	        ROSConnection.AddPublisher(this);
 	    }
 
+	    public virtual void Stop()
+	    {
+	        if (ROSConnection == null) return;
+            ROSConnection.RemovePublisher(this);
+	    }
+
     }
 }

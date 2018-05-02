@@ -1,7 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using ROSBridgeLib;
-//using System.IO.Ports;
 using UnityEngine;
 
 //The control interface to the robot
@@ -34,7 +32,6 @@ public class RobotInterface : MonoBehaviour {
 
     private float _timer = 0;
     private string _portName;
-   // private SerialPort HWPort;
     private bool _left, _right, _forward, _reverse;
     private bool _isStopped;
     private ROSLocomotionDirect _rosLocomotionDirect;
