@@ -18,7 +18,7 @@ public class RobotListItem : MonoBehaviour
     [SerializeField] private Color _connectedBackgroundColor;
     [SerializeField] private Color _disabledColor;
 
-    public delegate void ConnectWasClicked(bool shouldConnect, string uri);
+    public delegate void ConnectWasClicked(bool shouldConnect, string name);
 
     public event ConnectWasClicked OnConnectClicked;
 
@@ -64,7 +64,6 @@ public class RobotListItem : MonoBehaviour
     }
 
     private string _robotName;
-    private string _uri;
 
     void Awake()
     {
@@ -92,13 +91,12 @@ public class RobotListItem : MonoBehaviour
     {
         Connected = !_connected;
         if (OnConnectClicked != null)
-            OnConnectClicked(Connected, _uri);
+            OnConnectClicked(Connected, _robotName);
     }
 
     public void Initialise(string robotName, string uri, int port, bool connected)
     {
         _robotNameText.text = robotName;
-        _uri = uri;
         _uriPortText.text = uri + ":" + port;
         _robotName = robotName;
         Connected = connected;

@@ -640,14 +640,14 @@ public class PlayerUIController : MonoBehaviour
         CurrentUIState = UIState.Navigation;
     }
 
-    private void RobotListConnectClick(bool shouldConnect, string uri)
+    private void RobotListConnectClick(bool shouldConnect, string name)
     {
         if (shouldConnect)
         {
-            RobotMasterController.Instance.ConnectToRobot(uri);
+            RobotMasterController.Instance.ConnectToRobot(name);
         }
         else
-            RobotMasterController.Instance.DisconnectRobot(uri);
+            RobotMasterController.Instance.DisconnectRobot(name);
     }
 
     private void OverrideRobotPositionClick()

@@ -50,7 +50,7 @@ public class test : MonoBehaviour
 
     private void Initialise()
     {
-        ros = new ROSBridgeWebSocketConnection("ws://192.168.255.40", 9090);
+        ros = new ROSBridgeWebSocketConnection("ws://192.168.255.40", 9090, "Test");
         _genericPub = new ROSGenericPublisher(ros, "/pat", PathMsg.GetMessageType());
         _genericSub = new ROSGenericSubscriber<PathMsg>(ros, "/pat", PathMsg.GetMessageType(), msg => new PathMsg(msg));
         _genericSub.OnDataReceived += OnDataReceived;

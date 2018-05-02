@@ -74,6 +74,7 @@ namespace ROSBridgeLib
         private string _serviceValues = null;
         private Type _serviceResponse; // to deal with service responses
         private List<RenderTask> _taskQ = new List<RenderTask>();
+        private string _robotName;
 
         private object _queueLock = new object();
 
@@ -81,13 +82,14 @@ namespace ROSBridgeLib
          * Make a connection to a host/port. 
          * This does not actually start the connection, use Connect to do that.
          */
-        public ROSBridgeWebSocketConnection(string host, int port)
+        public ROSBridgeWebSocketConnection(string host, int port, string robotName)
         {
             _host = host;
             _port = port;
             _myThread = null;
             _subscribers = new List<ROSBridgeSubscriber>();
             _publishers = new List<ROSBridgePublisher>();
+            _robotName = robotName;
         }
 
 
@@ -163,7 +165,7 @@ namespace ROSBridgeLib
                 WebSocket.OnMessage += (sender, e) => this.OnMessage(e.Data);
                 WebSocket.Connect();
                 if (callback != null)
-                    callback(_host, WebSocket.IsAlive);
+                    callback(_robotName, WebSocket.IsAlive);
                 if (!WebSocket.IsAlive) return;
             }
             catch (Exception e)

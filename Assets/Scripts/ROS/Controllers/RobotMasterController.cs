@@ -24,9 +24,8 @@ public class RobotMasterController : MonoBehaviour
         }
     }
 
-    //Master Robot hostname, Corresponding Robot
+    //Master RobotName, corresponding Robot
     public static Dictionary<string, Robot> Robots { get; private set; }
-
     public static Dictionary<string, ROSController> ActiveRobots { get; private set; }
 
     private string _configPath;
@@ -36,6 +35,7 @@ public class RobotMasterController : MonoBehaviour
     {
         Instance = this;
         Robots = new Dictionary<string, Robot>();
+        ActiveRobots = new Dictionary<string, ROSController>();
         _configPath = Application.streamingAssetsPath + "/Config/Robots/";
         _robotPrefabPath = "Prefabs/Robots/";
     }
@@ -88,40 +88,39 @@ public class RobotMasterController : MonoBehaviour
                 robotFile.RosBridgeUri = "ws://" + robotFile.RosBridgeUri;
             ;
 
-            ROSBridgeWebSocketConnection rosBridge = new ROSBridgeWebSocketConnection(robotFile.RosBridgeUri, robotFile.RosBridgePort);
+            ROSBridgeWebSocketConnection rosBridge = new ROSBridgeWebSocketConnection(robotFile.RosBridgeUri, robotFile.RosBridgePort, robotName);
 
             Robot robot = new Robot(robotFile.Campuses, rosBridge, robotName, robotFile.RosBridgeUri, robotFile.RosBridgePort, false, robotFile);
-            Robots.Add(robotFile.RosBridgeUri, robot);
+            Robots.Add(robotName, robot);
         }
 
         PlayerUIController.Instance.LoadRobots(Robots.Select(robot => robot.Value).ToList());
     }
 
-    private void ConnectionResult(string uri, bool isAlive)
+    private void ConnectionResult(string robotName, bool isAlive)
     {
-        Robots[uri].IsActive = isAlive;
+        Robots[robotName].IsActive = isAlive;
         PlayerUIController.Instance.RobotRefreshed();
         if (isAlive)
-            Robots[uri].RosBridge.Disconnect();
+            Robots[robotName].RosBridge.Disconnect();
     }
 
     public Robot GetRobotFromName(int campusId, string robotName)
     {
-        foreach (KeyValuePair<string, Robot> pair in Robots)
+        Robot robot = null;
+
+        if (Robots.TryGetValue(robotName, out robot))
         {
-            if (pair.Value.Name == robotName && pair.Value.Campuses.Contains(campusId))
-                return pair.Value;
+            if (robot.Campuses.Contains(campusId))
+                return robot;
         }
         return null;
     }
 
     public ROSController GetRosControllerFromName(int campusId, string robotName)
     {
-        Robot robot = GetRobotFromName(campusId, robotName);
-        if (robot == null)
-            return null;
         ROSController rosController = null;
-        if (ActiveRobots.TryGetValue(robot.Uri, out rosController))
+        if (ActiveRobots.TryGetValue(robotName, out rosController))
         {
             return rosController;
         }
@@ -137,7 +136,7 @@ public class RobotMasterController : MonoBehaviour
     public void RobotLostConnection(ROSController robot)
     {
         Debug.LogError("Robot [" + robot.gameObject.name + "] lost connection!");
-        DisconnectRobot(robot.RobotConfig.RosBridgeUri);
+        DisconnectRobot(robot.RobotName);
         PlayerUIController.Instance.UpdateRobotList();
         if (ActiveRobots.Count > 0)
             SelectRobot(ActiveRobots.First().Value);
@@ -161,29 +160,29 @@ public class RobotMasterController : MonoBehaviour
         }
     }
 
-    public void ConnectToRobot(string uri)
+    public void ConnectToRobot(string robotName)
     {
-        Robots[uri].Connected = true;
-        Robots[uri].RosBridge.Connect();
-        Robot robot = Robots[uri];
+        Robots[robotName].Connected = true;
+        Robots[robotName].RosBridge.Connect();
+        Robot robot = Robots[robotName];
         GameObject robotObject = Instantiate(Resources.Load(_robotPrefabPath + robot.Name)) as GameObject;
         ROSController rosController = robotObject.GetComponent<ROSController>();
-        rosController.InitialiseRobot(robot.RosBridge, robot.RobotConfig);
-        ActiveRobots.Add(uri, rosController);
+        rosController.InitialiseRobot(robot.RosBridge, robot.RobotConfig, robot.Name);
+        ActiveRobots.Add(robotName, rosController);
 
         PlayerUIController.Instance.AddRobotToList(robot.Name);
     }
 
-    public void DisconnectRobot(string uri)
+    public void DisconnectRobot(string robotName)
     {
-        Robots[uri].Connected = false;
-        ActiveRobots[uri].Destroy();
-        ActiveRobots.Remove(uri);
+        Robots[robotName].Connected = false;
+        ActiveRobots[robotName].Destroy();
+        ActiveRobots.Remove(robotName);
 
-        PlayerUIController.Instance.RemoveRobotFromList(Robots[uri].Name);
+        PlayerUIController.Instance.RemoveRobotFromList(Robots[robotName].Name);
 
         if (SelectedRobot != null)
-            if (SelectedRobot.RobotConfig.RosBridgeUri == uri)
+            if (SelectedRobot.RobotName == robotName)
             {
                 SelectedRobot = null;
                 WaypointController.Instance.ClearAllWaypoints();

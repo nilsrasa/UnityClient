@@ -122,7 +122,7 @@ public class RobotInterface : MonoBehaviour
 
     public void Connect()
     {
-        _rosBridge = new ROSBridgeWebSocketConnection(_telerobotConfigFile.ROSBridgeUri, _telerobotConfigFile.ROSBridgePort);
+        _rosBridge = new ROSBridgeWebSocketConnection(_telerobotConfigFile.ROSBridgeUri, _telerobotConfigFile.ROSBridgePort, "Telerobot_ThetaS");
         _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Publisher, _rosBridge, "/cmd_vel");
         _rosBridge.Connect(((s, b) => { Debug.Log(s + " - " + b); }));
         IsConnected = true;

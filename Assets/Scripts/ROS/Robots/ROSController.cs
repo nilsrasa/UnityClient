@@ -23,6 +23,7 @@ public abstract class ROSController : MonoBehaviour
     public RobotLocomotionState CurrentRobotLocomotionState { get; protected set; }
     public RobotLocomotionType CurrenLocomotionType { get; protected set; }
     [HideInInspector] public RobotConfigFile RobotConfig;
+    [HideInInspector] public string RobotName;
 
     [SerializeField] public List<RobotModule> _robotModules;
 
@@ -95,7 +96,7 @@ public abstract class ROSController : MonoBehaviour
     /// </summary>
     /// <param name="rosBridge">Ros bridge connection.</param>
     /// <param name="robotConfig">Config file that contains robot parameters.</param>
-    public virtual void InitialiseRobot(ROSBridgeWebSocketConnection rosBridge, RobotConfigFile robotConfig)
+    public virtual void InitialiseRobot(ROSBridgeWebSocketConnection rosBridge, RobotConfigFile robotConfig, string robotName)
     {
         _rosBridge = rosBridge;
         _rosBridge.OnDisconnect += clean =>

@@ -1705,7 +1705,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _publishInterval: 3
-  _publishInGps: 1
   _saveFiducials: 0
 --- !u!1 &186665329
 GameObject:
