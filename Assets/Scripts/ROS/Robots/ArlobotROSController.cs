@@ -5,8 +5,8 @@ using ROSBridgeLib.std_msgs;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ArlobotROSController : ROSController {
-
+public class ArlobotROSController : ROSController
+{
     [SerializeField] private RawImage _cameraImage;
 
     public static ArlobotROSController Instance { get; private set; }
@@ -22,6 +22,7 @@ public class ArlobotROSController : ROSController {
     private ROSGenericPublisher _rosOdometryOverride;
 
     private bool _hasOdometryDataToConsume;
+
     private OdometryData _odometryDataToConsume;
     //private CompressedImageMsg _cameraDataToConsume;
     //private CameraInfo _cameraInfoToConsume;
@@ -29,6 +30,7 @@ public class ArlobotROSController : ROSController {
 
     //Navigation
     private Vector3 _currentWaypoint;
+
     private float _waypointDistanceThreshhold = 0.1f;
     private float _maxLinearSpeed;
     private float _maxAngularSpeed;
@@ -38,7 +40,6 @@ public class ArlobotROSController : ROSController {
         Instance = this;
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
-
     }
 
     void Update()
@@ -141,7 +142,6 @@ public class ArlobotROSController : ROSController {
         _rosLocomotionLinear.PublishData(new Float32Msg(_maxLinearSpeed));
         _rosLocomotionAngular.PublishData(new Float32Msg(_maxAngularSpeed));
         _rosLocomotionControlParams.PublishData(RobotConfig.LinearSpeedParameter, RobotConfig.RollSpeedParameter, RobotConfig.PitchSpeedParameter, RobotConfig.AngularSpeedParameter);
-
     }
 
     private void Move(Vector3 position)
@@ -172,8 +172,8 @@ public class ArlobotROSController : ROSController {
         base.OnDeselected();
         FiducialController.Instance.Unregister(_rosBridge);
     }
-    
-    public override void MovePath(List<GeoPointWGS84> waypoints) 
+
+    public override void MovePath(List<GeoPointWGS84> waypoints)
     {
         Waypoints = waypoints;
         StartWaypointRoute();
@@ -201,9 +201,9 @@ public class ArlobotROSController : ROSController {
             altitude = nav._pose._pose._position.GetZ(),
         };
         Quaternion orientation = new Quaternion(
-            x: nav._pose._pose._orientation.GetX(), 
-            z: nav._pose._pose._orientation.GetY(), 
-            y: nav._pose._pose._orientation.GetZ(), 
+            x: nav._pose._pose._orientation.GetX(),
+            z: nav._pose._pose._orientation.GetY(),
+            y: nav._pose._pose._orientation.GetZ(),
             w: nav._pose._pose._orientation.GetW()
         );
         _odometryDataToConsume = new OdometryData
@@ -236,7 +236,7 @@ public class ArlobotROSController : ROSController {
 
         PoseWithCovarianceMsg pose = new PoseWithCovarianceMsg(
             new PoseMsg(
-                new PointMsg(wgs84.longitude, wgs84.latitude, wgs84.altitude), 
+                new PointMsg(wgs84.longitude, wgs84.latitude, wgs84.altitude),
                 new QuaternionMsg(newOrientation.x, newOrientation.z, newOrientation.y, newOrientation.w)
             ));
 

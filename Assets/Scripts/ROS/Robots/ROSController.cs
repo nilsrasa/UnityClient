@@ -1,14 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ROSBridgeLib;
 using UnityEngine;
 
 public abstract class ROSController : MonoBehaviour
 {
-    public enum RobotLocomotionState { MOVING, STOPPED }
-    public enum RobotLocomotionType { WAYPOINT, DIRECT }
+    public enum RobotLocomotionState
+    {
+        MOVING,
+        STOPPED
+    }
+
+    public enum RobotLocomotionType
+    {
+        WAYPOINT,
+        DIRECT
+    }
 
     public delegate void RosStarted(ROSBridgeWebSocketConnection rosBridge);
+
     public event RosStarted OnRosStarted;
 
     public RobotLocomotionState CurrentRobotLocomotionState { get; protected set; }
@@ -77,7 +86,9 @@ public abstract class ROSController : MonoBehaviour
     /// When robot is deselected from the "Select Robot" dropdown menu.
     /// Ubsubscribes from relevant scripts and updates UI.
     /// </summary>
-    public virtual void OnDeselected() { }
+    public virtual void OnDeselected()
+    {
+    }
 
     /// <summary>
     /// Initialises robot and ROS Bridge connections and starts all attached modules.
@@ -87,7 +98,10 @@ public abstract class ROSController : MonoBehaviour
     public virtual void InitialiseRobot(ROSBridgeWebSocketConnection rosBridge, RobotConfigFile robotConfig)
     {
         _rosBridge = rosBridge;
-        _rosBridge.OnDisconnect += clean => { if (!clean) LostConnection(); };
+        _rosBridge.OnDisconnect += clean =>
+        {
+            if (!clean) LostConnection();
+        };
         RobotConfig = robotConfig;
         StartROS();
 
@@ -113,7 +127,8 @@ public abstract class ROSController : MonoBehaviour
         */
     }
 
-    private void GenerateRobot(string robotDescription) {
+    private void GenerateRobot(string robotDescription)
+    {
         //_robot = RobotUrdfUtility.GenerateRobotGameObjectFromDescription(robotDescription, _alwaysGenerateRobot).transform;
     }
 }

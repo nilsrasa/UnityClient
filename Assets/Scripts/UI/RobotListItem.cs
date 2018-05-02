@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 public class RobotListItem : MonoBehaviour
 {
-
     [SerializeField] private Text _robotNameText;
     [SerializeField] private Text _uriPortText;
     [SerializeField] private Button _connect;
@@ -20,9 +19,11 @@ public class RobotListItem : MonoBehaviour
     [SerializeField] private Color _disabledColor;
 
     public delegate void ConnectWasClicked(bool shouldConnect, string uri);
+
     public event ConnectWasClicked OnConnectClicked;
 
     private bool _isActive;
+
     public bool IsActive
     {
         get { return _isActive; }
@@ -46,6 +47,7 @@ public class RobotListItem : MonoBehaviour
     private ColorBlock _connectColorBlock;
 
     private bool _connected;
+
     private bool Connected
     {
         get { return _connected; }
@@ -101,5 +103,4 @@ public class RobotListItem : MonoBehaviour
         _robotName = robotName;
         Connected = connected;
     }
-
 }

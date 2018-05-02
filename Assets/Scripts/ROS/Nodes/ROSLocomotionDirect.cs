@@ -1,7 +1,5 @@
-﻿using System;
-using ROSBridgeLib;
+﻿using ROSBridgeLib;
 using ROSBridgeLib.geometry_msgs;
-using UnityEngine;
 
 public class ROSLocomotionDirect : ROSAgent
 {
@@ -9,6 +7,7 @@ public class ROSLocomotionDirect : ROSAgent
     private ROSGenericPublisher _publisher;
 
     public delegate void DataReceived(ROSBridgeMsg msg);
+
     public event ROSLocomotionControlParams.DataReceived OnDataReceived;
 
     public ROSLocomotionDirect(AgentJob job, ROSBridgeWebSocketConnection rosConnection, string topicName)
@@ -41,9 +40,8 @@ public class ROSLocomotionDirect : ROSAgent
     {
         if (_publisher == null) return;
 
-        TwistMsg twist = new TwistMsg(new Vector3Msg(linear, 0, 0), 
+        TwistMsg twist = new TwistMsg(new Vector3Msg(linear, 0, 0),
             new Vector3Msg(0, 0, angular));
         _publisher.PublishData(twist);
     }
-    
 }

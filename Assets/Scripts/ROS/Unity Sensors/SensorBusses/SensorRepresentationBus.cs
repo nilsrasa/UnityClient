@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public abstract class SensorRepresentationBus {
-
+public abstract class SensorRepresentationBus
+{
     public Type ROSAgentType { get; protected set; }
 
     protected List<SensorRepresentation> _sensorRepresentations;

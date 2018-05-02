@@ -12,17 +12,15 @@ public class KeyboardController : MonoBehaviour
     [SerializeField] private InputField _textViewer;
     [SerializeField] private Image _background;
     [SerializeField] private GazeButton _commandSwitch;
-    
-    [Header("Normal Colors")]
-    [SerializeField] private Color _backgroundColor;
+
+    [Header("Normal Colors")] [SerializeField] private Color _backgroundColor;
     [SerializeField] private Color _textViewerColor;
     [SerializeField] private Color _buttonHoverColor;
     [SerializeField] private Color _buttonTextColor;
     [SerializeField] private Color _buttonBorderColor;
     [SerializeField] private Color _buttonActivatedColor;
-    
-    [Header("Command Mode Colors")]
-    [SerializeField] private Color _backgroundColorCmd;
+
+    [Header("Command Mode Colors")] [SerializeField] private Color _backgroundColorCmd;
     [SerializeField] private Color _textViewerColorCmd;
     [SerializeField] private Color _buttonHoverColorCmd;
     [SerializeField] private Color _buttonTextColorCmd;
@@ -30,8 +28,11 @@ public class KeyboardController : MonoBehaviour
     [SerializeField] private Color _buttonActivatedColorCmd;
 
     public delegate void OnOpen();
+
     public event OnOpen Opened;
+
     public delegate void OnClose();
+
     public event OnClose Closed;
     public bool IsActive { get; private set; }
     public string CurrentString { get; private set; }
@@ -92,7 +93,8 @@ public class KeyboardController : MonoBehaviour
 
     private void DoneAnimating(bool shouldShow)
     {
-        foreach (GazeKeyboardButton button in _keyboardButtons) {
+        foreach (GazeKeyboardButton button in _keyboardButtons)
+        {
             button.SetEnabled(shouldShow);
         }
         IsActive = shouldShow;
@@ -105,7 +107,8 @@ public class KeyboardController : MonoBehaviour
     /// <param name="letter"> Char of the corresponding button.</param>
     public void KeyActivated(char letter)
     {
-        switch (letter) {
+        switch (letter)
+        {
             //Space
             case '_':
                 CurrentString += " ";
@@ -135,7 +138,6 @@ public class KeyboardController : MonoBehaviour
                 CurrentString += letter;
                 break;
         }
-
     }
 
     /// <summary>
@@ -173,8 +175,14 @@ public class KeyboardController : MonoBehaviour
 
     public void ShowKeyboard()
     {
-        iTween.ScaleTo(gameObject, new Hashtable {{"time", 0.75f}, {"scale", _openScale}, {"easetype", iTween.EaseType.easeInQuart},
-            { "onstart", "DoneAnimating"}, { "onstartparams", true } });
+        iTween.ScaleTo(gameObject, new Hashtable
+        {
+            {"time", 0.75f},
+            {"scale", _openScale},
+            {"easetype", iTween.EaseType.easeInQuart},
+            {"onstart", "DoneAnimating"},
+            {"onstartparams", true}
+        });
         iTween.MoveTo(gameObject, new Hashtable {{"time", 0.75f}, {"position", _openPosition}, {"islocal", true}, {"easetype", iTween.EaseType.easeInQuart}});
         if (Opened != null)
             Opened();
@@ -182,10 +190,21 @@ public class KeyboardController : MonoBehaviour
 
     public void HideKeyboard()
     {
-        iTween.ScaleTo(gameObject, new Hashtable {{"time", 0.75f}, {"scale", Vector3.zero}, {"easetype", iTween.EaseType.easeInQuart},
-            { "oncomplete", "DoneAnimating"}, { "oncompleteparams", false } });
-        iTween.MoveTo(gameObject, new Hashtable { { "time", 0.75f }, { "position", new Vector3(_openPosition.x, _openPosition.y-2, _openPosition.z)},
-            { "easetype", iTween.EaseType.easeInQuart }, {"islocal", true} });
+        iTween.ScaleTo(gameObject, new Hashtable
+        {
+            {"time", 0.75f},
+            {"scale", Vector3.zero},
+            {"easetype", iTween.EaseType.easeInQuart},
+            {"oncomplete", "DoneAnimating"},
+            {"oncompleteparams", false}
+        });
+        iTween.MoveTo(gameObject, new Hashtable
+        {
+            {"time", 0.75f},
+            {"position", new Vector3(_openPosition.x, _openPosition.y - 2, _openPosition.z)},
+            {"easetype", iTween.EaseType.easeInQuart},
+            {"islocal", true}
+        });
         if (Closed != null)
             Closed();
     }
@@ -204,7 +223,6 @@ public class KeyboardController : MonoBehaviour
         SetCommandMode(true);
         CurrentString = command;
         _commandSwitch.SetState(true);
-
     }
 
     public void ToggleKeyboard()
@@ -221,7 +239,7 @@ public class KeyboardController : MonoBehaviour
         _commandModeIsActive = isActive;
         foreach (GazeKeyboardButton button in _keyboardButtons)
         {
-            button.SetColor(new Color(0,0,0,0), 
+            button.SetColor(new Color(0, 0, 0, 0),
                 isActive ? _buttonHoverColorCmd : _buttonHoverColor,
                 isActive ? _buttonTextColorCmd : _buttonTextColor,
                 isActive ? _buttonBorderColorCmd : _buttonBorderColor,

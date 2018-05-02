@@ -3,25 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver {
-    [SerializeField]
-    private List<TKey> keys = new List<TKey>();
+public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
+{
+    [SerializeField] private List<TKey> keys = new List<TKey>();
 
-    [SerializeField]
-    private List<TValue> values = new List<TValue>();
+    [SerializeField] private List<TValue> values = new List<TValue>();
 
     // save the dictionary to lists
-    public void OnBeforeSerialize() {
+    public void OnBeforeSerialize()
+    {
         keys.Clear();
         values.Clear();
-        foreach (KeyValuePair<TKey, TValue> pair in this) {
+        foreach (KeyValuePair<TKey, TValue> pair in this)
+        {
             keys.Add(pair.Key);
             values.Add(pair.Value);
         }
     }
 
     // load dictionary from lists
-    public void OnAfterDeserialize() {
+    public void OnAfterDeserialize()
+    {
         this.Clear();
 
         if (keys.Count != values.Count)
@@ -32,7 +34,17 @@ public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IS
     }
 }
 
-[Serializable] public class SerializableDictionaryIntString : SerializableDictionary<int, string> { }
-[Serializable] public class SerializableDictionaryCampusJson : SerializableDictionary<int, CampusJson> { }
-[Serializable] public class SerializableDictionaryIntFloat : SerializableDictionary<int, float> { }
+[Serializable]
+public class SerializableDictionaryIntString : SerializableDictionary<int, string>
+{
+}
 
+[Serializable]
+public class SerializableDictionaryCampusJson : SerializableDictionary<int, CampusJson>
+{
+}
+
+[Serializable]
+public class SerializableDictionaryIntFloat : SerializableDictionary<int, float>
+{
+}

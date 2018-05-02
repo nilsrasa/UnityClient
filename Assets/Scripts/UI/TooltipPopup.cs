@@ -3,7 +3,6 @@
 //A tooltip that pops up when responsible GazeObject is hovered
 public class TooltipPopup : MonoBehaviour
 {
-
     [SerializeField] private GazeObject _gazeObject;
 
     private Transform _container;

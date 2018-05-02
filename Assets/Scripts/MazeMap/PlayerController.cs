@@ -7,12 +7,14 @@ public class PlayerController : MonoBehaviour
 {
     public enum PlayerState
     {
-        Normal, SorroundViewing
+        Normal,
+        SorroundViewing
     }
 
     public static PlayerController Instance { get; set; }
 
     public delegate void MouseWasClicked(Ray mouseRay);
+
     public event MouseWasClicked OnMouseClick;
 
     [SerializeField] private float _mouseMovementSpeed = 5;
@@ -22,12 +24,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform _triggerFloor;
 
     private PlayerState _currentPlayerState;
+
     public PlayerState CurrentPlayerState
     {
-        get
-        {
-            return _currentPlayerState;
-        }
+        get { return _currentPlayerState; }
         set
         {
             _currentPlayerState = value;
@@ -58,84 +58,85 @@ public class PlayerController : MonoBehaviour
         Instance = this;
     }
 
-	void Update () {
+    void Update()
+    {
         //Input events
-	    if (CurrentPlayerState == PlayerState.SorroundViewing) return;
+        if (CurrentPlayerState == PlayerState.SorroundViewing) return;
 
-	    Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-	    RaycastHit hit;
-	    if (Physics.Raycast(ray, out hit, Single.PositiveInfinity, LayerMask.GetMask("SorroundPhotoLocations")))
-	    {
-	        MouseObject hovered = hit.transform.GetComponent<MouseObject>();
-	        if (hovered != null)
-	        {
-	            if (_hoveredMouseObject != null)
-	            {
-	                if (_hoveredMouseObject == hovered)
-	                    _hoveredMouseObject.Stayed();
-	                else
-	                {
-	                    UnHoverMouseObject();
+        Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, Single.PositiveInfinity, LayerMask.GetMask("SorroundPhotoLocations")))
+        {
+            MouseObject hovered = hit.transform.GetComponent<MouseObject>();
+            if (hovered != null)
+            {
+                if (_hoveredMouseObject != null)
+                {
+                    if (_hoveredMouseObject == hovered)
+                        _hoveredMouseObject.Stayed();
+                    else
+                    {
+                        UnHoverMouseObject();
 
                         _hoveredMouseObject = hovered;
-	                    _hoveredMouseObject.Hovered();
+                        _hoveredMouseObject.Hovered();
                     }
-	            }
-	            else
-	            {
-	                _hoveredMouseObject = hovered;
-	                _hoveredMouseObject.Hovered();
-	            }
-	        }
-	        else
-	        {
-	            UnHoverMouseObject();
+                }
+                else
+                {
+                    _hoveredMouseObject = hovered;
+                    _hoveredMouseObject.Hovered();
+                }
+            }
+            else
+            {
+                UnHoverMouseObject();
             }
         }
-	    else
-	    {
-	        UnHoverMouseObject();
-	    }
+        else
+        {
+            UnHoverMouseObject();
+        }
 
         //Check if left mouse button was clicked or held
         if (Input.GetMouseButtonDown(0))
-	    {
-	        _mouseClickCheck = StartCoroutine(CheckForClick(_mouseClickSpeed));
+        {
+            _mouseClickCheck = StartCoroutine(CheckForClick(_mouseClickSpeed));
         }
 
-	    if (Input.GetMouseButtonUp(0))
-	    {
-	        if (_isMouseClick)
+        if (Input.GetMouseButtonUp(0))
+        {
+            if (_isMouseClick)
                 MouseClicked();
-	        _isMouseClick = false;
+            _isMouseClick = false;
             if (_mouseClickCheck != null)
                 StopCoroutine(_mouseClickCheck);
-	    }
+        }
 
-	    if (Input.GetMouseButton(0) && !_isMouseClick) {
-	        _camera.transform.rotation = Quaternion.Euler(
+        if (Input.GetMouseButton(0) && !_isMouseClick)
+        {
+            _camera.transform.rotation = Quaternion.Euler(
                 _camera.transform.eulerAngles.x + _mouseMovementSpeed * -Input.GetAxis("Mouse Y"),
-	            _camera.transform.eulerAngles.y + 0,
-	            _camera.transform.eulerAngles.z + 0);
-	        transform.eulerAngles = new Vector3(transform.eulerAngles.x,
-	            transform.eulerAngles.y + _mouseMovementSpeed * Input.GetAxis("Mouse X"),
-	            transform.eulerAngles.z);
-	    }
+                _camera.transform.eulerAngles.y + 0,
+                _camera.transform.eulerAngles.z + 0);
+            transform.eulerAngles = new Vector3(transform.eulerAngles.x,
+                transform.eulerAngles.y + _mouseMovementSpeed * Input.GetAxis("Mouse X"),
+                transform.eulerAngles.z);
+        }
 
         if (Input.GetMouseButton(1))
-	    {
-            transform.Translate(_mouseMovementSpeed * -Input.GetAxis("Mouse X"), 
-                0, 
+        {
+            transform.Translate(_mouseMovementSpeed * -Input.GetAxis("Mouse X"),
+                0,
                 _mouseMovementSpeed * -Input.GetAxis("Mouse Y"));
-	    }
-       
-	    if (Input.GetAxis("Mouse ScrollWheel") != 0)
-	    {
-	        transform.Translate(_camera.transform.forward * Input.GetAxis("Mouse ScrollWheel") * _mouseScrollSpeed, Space.World);
-	    }
+        }
+
+        if (Input.GetAxis("Mouse ScrollWheel") != 0)
+        {
+            transform.Translate(_camera.transform.forward * Input.GetAxis("Mouse ScrollWheel") * _mouseScrollSpeed, Space.World);
+        }
 
         _triggerFloor.position = new Vector3(transform.position.x, _triggerFloor.position.y, transform.position.z);
-
     }
 
     private void UnHoverMouseObject()
@@ -185,7 +186,7 @@ public class PlayerController : MonoBehaviour
                 return;
             }
             if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Floor")) return;
-            
+
             if (RobotMasterController.SelectedRobot != null)
                 WaypointController.Instance.CreateWaypoint(hit.point);
         }
@@ -194,7 +195,7 @@ public class PlayerController : MonoBehaviour
     public void FocusCameraOn(Transform target)
     {
         Vector3 cameraPoint = transform.position + _camera.transform.forward * _cameraFocusDistance;
-        Vector3 offset =  target.position - cameraPoint;
+        Vector3 offset = target.position - cameraPoint;
         transform.position += offset;
 
         //Vector3 pos = target.position - _camera.transform.forward * target.position.y;

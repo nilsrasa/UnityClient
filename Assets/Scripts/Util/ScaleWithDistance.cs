@@ -9,17 +9,17 @@ public class ScaleWithDistance : MonoBehaviour
 
     private float _originalScale;
 
-    void Awake ()
+    void Awake()
     {
         if (_camera == null)
             _camera = Camera.main;
         _originalScale = transform.localScale.x;
     }
-	
-	void LateUpdate ()
-	{
-	    float distanceToCamera = Vector3.Distance(_camera.transform.position, transform.position);
-	    float scale = Mathf.Clamp(_originalScale * distanceToCamera * _scaleMultiplier, _minSize, _maxSize);
+
+    void LateUpdate()
+    {
+        float distanceToCamera = Vector3.Distance(_camera.transform.position, transform.position);
+        float scale = Mathf.Clamp(_originalScale * distanceToCamera * _scaleMultiplier, _minSize, _maxSize);
         transform.localScale = new Vector3(scale, scale, scale);
     }
 }

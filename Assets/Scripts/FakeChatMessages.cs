@@ -3,7 +3,6 @@
 //List of fake names and chat messages that can be used to generate fake chat messages.
 public class FakeChatMessages
 {
-
     public static List<string> ChatMessages = new List<string>()
     {
         "Virtual Reality! Yes!",
@@ -36,7 +35,31 @@ public class FakeChatMessages
 
     public static List<string> ChatNames = new List<string>()
     {
-        "Sabrina", "Jonna", "Duncan", "Klaus", "Elisa", "Janis", "Rickie", "Sommer", "Kim", "Grethe", "Alton", "Mikaela", "Lou", "Shirlee",
-        "Martin", "John", "Luke", "Peter", "Loraine", "Eve", "Tia", "Heino", "Josephine", "Lea", "Klemens", "Laila"
+        "Sabrina",
+        "Jonna",
+        "Duncan",
+        "Klaus",
+        "Elisa",
+        "Janis",
+        "Rickie",
+        "Sommer",
+        "Kim",
+        "Grethe",
+        "Alton",
+        "Mikaela",
+        "Lou",
+        "Shirlee",
+        "Martin",
+        "John",
+        "Luke",
+        "Peter",
+        "Loraine",
+        "Eve",
+        "Tia",
+        "Heino",
+        "Josephine",
+        "Lea",
+        "Klemens",
+        "Laila"
     };
 }

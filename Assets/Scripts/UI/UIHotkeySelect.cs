@@ -1,19 +1,21 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UIHotkeySelect : MonoBehaviour {
-
-    void Update() {
-        if (Input.GetKeyDown(KeyCode.Tab)) {
+public class UIHotkeySelect : MonoBehaviour
+{
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                 NavigateToPrevious();
             else
                 NavigateToNext();
         }
 
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) {
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
             NavigateToNext();
         }
     }
@@ -38,14 +40,19 @@ public class UIHotkeySelect : MonoBehaviour {
         }
     }
 
-    private void ApplyEnterSelect(Selectable _selectionToApply) {
-        if (_selectionToApply != null) {
-            if (_selectionToApply.GetComponent<InputField>() != null) {
+    private void ApplyEnterSelect(Selectable _selectionToApply)
+    {
+        if (_selectionToApply != null)
+        {
+            if (_selectionToApply.GetComponent<InputField>() != null)
+            {
                 _selectionToApply.Select();
             }
-            else {
+            else
+            {
                 Button selectedButton = _selectionToApply.GetComponent<Button>();
-                if (selectedButton != null) {
+                if (selectedButton != null)
+                {
                     _selectionToApply.Select();
                     selectedButton.OnPointerClick(new PointerEventData(EventSystem.current));
                 }

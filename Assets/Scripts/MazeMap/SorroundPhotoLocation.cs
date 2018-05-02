@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class SorroundPhotoLocation : MouseObject
 {
-
     [SerializeField] private float _scaleFactor = 2;
 
     public delegate void WasClicked(SorroundPhotoLocation sender);
+
     public event WasClicked OnClick;
 
     public int PictureId;
@@ -21,11 +21,11 @@ public class SorroundPhotoLocation : MouseObject
         Timestamps = new List<DateTime>();
     }
 
-    void Update () 
+    void Update()
     {
         if (Camera.main != null)
-	        transform.LookAt(transform.position + Camera.main.transform.rotation * Vector3.forward,
-	            Camera.main.transform.rotation * Vector3.up);
+            transform.LookAt(transform.position + Camera.main.transform.rotation * Vector3.forward,
+                Camera.main.transform.rotation * Vector3.up);
     }
 
     public override void Hovered()

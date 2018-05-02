@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 
 namespace PointCloud.PointTypes.Converters
 {
@@ -14,7 +11,7 @@ namespace PointCloud.PointTypes.Converters
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
-            if(sourceType == typeof(string))
+            if (sourceType == typeof(string))
             {
                 return true;
             }
@@ -24,13 +21,13 @@ namespace PointCloud.PointTypes.Converters
 
         public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
         {
-            if(value is string)
+            if (value is string)
             {
                 String stringRep = (String) value;
                 culture = new CultureInfo("en-US");
                 String[] splitted = stringRep.Split(' ');
                 return new PointXYZ(Convert.ToSingle(splitted[0], culture), Convert.ToSingle(splitted[1], culture),
-                                    Convert.ToSingle(splitted[2], culture));
+                    Convert.ToSingle(splitted[2], culture));
             }
 
             return base.ConvertFrom(context, culture, value);
@@ -38,7 +35,7 @@ namespace PointCloud.PointTypes.Converters
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            if(destinationType == typeof(string))
+            if (destinationType == typeof(string))
             {
                 return true;
             }
@@ -48,7 +45,7 @@ namespace PointCloud.PointTypes.Converters
 
         public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
         {
-            if(destinationType == typeof(string))
+            if (destinationType == typeof(string))
             {
                 PointXYZ point = (PointXYZ) value;
                 return point.X + " " + point.Y + " " + point.Z;

@@ -1,34 +1,34 @@
-﻿namespace ROSBridgeLib {
-	public abstract class ROSBridgePublisher : ROSAgent
-	{
+﻿namespace ROSBridgeLib
+{
+    public abstract class ROSBridgePublisher : ROSAgent
+    {
         public string GetMessageTopic()
-	    {
-	        return TopicName;
-	    }
+        {
+            return TopicName;
+        }
 
-	    public string GetMessageType()
-	    {
-	        return MessageType;
-	    }
+        public string GetMessageType()
+        {
+            return MessageType;
+        }
 
-	    public virtual void PublishData(ROSBridgeMsg msg)
-	    {
-	        ROSConnection.Publish(TopicName, msg);
-	    }
+        public virtual void PublishData(ROSBridgeMsg msg)
+        {
+            ROSConnection.Publish(TopicName, msg);
+        }
 
-	    protected sealed override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
-	    {
-	        TopicName = topicName;
-	        MessageType = messageType;
-	        ROSConnection = rosConnection;
-	        ROSConnection.AddPublisher(this);
-	    }
+        protected sealed override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
+        {
+            TopicName = topicName;
+            MessageType = messageType;
+            ROSConnection = rosConnection;
+            ROSConnection.AddPublisher(this);
+        }
 
-	    public virtual void Stop()
-	    {
-	        if (ROSConnection == null) return;
+        public virtual void Stop()
+        {
+            if (ROSConnection == null) return;
             ROSConnection.RemovePublisher(this);
-	    }
-
+        }
     }
 }

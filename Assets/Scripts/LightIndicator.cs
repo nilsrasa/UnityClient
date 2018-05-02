@@ -3,7 +3,6 @@
 //Unity light that lights up depending on input
 class LightIndicator : MonoBehaviour
 {
-
     [SerializeField] private MeshRenderer _bulbRenderer;
     [SerializeField] private Color _onColor;
     [SerializeField] private Color _offColor;

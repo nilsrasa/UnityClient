@@ -1,6 +1,5 @@
-﻿using SimpleJSON;
-using ROSBridgeLib.std_msgs;
-using UnityEngine;
+﻿using ROSBridgeLib.std_msgs;
+using SimpleJSON;
 
 /**
  * Define a Image message.
@@ -8,9 +7,12 @@ using UnityEngine;
  * @author Mathias Ciarlo Thorstensen
  */
 
-namespace ROSBridgeLib {
-    namespace sensor_msgs {
-        public class ImageMsg : ROSBridgeMsg {
+namespace ROSBridgeLib
+{
+    namespace sensor_msgs
+    {
+        public class ImageMsg : ROSBridgeMsg
+        {
             private HeaderMsg _header;
             private uint _height;
             private uint _width;
@@ -19,17 +21,19 @@ namespace ROSBridgeLib {
             private uint _row_step;
             private byte[] _data;
 
-            public ImageMsg(JSONNode msg) {
-                _header = new HeaderMsg (msg ["header"]);
-                _height = uint.Parse(msg ["height"]);
-                _width = uint.Parse(msg ["width"]);
-                _encoding = msg ["encoding"];
+            public ImageMsg(JSONNode msg)
+            {
+                _header = new HeaderMsg(msg["header"]);
+                _height = uint.Parse(msg["height"]);
+                _width = uint.Parse(msg["width"]);
+                _encoding = msg["encoding"];
                 _is_bigendian = msg["is_bigendian"].AsBool;
-                _row_step = uint.Parse(msg ["step"]);
+                _row_step = uint.Parse(msg["step"]);
                 _data = System.Convert.FromBase64String(msg["data"]);
             }
 
-            public ImageMsg(HeaderMsg header, uint height, uint width, string encoding, bool is_bigendian, uint row_step, byte[] data) {
+            public ImageMsg(HeaderMsg header, uint height, uint width, string encoding, bool is_bigendian, uint row_step, byte[] data)
+            {
                 _header = header;
                 _height = height;
                 _width = width;
@@ -44,33 +48,39 @@ namespace ROSBridgeLib {
                 return _header;
             }
 
-            public uint GetWidth() {
+            public uint GetWidth()
+            {
                 return _width;
             }
 
-            public uint GetHeight() {
+            public uint GetHeight()
+            {
                 return _height;
             }
-                
-            public uint GetRowStep() {
+
+            public uint GetRowStep()
+            {
                 return _row_step;
             }
 
-            public byte[] GetImage() {
+            public byte[] GetImage()
+            {
                 return _data;
             }
 
-            public static string GetMessageType() {
+            public static string GetMessageType()
+            {
                 return "sensor_msgs/Image";
             }
 
-            public override string ToString() {
+            public override string ToString()
+            {
                 return "Image [header=" + _header.ToString() +
-                    "height=" + _height +
-                    "width=" + _width +
-                    "encoding=" + _encoding +
-                    "is_bigendian=" + _is_bigendian +
-                    "row_step=" + _row_step + 
+                       "height=" + _height +
+                       "width=" + _width +
+                       "encoding=" + _encoding +
+                       "is_bigendian=" + _is_bigendian +
+                       "row_step=" + _row_step +
                        ", \"data\" : \"" + System.Convert.ToBase64String(_data) + "\"}";
             }
 

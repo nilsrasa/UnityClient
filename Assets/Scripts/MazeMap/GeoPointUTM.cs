@@ -16,20 +16,23 @@ public struct GeoPointUTM
 
     public double[] ToArray()
     {
-        return new[] { longitude, latitude };
+        return new[] {longitude, latitude};
     }
 
     public static GeoPointUTM operator +(GeoPointUTM a, GeoPointUTM b)
     {
-        return new GeoPointUTM {
+        return new GeoPointUTM
+        {
             longitude = a.longitude + b.longitude,
             latitude = a.latitude + b.latitude,
             altitude = a.altitude + b.altitude,
         };
     }
 
-    public static GeoPointUTM operator -(GeoPointUTM a, GeoPointUTM b) {
-        return new GeoPointUTM {
+    public static GeoPointUTM operator -(GeoPointUTM a, GeoPointUTM b)
+    {
+        return new GeoPointUTM
+        {
             longitude = a.longitude - b.longitude,
             latitude = a.latitude - b.latitude,
             altitude = a.altitude - b.altitude,

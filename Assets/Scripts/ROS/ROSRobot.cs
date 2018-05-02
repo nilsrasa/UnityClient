@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(SensorBusController))]
-public class ROSRobot : MonoBehaviour {
-
-	
+public class ROSRobot : MonoBehaviour
+{
 }

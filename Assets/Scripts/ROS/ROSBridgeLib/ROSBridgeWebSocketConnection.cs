@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
-using System;
-using WebSocketSharp;
 using SimpleJSON;
 using UnityEngine;
+using WebSocketSharp;
 
 /**
  * This class handles the connection with the external ROS world, deserializing
@@ -59,6 +59,7 @@ namespace ROSBridgeLib
         }
 
         public delegate void WasDisconnected(bool wasClean);
+
         public event WasDisconnected OnDisconnect;
 
         public WebSocket WebSocket { get; private set; }
@@ -89,7 +90,7 @@ namespace ROSBridgeLib
             _publishers = new List<ROSBridgePublisher>();
         }
 
-        
+
         public void AddSubscriber(ROSBridgeSubscriber subscriber)
         {
             _subscribers.Add(subscriber);
@@ -170,10 +171,13 @@ namespace ROSBridgeLib
                 Debug.Log(e);
                 return;
             }
-            
+
             IsConnected = WebSocket.IsAlive;
 
-            WebSocket.OnClose += (sender, args) => { if (OnDisconnect != null) OnDisconnect(args.WasClean); };
+            WebSocket.OnClose += (sender, args) =>
+            {
+                if (OnDisconnect != null) OnDisconnect(args.WasClean);
+            };
 
             foreach (ROSBridgeSubscriber subscriber in _subscribers)
             {

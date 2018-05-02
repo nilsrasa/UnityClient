@@ -8,6 +8,7 @@ public class ROSLocomotionControlParams : ROSAgent
     private ROSGenericPublisher _publisher;
 
     public delegate void DataReceived(ROSBridgeMsg msg);
+
     public event DataReceived OnDataReceived;
 
     public ROSLocomotionControlParams(AgentJob job, ROSBridgeWebSocketConnection rosConnection, string topicName)
@@ -39,5 +40,4 @@ public class ROSLocomotionControlParams : ROSAgent
         if (_publisher != null)
             _publisher.PublishData(new StringMsg(string.Format("{0}, {1}, {2}, {3}", rho, roll, pitch, yaw)));
     }
-    
 }

@@ -6,10 +6,9 @@ public class MazeMapMeasurements
 {
     public List<CampusMeasurements> CampusMeasurements;
 
-    [NonSerialized]
-    private Dictionary<int, int> _register = new Dictionary<int, int>();
-    [NonSerialized]
-    private int _lastIndex = 0;
+    [NonSerialized] private Dictionary<int, int> _register = new Dictionary<int, int>();
+    [NonSerialized] private int _lastIndex = 0;
+
     public CampusMeasurements GetCampusMeasurement(int campusId)
     {
         if (_register.ContainsKey(campusId))

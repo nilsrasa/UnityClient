@@ -1,8 +1,8 @@
 ﻿using System;
-using UnityEngine;
 using System.IO;
 using System.IO.Ports;
 using ROSBridgeLib;
+using UnityEngine;
 
 public class WheelchairSimConnector : RobotModule
 {
@@ -51,19 +51,11 @@ public class Movement
 {
     //Ticks per circle = 1024
     //Wheel diameter = 6.00 cm (60000 micrometer)
-    private const double ticks2MicroMeterFactor = 1;//60000/1024;   
+    private const double ticks2MicroMeterFactor = 1; //60000/1024;   
 
-    public int LeftTicks
-    {
-        private set;
-        get;
-    }
+    public int LeftTicks { private set; get; }
 
-    public int RightTicks
-    {
-        private set;
-        get;
-    }
+    public int RightTicks { private set; get; }
 
     public Movement(int lTicks, int rTicks)
     {
@@ -86,18 +78,19 @@ public class Movement
     {
         return RightTicks * ticks2MicroMeterFactor;
     }
+
     internal void Reset()
     {
         LeftTicks = 0;
         RightTicks = 0;
     }
-
 }
 
 public class Connector
 {
     //Msg format: "wc:<left value>,<right value>;"
     private static readonly String END_CHAR = ";";
+
     private static readonly String COL_CHAR = ":";
     private static readonly String SEP_CHAR = ",";
     private static readonly String START_REQUEST = "s?" + END_CHAR;
@@ -105,14 +98,14 @@ public class Connector
     private static readonly String DATA_REQUEST = "d" + END_CHAR;
     private static readonly long RESPONSE_TIME_MS = 1000;
 
-    Action<String> collectorAction = delegate (String s)
+    Action<String> collectorAction = delegate(String s)
     {
         interpretIncoming(s); //TODO Implement actual method here...
     };
 
-    Action<SerialPort> collector = delegate (SerialPort sp)
+    Action<SerialPort> collector = delegate(SerialPort sp)
     {
-        while (true)//sp.IsOpen)
+        while (true) //sp.IsOpen)
             interpretIncoming(sp.ReadLine()); //TODO Implement actual method here...
     };
 
@@ -120,6 +113,7 @@ public class Connector
     //};
 
     private static Connector _instance;
+
     private static SerialPort _serialPort;
     //  public event EventHandler OnMove;
 
@@ -128,12 +122,11 @@ public class Connector
 
     public Connector()
     {
-
     }
 
     public string AutoConnect()
     {
-        String[] ports = new String[] { "COM2", "COM3", "COM4", "COM5" };// SerialPort.GetPortNames();
+        String[] ports = new String[] {"COM2", "COM3", "COM4", "COM5"}; // SerialPort.GetPortNames();
 
 
         //TODO tryDisconnect(); //Make sure it is disconnected and that we don't leave an open connection!
@@ -141,7 +134,7 @@ public class Connector
         {
             if (!port.Equals("COM1"))
             {
-                SerialPort sp = tryConnect(port, 9600, Parity.None, 8, StopBits.One);   //_serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
+                SerialPort sp = tryConnect(port, 9600, Parity.None, 8, StopBits.One); //_serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
                 if (sp != null)
                 {
                     _serialPort = sp;
@@ -151,7 +144,6 @@ public class Connector
                     return "Connected Successfully on port " + port;
                 }
             }
-
         }
 
         return "Failure in connecting to wheelchair simulator";
@@ -165,7 +157,7 @@ public class Connector
             String s = _serialPort.ReadLine();
 
             Movement m = interpretIncoming(s);
-            return m;// _latestMovement.IncreaseWith(m);
+            return m; // _latestMovement.IncreaseWith(m);
         }
 
         Console.Out.WriteLine("Serialport is null");
@@ -227,7 +219,6 @@ public class Connector
         incomingLeftover = str;
 
         return new Movement(l, r * -1);
-
     }
 
 
@@ -277,5 +268,4 @@ public class Connector
         _serialPort.Close();
         _serialPort = null;
     }
-
 }

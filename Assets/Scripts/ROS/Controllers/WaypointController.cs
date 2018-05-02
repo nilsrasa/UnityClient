@@ -2,15 +2,19 @@
 using System.Linq;
 using UnityEngine;
 
-public class WaypointController : MonoBehaviour {
+public class WaypointController : MonoBehaviour
+{
+    public enum WaypointMode
+    {
+        Single,
+        Route
+    }
 
-	public enum WaypointMode { Single, Route }
     public static WaypointController Instance { get; private set; }
 
     [SerializeField] private GameObject _waypointMarkerPrefab;
 
-    [Header("Rendering")]
-    [SerializeField] private Color32 _singleWaypointColor;
+    [Header("Rendering")] [SerializeField] private Color32 _singleWaypointColor;
     [SerializeField] private Color32 _waypointRouteColor;
 
     private WaypointMode _currentWaypointMode = WaypointMode.Single;
@@ -44,7 +48,6 @@ public class WaypointController : MonoBehaviour {
             _lineRendererRobot.positionCount = 2;
             _lineRendererRobot.SetPositions(new Vector3[] {RobotMasterController.SelectedRobot.transform.position, _waypointMarkers[0].transform.position});
         }
-
     }
 
     private void LoadInPathsFromConfig()
@@ -83,7 +86,7 @@ public class WaypointController : MonoBehaviour {
             foreach (WaypointMarker marker in _waypointMarkers)
                 marker.SetLock(true);
             _lineRendererRoute.positionCount++;
-            _lineRendererRoute.SetPosition(_lineRendererRoute.positionCount-1, waypointPosition);
+            _lineRendererRoute.SetPosition(_lineRendererRoute.positionCount - 1, waypointPosition);
         }
 
         WaypointMarker waypoint = Instantiate(_waypointMarkerPrefab, waypointPosition, Quaternion.identity).GetComponent<WaypointMarker>();
@@ -111,7 +114,7 @@ public class WaypointController : MonoBehaviour {
         if (_lineRendererRoute.positionCount > 0)
             _lineRendererRoute.positionCount--;
         Destroy(_waypointMarkers[_waypointMarkers.Count - 1].gameObject);
-        _waypointMarkers.RemoveAt(_waypointMarkers.Count-1);
+        _waypointMarkers.RemoveAt(_waypointMarkers.Count - 1);
     }
 
     public List<Vector3> GetPath()
@@ -119,7 +122,8 @@ public class WaypointController : MonoBehaviour {
         return _waypointMarkers.Select(marker => marker.transform.position).ToList();
     }
 
-    public void ClearAllWaypoints() {
+    public void ClearAllWaypoints()
+    {
         foreach (WaypointMarker marker in _waypointMarkers)
             Destroy(marker.gameObject);
         _waypointMarkers = new List<WaypointMarker>();
@@ -152,5 +156,4 @@ public class WaypointController : MonoBehaviour {
         }
         ConfigManager.SaveRoute(routeName, route);
     }
-
 }

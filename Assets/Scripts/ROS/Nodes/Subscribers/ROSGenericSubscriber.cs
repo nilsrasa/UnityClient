@@ -6,8 +6,8 @@ using SimpleJSON;
 /// Generic subscriber that collects data received by ROS
 /// </summary>
 /// <typeparam name="T">Type of ROSBridgeMsg the subscriber should return when parsing</typeparam>
-public class ROSGenericSubscriber<T> : ROSBridgeSubscriber where T : ROSBridgeMsg  {
-
+public class ROSGenericSubscriber<T> : ROSBridgeSubscriber where T : ROSBridgeMsg
+{
     private bool _isRunning;
     private Func<JSONNode, T> _parseAction;
 
@@ -18,7 +18,7 @@ public class ROSGenericSubscriber<T> : ROSBridgeSubscriber where T : ROSBridgeMs
         _parseAction = parseAction;
         StartAgent(rosConnection, topicName, messageType);
     }
-    
+
     ///<summary>
     ///Stops advertising loop
     ///</summary>

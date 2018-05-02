@@ -12,14 +12,14 @@ public class RefreshButton : MonoBehaviour
         set
         {
             _shouldRotate = value;
-            if (!value) 
+            if (!value)
                 transform.rotation = Quaternion.identity;
         }
     }
 
     void Update()
     {
-        if (_shouldRotate) 
+        if (_shouldRotate)
             transform.localEulerAngles += new Vector3(0, 0, Time.deltaTime * _rotationSpeed);
     }
 }

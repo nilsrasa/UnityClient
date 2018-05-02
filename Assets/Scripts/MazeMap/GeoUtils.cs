@@ -3,7 +3,8 @@ using ProjNet.CoordinateSystems;
 using ProjNet.CoordinateSystems.Transformations;
 using UnityEngine;
 
-public static class GeoUtils {
+public static class GeoUtils
+{
     public static bool UtmOriginSet;
 
     static GeoPointUTM _utmOrigin;
@@ -33,6 +34,7 @@ public static class GeoUtils {
     }
 
     #region Geo Transformations
+
     public static GeoPointWGS84 ToWGS84(this GeoPointMercator geoPoint)
     {
         GeoPointWGS84 wgs84 = new GeoPointWGS84(_transformationFromMercatorToWGS84.MathTransform.Transform(geoPoint.ToArray()))
@@ -110,8 +112,9 @@ public static class GeoUtils {
     public static Vector3 ToUnity(this GeoPointUTM geoPoint)
     {
         GeoPointUTM ucs = geoPoint - _utmOrigin;
-        return new Vector3(x: (float)ucs.longitude, y: (float)ucs.altitude, z: (float)ucs.latitude);
+        return new Vector3(x: (float) ucs.longitude, y: (float) ucs.altitude, z: (float) ucs.latitude);
     }
+
     #endregion
 
     #region Coordinate Systems
@@ -124,10 +127,9 @@ public static class GeoUtils {
 
     public static Vector3 ToUnity(this GeoRotation geoRotation)
     {
-        Vector3 unityRotation = new Vector3(x: (float)geoRotation.east, y: (float)geoRotation.heading, z: (float)geoRotation.north);
+        Vector3 unityRotation = new Vector3(x: (float) geoRotation.east, y: (float) geoRotation.heading, z: (float) geoRotation.north);
         return unityRotation;
     }
 
     #endregion
-
 }

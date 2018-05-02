@@ -14,9 +14,7 @@ public class ChatController : MonoBehaviour
     [SerializeField] private GameObject _chatPrefab;
     [SerializeField] private int _maxMessages = 15;
 
-    [Space(10)]
-    [Header("Debug Chat")]
-    [SerializeField] private bool _useFakeChat;
+    [Space(10)] [Header("Debug Chat")] [SerializeField] private bool _useFakeChat;
     [SerializeField] private float _minChatSpamTime = 1;
     [SerializeField] private float _maxChatSpamTime = 10;
 
@@ -40,18 +38,19 @@ public class ChatController : MonoBehaviour
         _openPosition = transform.localPosition;
     }
 
-    void Update () {
-	    if (_useFakeChat)
-	    {
-	        if (_fakeChatTimer >= _fakeChatTimeLimit)
-	        {
+    void Update()
+    {
+        if (_useFakeChat)
+        {
+            if (_fakeChatTimer >= _fakeChatTimeLimit)
+            {
                 GenerateFakeChat();
-	            _fakeChatTimer = 0;
+                _fakeChatTimer = 0;
                 _fakeChatTimeLimit = Random.Range(_minChatSpamTime, _maxChatSpamTime);
-	        }
+            }
             else
-	            _fakeChatTimer += Time.deltaTime;
-	    }
+                _fakeChatTimer += Time.deltaTime;
+        }
     }
 
     //Generates fake chat messages based of already input names and messages for showcase purposes
@@ -62,22 +61,42 @@ public class ChatController : MonoBehaviour
         CreateChatMessage(fakeName, fakeMessage, false);
     }
 
-    private void DoneAnimating(bool shouldShow) {
+    private void DoneAnimating(bool shouldShow)
+    {
         //_canvas.enabled = shouldShow;
         _isActive = shouldShow;
     }
 
-    public void ShowChat() {
-        iTween.ScaleTo(gameObject, new Hashtable {{"time", 0.75f}, {"scale", _openScale}, {"easetype", iTween.EaseType.easeInQuart},
-            { "onstart", "DoneAnimating"}, { "onstartparams", true } });
-        iTween.MoveTo(gameObject, new Hashtable { { "time", 0.75f }, { "position", _openPosition }, { "easetype", iTween.EaseType.easeInQuart }, { "islocal", true } });
+    public void ShowChat()
+    {
+        iTween.ScaleTo(gameObject, new Hashtable
+        {
+            {"time", 0.75f},
+            {"scale", _openScale},
+            {"easetype", iTween.EaseType.easeInQuart},
+            {"onstart", "DoneAnimating"},
+            {"onstartparams", true}
+        });
+        iTween.MoveTo(gameObject, new Hashtable {{"time", 0.75f}, {"position", _openPosition}, {"easetype", iTween.EaseType.easeInQuart}, {"islocal", true}});
     }
 
-    public void HideChat() {
-        iTween.ScaleTo(gameObject, new Hashtable {{"time", 0.75f}, {"scale", Vector3.zero}, {"easetype", iTween.EaseType.easeInQuart},
-            { "oncomplete", "DoneAnimating"}, { "oncompleteparams", false } });
-        iTween.MoveTo(gameObject, new Hashtable { { "time", 0.75f }, { "position", new Vector3(_openPosition.x, _openPosition.y-2, _openPosition.z)},
-            { "easetype", iTween.EaseType.easeInQuart }, {"islocal", true} });
+    public void HideChat()
+    {
+        iTween.ScaleTo(gameObject, new Hashtable
+        {
+            {"time", 0.75f},
+            {"scale", Vector3.zero},
+            {"easetype", iTween.EaseType.easeInQuart},
+            {"oncomplete", "DoneAnimating"},
+            {"oncompleteparams", false}
+        });
+        iTween.MoveTo(gameObject, new Hashtable
+        {
+            {"time", 0.75f},
+            {"position", new Vector3(_openPosition.x, _openPosition.y - 2, _openPosition.z)},
+            {"easetype", iTween.EaseType.easeInQuart},
+            {"islocal", true}
+        });
     }
 
     /// <summary>
@@ -92,7 +111,8 @@ public class ChatController : MonoBehaviour
         chat.transform.SetParent(_contentWindow, false);
         _chatmessages.Add(chat.GetComponent<RectTransform>());
         chat.GetComponent<ChatMessage>().Initialize(senderName, messageText, isFromPlayer);
-        if (_chatmessages.Count > _maxMessages) {
+        if (_chatmessages.Count > _maxMessages)
+        {
             Destroy(_chatmessages[0].gameObject);
             _chatmessages.RemoveAt(0);
         }
@@ -106,7 +126,8 @@ public class ChatController : MonoBehaviour
         _chatmessages.RemoveAt(0);
     }
 
-    public void ToggleChat() {
+    public void ToggleChat()
+    {
         if (_isActive) HideChat();
         else ShowChat();
     }

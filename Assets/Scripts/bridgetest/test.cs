@@ -5,8 +5,8 @@ using ROSBridgeLib.nav_msgs;
 using ROSBridgeLib.std_msgs;
 using UnityEngine;
 
-public class test : MonoBehaviour{
-
+public class test : MonoBehaviour
+{
     private ROSBridgeWebSocketConnection ros = null;
     private float timer;
     private float pollRate = 2;
@@ -15,34 +15,35 @@ public class test : MonoBehaviour{
     private bool _running = false;
 
 
-    void Start () {
-	    Initialise();
-        
+    void Start()
+    {
+        Initialise();
+
         Application.runInBackground = true;
     }
-	
-	void Update ()
-	{
-	    if (!_running) return;
-		
-	    timer -= Time.deltaTime;
-	    ros.Render();
+
+    void Update()
+    {
+        if (!_running) return;
+
+        timer -= Time.deltaTime;
+        ros.Render();
 
         if (timer <= 0)
-	    {
-	        timer = pollRate;
+        {
+            timer = pollRate;
 
             PointMsg point = new PointMsg(1, 2, 3);
             QuaternionMsg quat = new QuaternionMsg(1, 2, 3, 4);
-	        PoseMsg pose = new PoseMsg(point, quat);
-	        PoseWithCovarianceMsg posec = new PoseWithCovarianceMsg(pose);
+            PoseMsg pose = new PoseMsg(point, quat);
+            PoseWithCovarianceMsg posec = new PoseWithCovarianceMsg(pose);
             Vector3Msg vec3 = new Vector3Msg(1, 2, 3);
-	        TwistMsg twist = new TwistMsg(vec3, vec3);
-	        TwistWithCovarianceMsg twistc = new TwistWithCovarianceMsg(twist, new double[36]);
-            HeaderMsg header = new HeaderMsg(1, new TimeMsg(1, 1), "0" );
+            TwistMsg twist = new TwistMsg(vec3, vec3);
+            TwistWithCovarianceMsg twistc = new TwistWithCovarianceMsg(twist, new double[36]);
+            HeaderMsg header = new HeaderMsg(1, new TimeMsg(1, 1), "0");
 
             PoseStampedMsg ps = new PoseStampedMsg(header, pose);
-            PathMsg msg = new PathMsg(header, new PoseStampedMsg[] { ps , ps , ps });
+            PathMsg msg = new PathMsg(header, new PoseStampedMsg[] {ps, ps, ps});
             _genericPub.PublishData(msg);
         }
     }
@@ -73,5 +74,4 @@ public class test : MonoBehaviour{
     {
         ros.Disconnect();
     }
-
 }

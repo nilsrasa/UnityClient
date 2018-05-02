@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
 public class MjpegStreamViewer : MonoBehaviour
 {
-
     [SerializeField] private string _streamUrl = "";
     [SerializeField] private float _updateRate = 0.2f;
 
@@ -18,17 +15,17 @@ public class MjpegStreamViewer : MonoBehaviour
         _mesh = GetComponent<MeshRenderer>();
     }
 
-	// Update is called once per frame
-	void Update ()
-	{
-	    if (_streamUrl == "") return;
-	    _timer -= Time.deltaTime;
-	    if (_timer <= 0)
-	    {
-	        StartCoroutine(UpdateImageFromStream(_streamUrl));
-	        _timer = _updateRate;
-	    }
-	}
+    // Update is called once per frame
+    void Update()
+    {
+        if (_streamUrl == "") return;
+        _timer -= Time.deltaTime;
+        if (_timer <= 0)
+        {
+            StartCoroutine(UpdateImageFromStream(_streamUrl));
+            _timer = _updateRate;
+        }
+    }
 
     private IEnumerator UpdateImageFromStream(string url)
     {
@@ -46,7 +43,6 @@ public class MjpegStreamViewer : MonoBehaviour
                 // Get downloaded asset bundle
                 _mesh.material.mainTexture = DownloadHandlerTexture.GetContent(uwr);
                 Debug.Log("DONE");
-
             }
         }
     }

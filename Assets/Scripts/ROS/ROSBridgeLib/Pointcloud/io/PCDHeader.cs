@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace PointCloud.io
 {
@@ -21,7 +18,7 @@ namespace PointCloud.io
 
         public int Points
         {
-            get { return Width*Height; }
+            get { return Width * Height; }
         }
 
         public PCDVersion Version

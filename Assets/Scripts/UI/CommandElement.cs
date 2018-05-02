@@ -1,6 +1,7 @@
 ﻿//Single command UI element
-public class CommandElement : GazeButton {
 
+public class CommandElement : GazeButton
+{
     public string Command { get; private set; }
 
     protected override void Awake()
@@ -20,5 +21,4 @@ public class CommandElement : GazeButton {
         Command = commandText;
         _buttonText.text = commandText;
     }
-    
 }

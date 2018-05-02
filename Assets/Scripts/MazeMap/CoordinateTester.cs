@@ -1,53 +1,48 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CoordinateTester : MonoBehaviour
 {
-    [Header("Coordinates from point")]
-    [SerializeField] private Transform _testPoint;
+    [Header("Coordinates from point")] [SerializeField] private Transform _testPoint;
     [SerializeField] private bool _test;
 
-    [Header("Find WGS Coordinate")]
-    [SerializeField] private GeoPointWGS84 _wgsPointToTest;
+    [Header("Find WGS Coordinate")] [SerializeField] private GeoPointWGS84 _wgsPointToTest;
     [SerializeField] private bool _testCoord;
 
-    [Header("Distance between two points")]
-    [SerializeField] private Transform _testDistancePointA;
+    [Header("Distance between two points")] [SerializeField] private Transform _testDistancePointA;
     [SerializeField] private Transform _testDistancePointB;
     [SerializeField] private bool _testDistance;
 
-    [Header("Look at object")]
-    [SerializeField] private Transform _testOrientationPoint;
+    [Header("Look at object")] [SerializeField] private Transform _testOrientationPoint;
     [SerializeField] private bool _testOrientation;
 
-    [Header("Find distance point")]
-    [SerializeField] private float _distance;
+    [Header("Find distance point")] [SerializeField] private float _distance;
     [SerializeField] private bool _testDistancePoint;
 
-    [Header("Move to distance")]
-    [SerializeField] private float _moveDistance;
+    [Header("Move to distance")] [SerializeField] private float _moveDistance;
     [SerializeField] private bool _moveToDistance;
 
     private int i = 10;
+
     // Update is called once per frame
-    void Update () {
-	    if (_test)
-	    {
-	        GeoPointUTM coordinatesUtm = _testPoint.transform.position.ToUTM();
-	        Debug.Log("Test point - UTM: " + coordinatesUtm);
-	        GeoPointWGS84 wgs84 = coordinatesUtm.ToWGS84();
+    void Update()
+    {
+        if (_test)
+        {
+            GeoPointUTM coordinatesUtm = _testPoint.transform.position.ToUTM();
+            Debug.Log("Test point - UTM: " + coordinatesUtm);
+            GeoPointWGS84 wgs84 = coordinatesUtm.ToWGS84();
             Debug.Log("Test point - WGS84: " + wgs84);
-	        GeoPointMercator utm = coordinatesUtm.ToMercator();
+            GeoPointMercator utm = coordinatesUtm.ToMercator();
             Debug.Log("Test point - Mercator: " + utm);
 
             _test = false;
-	    }
-	    if (_testCoord) {
-	        GameObject point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-	        point.transform.position = _wgsPointToTest.ToUTM().ToUnity();
-	        _testCoord = false;
-	    }
+        }
+        if (_testCoord)
+        {
+            GameObject point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            point.transform.position = _wgsPointToTest.ToUTM().ToUnity();
+            _testCoord = false;
+        }
         if (_testDistance)
         {
             Debug.Log(Vector3.Distance(_testDistancePointA.position, _testDistancePointB.position) + "meters");

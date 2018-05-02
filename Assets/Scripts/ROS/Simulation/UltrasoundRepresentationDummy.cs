@@ -12,12 +12,13 @@ public class UltrasoundRepresentationDummy : SensorRepresentation
         _spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    void Update() 
+    void Update()
     {
         Ray ray = new Ray(transform.position - transform.right * 0.25f, transform.right * 3);
         RaycastHit hit;
         float sensorData = 3;
-        if (Physics.Raycast(ray, out hit)) {
+        if (Physics.Raycast(ray, out hit))
+        {
             if (hit.distance < 0.2f)
                 sensorData = 0.2f;
             else if (hit.distance > 3)
@@ -27,5 +28,4 @@ public class UltrasoundRepresentationDummy : SensorRepresentation
         }
         _spriteRenderer.sprite = _ultrasoundLevels[GetLevelOfValue(sensorData, 3, _ultrasoundLevels.Count)];
     }
-
 }

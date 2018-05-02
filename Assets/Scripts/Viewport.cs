@@ -66,7 +66,8 @@ public class Viewport : MonoBehaviour
 
             yield return new WaitForEndOfFrame();
         }
-        while (_canvasRectTransform.localScale.y != target) {
+        while (_canvasRectTransform.localScale.y != target)
+        {
             _canvasRectTransform.localScale = Vector3.Slerp(_canvasRectTransform.localScale, new Vector3(target, target, 1), animationTimer / _animationSpeed);
 
             animationTimer += Time.deltaTime;
@@ -99,5 +100,4 @@ public class Viewport : MonoBehaviour
     {
         _objectToFollow = target;
     }
-
 }

@@ -1,11 +1,9 @@
-﻿using System;
-using ROSBridgeLib.std_msgs;
+﻿using ROSBridgeLib.std_msgs;
 
-public class UltrasoundRepresentationBus : SensorRepresentationBus {
-
+public class UltrasoundRepresentationBus : SensorRepresentationBus
+{
     public UltrasoundRepresentationBus()
     {
-        
         //ROSAgentType = typeof(ROSUltrasound);
     }
 
@@ -15,7 +13,8 @@ public class UltrasoundRepresentationBus : SensorRepresentationBus {
         JSONObject root = new JSONObject(dataString._data);
         foreach (string key in root.keys)
         {
-            foreach (SensorRepresentation sensor in _sensorRepresentations) {
+            foreach (SensorRepresentation sensor in _sensorRepresentations)
+            {
                 if (sensor.SensorId == key)
                 {
                     string dat = "";

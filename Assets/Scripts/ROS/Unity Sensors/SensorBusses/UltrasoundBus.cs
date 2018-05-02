@@ -2,8 +2,8 @@
 using System.Linq;
 using ROSBridgeLib.std_msgs;
 
-public class UltrasoundBus : SensorBus {
-
+public class UltrasoundBus : SensorBus
+{
     public UltrasoundBus()
     {
         //ROSAgentType = typeof(ROSUltrasound);

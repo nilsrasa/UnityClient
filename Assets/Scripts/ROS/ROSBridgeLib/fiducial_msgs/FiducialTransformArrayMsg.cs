@@ -1,13 +1,15 @@
 ﻿using ROSBridgeLib.std_msgs;
 using SimpleJSON;
 
-namespace ROSBridgeLib {
-	namespace fiducial_msgs {
-		public class FiducialTransformArrayMsg : ROSBridgeMsg
-		{
-		    public HeaderMsg _header;
-		    public int _image_seq;
-		    public FiducialTransformMsg[] _transforms;
+namespace ROSBridgeLib
+{
+    namespace fiducial_msgs
+    {
+        public class FiducialTransformArrayMsg : ROSBridgeMsg
+        {
+            public HeaderMsg _header;
+            public int _image_seq;
+            public FiducialTransformMsg[] _transforms;
 
             public FiducialTransformArrayMsg(JSONNode msg)
             {
@@ -21,35 +23,36 @@ namespace ROSBridgeLib {
                 }
             }
 
-		    public FiducialTransformArrayMsg(HeaderMsg header, int image_seq, FiducialTransformMsg[] transforms)
-		    {
-		        _header = header;
-		        _image_seq = image_seq;
-		        _transforms = transforms;
-		    }
-			
-			public static string GetMessageType() {
-				return "fiducial_msgs/FiducialTransformArray";
-			}
-			
-			public override string ToString()
-			{
-			    return string.Format("fiducial_msgs/FiducialTransformArray [header={0}][image_seq={1}][transforms length={2}]", _header, _image_seq, _transforms.Length);
-			}
-					
-			public override string ToYAMLString()
-			{
-			    string array = "[";
-			    for (int i = 0; i < _transforms.Length; i++)
-			    {
-			        array = array + _transforms[i].ToYAMLString();
-			        if (i < _transforms.Length -1)
-			        array += ",";
-			    }
-			    array += "]";
+            public FiducialTransformArrayMsg(HeaderMsg header, int image_seq, FiducialTransformMsg[] transforms)
+            {
+                _header = header;
+                _image_seq = image_seq;
+                _transforms = transforms;
+            }
 
-			    return "{\"header\" : " + _header.ToYAMLString() + ",\"image_seq\" :" + _image_seq + ",\"transforms\" :" + array + "}";
-			}
-		}
-	}
+            public static string GetMessageType()
+            {
+                return "fiducial_msgs/FiducialTransformArray";
+            }
+
+            public override string ToString()
+            {
+                return string.Format("fiducial_msgs/FiducialTransformArray [header={0}][image_seq={1}][transforms length={2}]", _header, _image_seq, _transforms.Length);
+            }
+
+            public override string ToYAMLString()
+            {
+                string array = "[";
+                for (int i = 0; i < _transforms.Length; i++)
+                {
+                    array = array + _transforms[i].ToYAMLString();
+                    if (i < _transforms.Length - 1)
+                        array += ",";
+                }
+                array += "]";
+
+                return "{\"header\" : " + _header.ToYAMLString() + ",\"image_seq\" :" + _image_seq + ",\"transforms\" :" + array + "}";
+            }
+        }
+    }
 }

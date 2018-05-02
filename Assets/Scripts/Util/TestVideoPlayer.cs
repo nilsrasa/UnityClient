@@ -5,7 +5,6 @@ using UnityEngine.Video;
 //Video player for 360 video for testing
 public class TestVideoPlayer : MonoBehaviour
 {
-
     private VideoPlayer _videoPlayer;
 
     void Awake()
@@ -17,12 +16,13 @@ public class TestVideoPlayer : MonoBehaviour
     {
         StartCoroutine(playVideo());
     }
-	
-	void Update () {
-		
-	}
 
-    private IEnumerator playVideo() {
+    void Update()
+    {
+    }
+
+    private IEnumerator playVideo()
+    {
         _videoPlayer.errorReceived += VideoPlayer_errorReceived;
         _videoPlayer.prepareCompleted += VideoPlayer_prepareCompleted;
 
@@ -38,14 +38,15 @@ public class TestVideoPlayer : MonoBehaviour
         yield return 0;
     }
 
-    private void VideoPlayer_prepareCompleted(VideoPlayer source) {
+    private void VideoPlayer_prepareCompleted(VideoPlayer source)
+    {
         Debug.Log("Done Preparing Video");
         //Play Video
         _videoPlayer.Play();
     }
-    private void VideoPlayer_errorReceived(VideoPlayer source, string message) {
-        Debug.Log("Error:" + message);
 
+    private void VideoPlayer_errorReceived(VideoPlayer source, string message)
+    {
+        Debug.Log("Error:" + message);
     }
-    
 }

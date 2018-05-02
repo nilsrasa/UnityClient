@@ -2,8 +2,8 @@
 using UnityEngine.UI;
 
 //Trackpad GUI Element that is used to control robot
-class RobotControlTrackPad : GazeObject {
-
+class RobotControlTrackPad : GazeObject
+{
     [SerializeField] private Image _background;
     [SerializeField] private SpriteRenderer _border;
     [SerializeField] private Text _text;
@@ -13,18 +13,15 @@ class RobotControlTrackPad : GazeObject {
     [SerializeField] private Color _borderGrazePeriodColor;
     [SerializeField] private Color _borderLowPeriodColor;
 
-    [Header("Interface")]
-    [SerializeField] private Vector2 _zeroOffset;
+    [Header("Interface")] [SerializeField] private Vector2 _zeroOffset;
     [SerializeField] private Vector2 _deadZone;
     [SerializeField] private float _centerZoneSize = 0.1f;
 
-    [Header("Overlay")]
-    [SerializeField] private RectTransform _overlayContainer;
+    [Header("Overlay")] [SerializeField] private RectTransform _overlayContainer;
     [SerializeField] private RectTransform _horizontalBar;
     [SerializeField] private RectTransform _verticalBar;
 
-    [Header("Timers")]
-    [SerializeField] private float _grazePeriod = 2f;
+    [Header("Timers")] [SerializeField] private float _grazePeriod = 2f;
     [SerializeField] private float _lowTimerPeriod = 5f;
     [SerializeField] private float _grazePeriodTimer = 0;
     [SerializeField] private float _lowTimerPeriodTimer = 1.5f;
@@ -42,7 +39,8 @@ class RobotControlTrackPad : GazeObject {
         _orgDwellTime = _dwellTime;
     }
 
-    protected override void Update() {
+    protected override void Update()
+    {
         base.Update();
 
         if (!IsActivated && Gazed)
@@ -78,7 +76,8 @@ class RobotControlTrackPad : GazeObject {
             _text.text = "";
     }
 
-    protected override void Activate() {
+    protected override void Activate()
+    {
         base.Activate();
         _grazeTimer = 0;
     }
@@ -105,8 +104,8 @@ class RobotControlTrackPad : GazeObject {
         if (!IsActivated) return Vector2.zero;
         Vector2 controlResult = new Vector2();
         Vector3 localSpace = transform.InverseTransformPoint(worldPos);
-        Vector2 offsetLocalSpace = (Vector2)localSpace - _zeroOffset;
-        controlResult = new Vector2(offsetLocalSpace.x / (_rect.sizeDelta.x/2), offsetLocalSpace.y / (_rect.sizeDelta.y/2));
+        Vector2 offsetLocalSpace = (Vector2) localSpace - _zeroOffset;
+        controlResult = new Vector2(offsetLocalSpace.x / (_rect.sizeDelta.x / 2), offsetLocalSpace.y / (_rect.sizeDelta.y / 2));
         controlResult = new Vector2(Mathf.Abs(controlResult.x) < _centerZoneSize ? 0 : controlResult.x, Mathf.Abs(controlResult.y) < _centerZoneSize ? 0 : controlResult.y);
 
         return controlResult;
@@ -122,5 +121,4 @@ class RobotControlTrackPad : GazeObject {
     {
         _overlayContainer.gameObject.SetActive(isVisible);
     }
-
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class SensorBusController
 {
@@ -23,23 +22,23 @@ public class SensorBusController
         }
         return null;
     }
-    
+
     public void Register<T>(UnitySensor sensor) where T : SensorBus
     {
         for (int i = 0; i < SensorBusses.Count; i++)
         {
             SensorBus b = SensorBusses[i];
-            if (b.GetType().ToString().Contains(typeof(T).ToString())) {
+            if (b.GetType().ToString().Contains(typeof(T).ToString()))
+            {
                 b.Register(sensor);
                 SensorBusses.Remove(b);
                 SensorBusses.Add(b);
                 return;
             }
         }
-        T sensorBus = (T)Activator.CreateInstance(typeof(T), new object[]{});
+        T sensorBus = (T) Activator.CreateInstance(typeof(T), new object[] { });
         sensorBus.Register(sensor);
         SensorBusses.Add(sensorBus);
         _controller.StartAgent(sensorBus.ROSAgentType);
     }
-    
 }

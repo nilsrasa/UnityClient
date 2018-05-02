@@ -10,13 +10,37 @@ public class PlayerUIController : MonoBehaviour
 {
     public static PlayerUIController Instance { get; private set; }
 
-    private enum UIState { Navigation, Options, PlacingFiducial, UpdatingFiducial, DeletingFiducial, SorroundPhoto, Loading, RobotList, SetRobotPosition, SetRobotOrientation}
-    private enum RobotDrivingUIState { NoRobotSelected, RobotStopped, RobotDriving, RobotPaused }
-    private enum WaypointMode { Point, Route }
+    private enum UIState
+    {
+        Navigation,
+        Options,
+        PlacingFiducial,
+        UpdatingFiducial,
+        DeletingFiducial,
+        SorroundPhoto,
+        Loading,
+        RobotList,
+        SetRobotPosition,
+        SetRobotOrientation
+    }
+
+    private enum RobotDrivingUIState
+    {
+        NoRobotSelected,
+        RobotStopped,
+        RobotDriving,
+        RobotPaused
+    }
+
+    private enum WaypointMode
+    {
+        Point,
+        Route
+    }
 
     //Right Panel
-    [Header("Right Panel")]
-    [SerializeField] private GameObject _rightPanel;
+    [Header("Right Panel")] [SerializeField] private GameObject _rightPanel;
+
     [SerializeField] private Button _generateCampus;
     [SerializeField] private Button _goToBuilding;
     [SerializeField] private Dropdown _selectRobot;
@@ -30,11 +54,14 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Button _returnToBase;
     [SerializeField] private Button _driveRobot;
     [SerializeField] private Button _loadRoute;
+
     [SerializeField] private Button _saveRoute;
+
     //[SerializeField] private Color _driveRobotStopColorNormal;
     //[SerializeField] private Color _driveRobotStopColorHovered;
     //[SerializeField] private Color _driveRobotStopColorDown;
     [SerializeField] private Text _driveRobotText;
+
     [SerializeField] private Button _pauseRobot;
     [SerializeField] private Text _pauseRobotText;
     [SerializeField] private Color _resumeColorNormal;
@@ -46,27 +73,26 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Button _options;
 
     //Loading Panel
-    [Header("Loading Panel")]
-    [SerializeField] private GameObject _loadingPanel;
+    [Header("Loading Panel")] [SerializeField] private GameObject _loadingPanel;
+
     [SerializeField] private Image _loadingFill;
 
     //Floor indicators
-    [Header("Floor Level Panel")]
-    [SerializeField] private GameObject _layerPanel;
+    [Header("Floor Level Panel")] [SerializeField] private GameObject _layerPanel;
+
     [SerializeField] private Text _layerNumberText;
     [SerializeField] private Button _layerUp;
     [SerializeField] private Button _layerDown;
-        
+
     //Sorround Photo UI
-    [Header("Sorround Photo Panel")]
-    [SerializeField] private Button _backFromSorroundPhoto;
+    [Header("Sorround Photo Panel")] [SerializeField] private Button _backFromSorroundPhoto;
+
     [SerializeField] private GameObject _sorroundPhotoPanel;
     [SerializeField] private Slider _timeSlider;
     [SerializeField] private GameObject _timeSliderPositionPrefab;
     [SerializeField] private Text _timeSliderDateText;
 
-    [Header("Options Panel")]
-    [SerializeField] private GameObject _optionsPanel;
+    [Header("Options Panel")] [SerializeField] private GameObject _optionsPanel;
     [SerializeField] private Button _addFiducial;
     [SerializeField] private Button _updateFiducial;
     [SerializeField] private Button _deleteFiducial;
@@ -74,12 +100,10 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Button _exitApplication;
     [SerializeField] private Button _closeOptions;
 
-    [Header("Info Panel")]
-    [SerializeField] private GameObject _infoPanel;
+    [Header("Info Panel")] [SerializeField] private GameObject _infoPanel;
     [SerializeField] private Text _infoText;
 
-    [Header("Add Fiducial Panel")]
-    [SerializeField] private GameObject _addFiducialPanel;
+    [Header("Add Fiducial Panel")] [SerializeField] private GameObject _addFiducialPanel;
     [SerializeField] private InputField _addFidId;
     [SerializeField] private InputField _addFidPosX;
     [SerializeField] private InputField _addFidPosY;
@@ -89,14 +113,12 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private InputField _addFidRotZ;
     [SerializeField] private Button _addFidAccept;
     [SerializeField] private Button _addFidCancel;
-    
-    [Header("Done Panel")]
-    [SerializeField] private GameObject _donePanel;
+
+    [Header("Done Panel")] [SerializeField] private GameObject _donePanel;
     [SerializeField] private Button _doneAccept;
     [SerializeField] private Button _doneCancel;
 
-    [Header("Robot Panel")]
-    [SerializeField] private GameObject _robotPanel;
+    [Header("Robot Panel")] [SerializeField] private GameObject _robotPanel;
     [SerializeField] private Button _robotListRefreshList;
     [SerializeField] private Button _robotListClose;
     [SerializeField] private Text _robotRefreshText;
@@ -195,7 +217,7 @@ public class PlayerUIController : MonoBehaviour
                     _pauseRobot.interactable = true;
                     _returnToBase.interactable = true;
                     _driveRobot.colors = _driveRobotStopColorBlock;
-                    _driveRobotText.text ="Stop";
+                    _driveRobotText.text = "Stop";
                     _isDriving = true;
                     break;
                 case RobotDrivingUIState.RobotPaused:
@@ -292,8 +314,8 @@ public class PlayerUIController : MonoBehaviour
 
         _driveRobotStopColorBlock = _driveRobot.colors;
         //_driveRobotStopColorBlock.normalColor = _driveRobotStopColorNormal;
-       // _driveRobotStopColorBlock.highlightedColor = _driveRobotStopColorHovered;
-       // _driveRobotStopColorBlock.pressedColor = _driveRobotStopColorDown;
+        // _driveRobotStopColorBlock.highlightedColor = _driveRobotStopColorHovered;
+        // _driveRobotStopColorBlock.pressedColor = _driveRobotStopColorDown;
 
         _pauseRobotColorBlock = _pauseRobot.colors;
 
@@ -306,7 +328,6 @@ public class PlayerUIController : MonoBehaviour
         _layerDown.onClick.AddListener(() => { LayerChangeClick(false); });
 
         _sliderTransform = _timeSlider.GetComponent<RectTransform>();
-
     }
 
     void Start()
@@ -406,6 +427,7 @@ public class PlayerUIController : MonoBehaviour
     }
 
     #region ButtonClickEvents
+
     private void GenerateCampusButtonOnClick()
     {
         StartCoroutine(GenerateCampus());
@@ -437,7 +459,7 @@ public class PlayerUIController : MonoBehaviour
     private void ReturnRobotToBase()
     {
         //TODO: Hardcoded
-        MazeMapController.Instance.GetPath(RobotMasterController.SelectedRobot.transform.position.ToUTM().ToWGS84(), new GeoPointWGS84() { latitude = 55.78268988306574, longitude = 12.514101387003798 });
+        MazeMapController.Instance.GetPath(RobotMasterController.SelectedRobot.transform.position.ToUTM().ToWGS84(), new GeoPointWGS84() {latitude = 55.78268988306574, longitude = 12.514101387003798});
     }
 
     private void DriveRobotOnClick()
@@ -623,7 +645,6 @@ public class PlayerUIController : MonoBehaviour
         if (shouldConnect)
         {
             RobotMasterController.Instance.ConnectToRobot(uri);
-
         }
         else
             RobotMasterController.Instance.DisconnectRobot(uri);
@@ -638,6 +659,7 @@ public class PlayerUIController : MonoBehaviour
     #endregion
 
     #region OnValueChangeEvents
+
     private void OnAddFiducialValuesChanged(string value)
     {
         Vector3 position = new Vector3(float.Parse(_addFidPosX.text, CultureInfo.InvariantCulture),
@@ -688,9 +710,11 @@ public class PlayerUIController : MonoBehaviour
         _timeSliderDateText.text = selectedDateTime.ToString("dd-MM-yyyy");
         SorroundPhotoController.Instance.ChangeTimeOnLoadedPhoto(selectedDateTime);
     }
+
     #endregion
 
     #region MouseClickEvents
+
     private void RegisterMouseClick()
     {
         PlayerController.Instance.OnMouseClick += OnMouseClick;
@@ -779,6 +803,7 @@ public class PlayerUIController : MonoBehaviour
     {
         CurrentUIState = UIState.SorroundPhoto;
     }
+
     #endregion
 
     private void ClearTimeSliderHighlights()
@@ -962,6 +987,5 @@ public class PlayerUIController : MonoBehaviour
             _selectRobot.value = 0;
         }
         _selectRobot.RefreshShownValue();
-
     }
 }

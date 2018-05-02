@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Text;
-using SimpleJSON;
+﻿using SimpleJSON;
 
 /**
  * Define a time message. These have been hand-crafted from the corresponding msg file.
@@ -14,40 +12,50 @@ using SimpleJSON;
  * @version 3.1
  */
 
-namespace ROSBridgeLib {
-	namespace std_msgs {
-		public class TimeMsg : ROSBridgeMsg {
-			private int _secs, _nsecs;
+namespace ROSBridgeLib
+{
+    namespace std_msgs
+    {
+        public class TimeMsg : ROSBridgeMsg
+        {
+            private int _secs, _nsecs;
 
-			public TimeMsg(JSONNode msg) {
-				_secs = int.Parse(msg["secs"]);
-				_nsecs = int.Parse (msg["nsecs"]);
-			}
+            public TimeMsg(JSONNode msg)
+            {
+                _secs = int.Parse(msg["secs"]);
+                _nsecs = int.Parse(msg["nsecs"]);
+            }
 
-			public TimeMsg(int secs, int nsecs) {
-				_secs = secs;
-				_nsecs = nsecs;
-			}
+            public TimeMsg(int secs, int nsecs)
+            {
+                _secs = secs;
+                _nsecs = nsecs;
+            }
 
-			public static string GetMessageType() {
-				return "std_msgs/Time";
-			}
+            public static string GetMessageType()
+            {
+                return "std_msgs/Time";
+            }
 
-			public int GetSecs() {
-				return _secs;
-			}
+            public int GetSecs()
+            {
+                return _secs;
+            }
 
-			public int GetNsecs() {
-				return _nsecs;
-			}
+            public int GetNsecs()
+            {
+                return _nsecs;
+            }
 
-			public override string ToString() {
-				return "Time [secs=" + _secs + ",  nsecs=" + _nsecs + "]";
-			}
+            public override string ToString()
+            {
+                return "Time [secs=" + _secs + ",  nsecs=" + _nsecs + "]";
+            }
 
-			public override string ToYAMLString() {
-				return "{\"data\" : {\"secs\" : " + _secs + ", \"nsecs\" : " + _nsecs + "}}";
-			}
-		}
-	}
+            public override string ToYAMLString()
+            {
+                return "{\"data\" : {\"secs\" : " + _secs + ", \"nsecs\" : " + _nsecs + "}}";
+            }
+        }
+    }
 }

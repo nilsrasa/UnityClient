@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Text;
 using SimpleJSON;
 
 /* 
@@ -7,40 +5,51 @@ using SimpleJSON;
  * @author Michael Jenkin, Robert Codd-Downey, Andrew Speers and Miquel Massot Campos
  */
 
-namespace ROSBridgeLib {
-	namespace std_msgs {
-        public class Int32MultiArrayMsg : ROSBridgeMsg {
+namespace ROSBridgeLib
+{
+    namespace std_msgs
+    {
+        public class Int32MultiArrayMsg : ROSBridgeMsg
+        {
             private MultiArrayLayoutMsg _layout;
             private int[] _data;
 
-            public Int32MultiArrayMsg(JSONNode msg) {
+            public Int32MultiArrayMsg(JSONNode msg)
+            {
                 _layout = new MultiArrayLayoutMsg(msg["layout"]);
                 _data = new int[msg["data"].Count];
-				for (int i = 0; i < _data.Length; i++) {
+                for (int i = 0; i < _data.Length; i++)
+                {
                     _data[i] = int.Parse(msg["data"][i]);
                 }
             }
 
-            public Int32MultiArrayMsg(MultiArrayLayoutMsg layout, int[] data) {
+            public Int32MultiArrayMsg(MultiArrayLayoutMsg layout, int[] data)
+            {
                 _layout = layout;
                 _data = data;
             }
 
-            public static string GetMessageType() {
+            public static string GetMessageType()
+            {
                 return "std_msgs/Int32MultiArray";
             }
 
-            public int[] GetData() {
+            public int[] GetData()
+            {
                 return _data;
             }
 
-            public MultiArrayLayoutMsg GetLayout() {
+            public MultiArrayLayoutMsg GetLayout()
+            {
                 return _layout;
             }
 
-            public override string ToString() {
+            public override string ToString()
+            {
                 string array = "[";
-                for (int i = 0; i < _data.Length; i++) {
+                for (int i = 0; i < _data.Length; i++)
+                {
                     array = array + _data[i];
                     if (i < _data.Length - 1)
                         array += ",";
@@ -49,9 +58,11 @@ namespace ROSBridgeLib {
                 return "Int32MultiArray [layout=" + _layout.ToString() + ", data=" + _data + "]";
             }
 
-            public override string ToYAMLString() {
+            public override string ToYAMLString()
+            {
                 string array = "[";
-                for (int i = 0; i < _data.Length; i++) {
+                for (int i = 0; i < _data.Length; i++)
+                {
                     array = array + _data[i];
                     if (i < _data.Length - 1)
                         array += ",";

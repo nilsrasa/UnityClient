@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class WaypointNavigation : MonoBehaviour
 {
-
     [SerializeField] private float _publishInterval = 0.2f;
 
     private float _publishTimer = 0;
@@ -27,10 +26,12 @@ public class WaypointNavigation : MonoBehaviour
 
     //Publishers
     private ROSLocomotionDirect _rosLocomotionDirect;
+
     private ROSGenericPublisher _rosLocomotionState;
 
     //Subscribers
     private ROSLocomotionWaypoint _rosLocomotionWaypoint;
+
     private ROSLocomotionWaypointState _rosLocomotionWaypointState;
     private ROSLocomotionControlParams _rosLocomotionControlParams;
     private ROSGenericSubscriber<Float32Msg> _rosLocomotionLinear;
@@ -149,7 +150,7 @@ public class WaypointNavigation : MonoBehaviour
 
     private void PublishVelocity(TwistMsg twist)
     {
-        _rosLocomotionDirect.PublishData((float)twist._linear._x, (float)twist._angular._z);
+        _rosLocomotionDirect.PublishData((float) twist._linear._x, (float) twist._angular._z);
     }
 
     private void ReceivedNavigationParameters(ROSBridgeMsg parameters)
@@ -172,7 +173,7 @@ public class WaypointNavigation : MonoBehaviour
         vel_maxang = data._data;
     }
 
-    public void SetNavigationMovementParameters(Float32Msg maxLinearVel = null, Float32Msg maxAngularVel = null) 
+    public void SetNavigationMovementParameters(Float32Msg maxLinearVel = null, Float32Msg maxAngularVel = null)
     {
         if (maxLinearVel != null)
             vel_maxlin = maxLinearVel._data;
@@ -183,7 +184,7 @@ public class WaypointNavigation : MonoBehaviour
 
     public void ReceivedNavigationState(ROSBridgeMsg newState)
     {
-        StringMsg data = (StringMsg)newState;
+        StringMsg data = (StringMsg) newState;
         state = data._data;
     }
 
@@ -200,5 +201,4 @@ public class WaypointNavigation : MonoBehaviour
         goal_set = true;
         subState = "STOP";
     }
-
 }

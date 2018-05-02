@@ -4,12 +4,18 @@ using ROSBridgeLib.std_msgs;
 
 public class ROSLocomotionWaypointState : ROSAgent
 {
-    public enum RobotWaypointState { RUNNING, STOP, PARK }
+    public enum RobotWaypointState
+    {
+        RUNNING,
+        STOP,
+        PARK
+    }
 
     private ROSGenericSubscriber<StringMsg> _subscriber;
     private ROSGenericPublisher _publisher;
 
     public delegate void DataReceived(ROSBridgeMsg msg);
+
     public event ROSLocomotionControlParams.DataReceived OnDataReceived;
 
     public ROSLocomotionWaypointState(AgentJob job, ROSBridgeWebSocketConnection rosConnection, string topicName)
@@ -48,5 +54,4 @@ public class ROSLocomotionWaypointState : ROSAgent
         StringMsg state = new StringMsg(data);
         _publisher.PublishData(state);
     }
-
 }

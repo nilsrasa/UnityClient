@@ -16,7 +16,7 @@ public struct GeoRotation
 
     public double[] ToArray()
     {
-        return new[] { heading, north, east };
+        return new[] {heading, north, east};
     }
 
     public static GeoRotation operator +(GeoRotation a, GeoRotation b)
@@ -29,7 +29,8 @@ public struct GeoRotation
         };
     }
 
-    public static GeoRotation operator -(GeoRotation a, GeoRotation b) {
+    public static GeoRotation operator -(GeoRotation a, GeoRotation b)
+    {
         return new GeoRotation
         {
             heading = a.heading - b.heading,
@@ -42,5 +43,4 @@ public struct GeoRotation
     {
         return String.Format("heading: {0}, north: {1}, east: {2}", heading, north, east);
     }
-
 }

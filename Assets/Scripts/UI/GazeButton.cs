@@ -9,13 +9,13 @@ public class GazeButton : GazeObject
 {
     [SerializeField] protected Image _background;
     [SerializeField] protected string _activatedTextOverride;
-    
+
     protected Text _buttonText;
     protected SpriteRenderer _border;
     protected string _orgText;
     protected string _activeText;
 
-    public Color _backgroundColor = new Color(0,0,0,0);
+    public Color _backgroundColor = new Color(0, 0, 0, 0);
     public Color _hoverColor;
     public Color _activatedColor = Color.green;
 
@@ -41,7 +41,7 @@ public class GazeButton : GazeObject
         base.Start();
         _background.color = IsActivated ? _activatedColor : _backgroundColor;
     }
-    
+
     protected override void Activate()
     {
         base.Activate();

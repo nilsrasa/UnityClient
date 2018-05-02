@@ -16,20 +16,23 @@ public struct GeoPointWGS84
 
     public double[] ToArray()
     {
-        return new[] { longitude, latitude };
+        return new[] {longitude, latitude};
     }
 
     public static GeoPointWGS84 operator +(GeoPointWGS84 a, GeoPointWGS84 b)
     {
-        return new GeoPointWGS84 {
+        return new GeoPointWGS84
+        {
             longitude = a.longitude + b.longitude,
             latitude = a.latitude + b.latitude,
             altitude = a.altitude + b.altitude,
         };
     }
 
-    public static GeoPointWGS84 operator -(GeoPointWGS84 a, GeoPointWGS84 b) {
-        return new GeoPointWGS84 {
+    public static GeoPointWGS84 operator -(GeoPointWGS84 a, GeoPointWGS84 b)
+    {
+        return new GeoPointWGS84
+        {
             longitude = a.longitude - b.longitude,
             latitude = a.latitude - b.latitude,
             altitude = a.altitude - b.altitude,

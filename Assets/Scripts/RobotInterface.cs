@@ -4,9 +4,10 @@ using UnityEngine;
 
 //The control interface to the robot
 //TODO: To be changed to ROS
-public class RobotInterface : MonoBehaviour {
-
-    public enum CommandType {
+public class RobotInterface : MonoBehaviour
+{
+    public enum CommandType
+    {
         TurnSeatLeft,
         TurnSeatRight,
         TurnRobotLeft,
@@ -15,14 +16,14 @@ public class RobotInterface : MonoBehaviour {
         DriveRobotReverse,
         ParkingBrakeEngaged,
         ParkingBrakeDisengaged,
-        StopRobot 
+        StopRobot
     }
 
     private string _telerobotConfigPath;
 
     public static RobotInterface Instance { get; private set; }
     public bool Parked { get; private set; }
-    
+
     public bool IsConnected { get; private set; }
     public AnimationCurve SpeedCurve;
 
@@ -38,7 +39,8 @@ public class RobotInterface : MonoBehaviour {
     private ROSBridgeWebSocketConnection _rosBridge;
     private Telerobot_ThetaFile _telerobotConfigFile;
 
-    void Awake() {
+    void Awake()
+    {
         Instance = this;
         _telerobotConfigPath = Application.streamingAssetsPath + "/Config/Telerobot_ThetaS.json";
     }
@@ -49,24 +51,27 @@ public class RobotInterface : MonoBehaviour {
         _telerobotConfigFile = JsonUtility.FromJson<Telerobot_ThetaFile>(robotFileJson);
     }
 
-    void OnApplicationQuit() {
+    void OnApplicationQuit()
+    {
         if (_rosBridge != null)
             _rosBridge.Disconnect();
     }
 
-    private string GetMotorSpeedString(float speed) {
-        int intIntensity = (int)(SpeedCurve.Evaluate(Mathf.Abs(speed)) * (_motorMaxSpeed - _motorMinSpeed) + _motorMinSpeed);
+    private string GetMotorSpeedString(float speed)
+    {
+        int intIntensity = (int) (SpeedCurve.Evaluate(Mathf.Abs(speed)) * (_motorMaxSpeed - _motorMinSpeed) + _motorMinSpeed);
         if (speed == 0)
             return "000";
         else
             return intIntensity.ToString("000");
     }
 
-    private void SendCommandToRobot(Vector2 controlOutput) {
-        Vector2 movement = new Vector2(controlOutput.y, - controlOutput.x);
+    private void SendCommandToRobot(Vector2 controlOutput)
+    {
+        Vector2 movement = new Vector2(controlOutput.y, -controlOutput.x);
         _rosLocomotionDirect.PublishData(movement.x, movement.y);
         _isStopped = false;
-    }   
+    }
 
     public void StopRobot()
     {
@@ -75,9 +80,11 @@ public class RobotInterface : MonoBehaviour {
         _isStopped = true;
     }
 
-    public void SendCommand(Vector2 controlOutput) {
+    public void SendCommand(Vector2 controlOutput)
+    {
         if (!IsConnected) return;
-        if (_timer < _commandTimer / 1000f) {
+        if (_timer < _commandTimer / 1000f)
+        {
             _timer += Time.deltaTime;
             return;
         }
@@ -86,12 +93,15 @@ public class RobotInterface : MonoBehaviour {
         SendCommandToRobot(controlOutput);
     }
 
-    public void SetParkingBrake(bool isOn) {
-        if (isOn) {
+    public void SetParkingBrake(bool isOn)
+    {
+        if (isOn)
+        {
             GuiController.Instance.SetRobotControlVisibility(false);
             StreamController.Instance.EnableParkedMode();
         }
-        else {
+        else
+        {
             StreamController.Instance.DisableParkedMode();
             GuiController.Instance.SetSeatControlVisibility(false);
             VRController.Instance.CenterSeat();
@@ -99,19 +109,22 @@ public class RobotInterface : MonoBehaviour {
         Parked = isOn;
     }
 
-    public void DoneEnableDrivingMode() {
+    public void DoneEnableDrivingMode()
+    {
         GuiController.Instance.SetRobotControlVisibility(true);
         Viewport.Instance.SetEnabled(true);
     }
 
-    public void DoneEnableParkMode() {
+    public void DoneEnableParkMode()
+    {
         GuiController.Instance.SetSeatControlVisibility(true);
     }
 
-    public void Connect() {
+    public void Connect()
+    {
         _rosBridge = new ROSBridgeWebSocketConnection(_telerobotConfigFile.ROSBridgeUri, _telerobotConfigFile.ROSBridgePort);
         _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Publisher, _rosBridge, "/cmd_vel");
-        _rosBridge.Connect(((s, b) => {Debug.Log(s + " - " + b);}));
+        _rosBridge.Connect(((s, b) => { Debug.Log(s + " - " + b); }));
         IsConnected = true;
     }
 }

@@ -9,6 +9,7 @@ public class RobotMasterController : MonoBehaviour
     public static RobotMasterController Instance { get; private set; }
 
     private static ROSController _selectedRobot;
+
     public static ROSController SelectedRobot
     {
         get { return _selectedRobot; }
@@ -25,6 +26,7 @@ public class RobotMasterController : MonoBehaviour
 
     //Master Robot hostname, Corresponding Robot
     public static Dictionary<string, Robot> Robots { get; private set; }
+
     public static Dictionary<string, ROSController> ActiveRobots { get; private set; }
 
     private string _configPath;
@@ -92,7 +94,7 @@ public class RobotMasterController : MonoBehaviour
             Robots.Add(robotFile.RosBridgeUri, robot);
         }
 
-        PlayerUIController.Instance.LoadRobots(Robots.Select( robot => robot.Value).ToList());
+        PlayerUIController.Instance.LoadRobots(Robots.Select(robot => robot.Value).ToList());
     }
 
     private void ConnectionResult(string uri, bool isAlive)
@@ -125,7 +127,6 @@ public class RobotMasterController : MonoBehaviour
         }
         else
             return null;
-
     }
 
     public List<string> GetRobotNames(int campusId)
@@ -187,9 +188,8 @@ public class RobotMasterController : MonoBehaviour
                 SelectedRobot = null;
                 WaypointController.Instance.ClearAllWaypoints();
             }
-
     }
-    
+
     public void DisconnectAllRobots()
     {
         foreach (KeyValuePair<string, Robot> pair in Robots)
@@ -204,12 +204,12 @@ public class RobotMasterController : MonoBehaviour
             }
         }
     }
-    
+
     public void SelectRobot(ROSController rosController)
     {
         if (SelectedRobot != null)
             SelectedRobot.OnDeselected();
-        
+
         if (rosController == null)
         {
             SelectedRobot = null;
@@ -245,5 +245,4 @@ public class RobotMasterController : MonoBehaviour
             RobotConfig = robotConfig;
         }
     }
-
 }

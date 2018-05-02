@@ -9,7 +9,8 @@ public class ThetaWebcamStream : MonoBehaviour
     [SerializeField] private Texture _dummyImage;
     [SerializeField] private Texture _text;
 
-    public void StartStream() {
+    public void StartStream()
+    {
         if (_useDummyImage)
         {
             _primarySphere.material.mainTexture = _dummyImage;

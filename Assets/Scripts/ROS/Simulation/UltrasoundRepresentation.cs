@@ -17,14 +17,15 @@ public class UltrasoundRepresentation : SensorRepresentation
         _spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    void Start() 
+    void Start()
     {
         SensorRepresentationBusController.Instance.Register<UltrasoundRepresentationBus>(this);
     }
 
-    void Update() 
+    void Update()
     {
-        if (_hasData) {
+        if (_hasData)
+        {
             _spriteRenderer.sprite = _ultrasoundLevels[GetLevelOfValue(_dataToHandle, _sensorMaxValue, _ultrasoundLevels.Count)];
             _hasData = false;
         }
@@ -36,5 +37,4 @@ public class UltrasoundRepresentation : SensorRepresentation
         _dataToHandle = reading;
         _hasData = true;
     }
-
 }

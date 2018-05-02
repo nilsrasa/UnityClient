@@ -45,7 +45,6 @@ public class FiducialController : MonoBehaviour
 
     void Update()
     {
-
         if (_saveFiducials)
         {
             _saveFiducials = false;
@@ -57,7 +56,7 @@ public class FiducialController : MonoBehaviour
     {
         _fiducials = new Dictionary<int, Fiducial>();
         _fiducialObjects = new Dictionary<int, FiducialObject>();
-        Fiducial newFiducial = (Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _zeroLocation.Position.ToUTM().ToUnity(), 
+        Fiducial newFiducial = (Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _zeroLocation.Position.ToUTM().ToUnity(),
             Quaternion.Euler(_zeroLocation.Rotation)) as GameObject).GetComponent<Fiducial>();
 
         newFiducial.gameObject.name = _zeroLocation.FiducialId.ToString();
@@ -89,9 +88,9 @@ public class FiducialController : MonoBehaviour
 
     private void UpdateFiducial(FiducialMapEntryMsg entry)
     {
-        Vector3 localpos = new Vector3((float)entry._x, (float)entry._z, (float)entry._y);
+        Vector3 localpos = new Vector3((float) entry._x, (float) entry._z, (float) entry._y);
         _fiducials[entry._fiducial_id].transform.localPosition = _fiducials[_zeroLocation.FiducialId].transform.rotation * localpos;
-        _fiducials[entry._fiducial_id].transform.localEulerAngles = new Vector3((float)entry._rx * Mathf.Rad2Deg, (float)entry._rz * Mathf.Rad2Deg, (float)entry._ry * Mathf.Rad2Deg);
+        _fiducials[entry._fiducial_id].transform.localEulerAngles = new Vector3((float) entry._rx * Mathf.Rad2Deg, (float) entry._rz * Mathf.Rad2Deg, (float) entry._ry * Mathf.Rad2Deg);
     }
 
     /// <summary>
@@ -139,7 +138,8 @@ public class FiducialController : MonoBehaviour
         lock (_fiducials)
         {
             _fiducialCollectionFile = JsonUtility.FromJson<FiducialCollectionFile>(File.ReadAllText(_fiducialSavePath));
-            foreach (FiducialCollection collection in _fiducialCollectionFile.FiducialCollections) {
+            foreach (FiducialCollection collection in _fiducialCollectionFile.FiducialCollections)
+            {
                 if (campusId == collection.CampusId)
                 {
                     foreach (FiducialObject fiducialObject in collection.SavedFiducials)
@@ -192,7 +192,6 @@ public class FiducialController : MonoBehaviour
         else
         {
             _tempFiducial.transform.SetPositionAndRotation(position, Quaternion.Euler(rotation));
-
         }
         _tempFiducial.FiducialId = _tempFiducialId;
         return _tempFiducialId;
@@ -298,7 +297,7 @@ public class FiducialController : MonoBehaviour
         if (_fiducialToUpdate == null) return;
 
         _fiducialToUpdate.SetPositionAndRotation(_tempFiducial.transform.position, Quaternion.Euler(_tempFiducial.transform.eulerAngles));
-        
+
         _fiducialObjects[_tempFiducialId].Position = _fiducialToUpdate.position.ToUTM().ToWGS84();
         _fiducialObjects[_tempFiducialId].Rotation = _fiducialToUpdate.eulerAngles.ToGeoRotation();
 
@@ -354,7 +353,8 @@ public class FiducialController : MonoBehaviour
 }
 
 [Serializable]
-public class FiducialData {
+public class FiducialData
+{
     public int FiducialId;
     public GeoPointWGS84 Position;
     public Vector3 Rotation;

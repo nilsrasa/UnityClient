@@ -16,6 +16,7 @@ public class GazeKeyboardButton : GazeButton
     }
 
     public new delegate void OnActivated(char letter);
+
     public new event OnActivated Activated;
 
     protected override void Awake()

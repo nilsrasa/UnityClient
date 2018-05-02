@@ -3,12 +3,11 @@ using UnityEngine;
 using UnityEngine.UI;
 
 //Collects and controls all GUI elements such as keyboard, command view and chat.
-public class GuiController : MonoBehaviour {
+public class GuiController : MonoBehaviour
+{
     public static GuiController Instance { get; private set; }
 
-    [Header("Interface")]
-    [SerializeField]
-    private float _interfaceDistance = 4.5f;
+    [Header("Interface")] [SerializeField] private float _interfaceDistance = 4.5f;
     [SerializeField] private float _screenDiameter = 100;
     [SerializeField] private float _screenAspectRatio = 1.77777f;
     [SerializeField] private Vector2 _rearViewSizeMultiplier = new Vector2(1, 1);
@@ -17,9 +16,7 @@ public class GuiController : MonoBehaviour {
     [SerializeField] private Transform _staticControlsInterfaceContainer;
     [SerializeField] private GazeButton _toggleViewport;
 
-    [Header("RobotControl")]
-    [SerializeField]
-    private float _robotControlTrackPadDiameter = 100;
+    [Header("RobotControl")] [SerializeField] private float _robotControlTrackPadDiameter = 100;
     [SerializeField] private float _robotControlTrackPadAspectRatio = 1.77777f;
     [SerializeField] private float _robotControlsInterfaceHorAngleToScreen = 20;
     [SerializeField] private float _robotControlsInterfaceVerAngleToScreen = 10;
@@ -30,9 +27,7 @@ public class GuiController : MonoBehaviour {
     [SerializeField] private RectTransform _viewportDownCanvas;
     [SerializeField] private RectTransform _viewportRearCanvas;
 
-    [Header("SeatControls")]
-    [SerializeField]
-    private float _seatControlsInterfaceAngleToScreen = 10;
+    [Header("SeatControls")] [SerializeField] private float _seatControlsInterfaceAngleToScreen = 10;
     [SerializeField] private float _seatRotationSpeed = 1;
     [SerializeField] private Image _turnSeatLeft;
     [SerializeField] private Image _turnSeatRight;
@@ -45,11 +40,13 @@ public class GuiController : MonoBehaviour {
     private RectTransform _viewportFrontCanvas;
     private bool _turningRobotLeft, _turningRobotRight, _drivingRobotForwards, _drivingRobotReverse;
 
-    void Awake() {
+    void Awake()
+    {
         Instance = this;
     }
 
-    void Start() {
+    void Start()
+    {
         _cmdController = CommandListController.Instance;
         _keyboardController = KeyboardController.Instance;
         _chatController = ChatController.Instance;
@@ -63,38 +60,45 @@ public class GuiController : MonoBehaviour {
         _robotControlTrackPad.Unhovered += OnTrackpadUnhovered;
         _toggleControlOverlay.Unhovered += OnToggleControlOverlayActivated;
 
-        iTween.MoveTo(gameObject, new Hashtable { { "oncomplete", "HideUI" }, { "time", 2 } });
+        iTween.MoveTo(gameObject, new Hashtable {{"oncomplete", "HideUI"}, {"time", 2}});
     }
 
-    void Update() {
+    void Update()
+    {
         CheckControls();
     }
 
-    void OnRobotParkingBrakeActivated(GazeObject sender) {
+    void OnRobotParkingBrakeActivated(GazeObject sender)
+    {
         RobotInterface.Instance.SetParkingBrake(sender.IsActivated);
     }
 
-    void OnToggleViewportActivated(GazeObject sender) {
+    void OnToggleViewportActivated(GazeObject sender)
+    {
         StreamController.Instance.SetViewportVisibility(sender.IsActivated);
     }
 
-    void OnToggleControlOverlayActivated(GazeObject sender) {
+    void OnToggleControlOverlayActivated(GazeObject sender)
+    {
         _robotControlTrackPad.SetOverlayVisibility(sender.IsActivated);
     }
 
-    void OnTrackpadInteracted(GazeObject sender) {
+    void OnTrackpadInteracted(GazeObject sender)
+    {
         if (sender.IsActivated)
             StreamController.Instance.EnableDrivingMode();
     }
 
-    void OnTrackpadUnhovered(GazeObject sender) {
+    void OnTrackpadUnhovered(GazeObject sender)
+    {
         StreamController.Instance.DisableDrivingMode();
     }
 
     /// <summary>
     /// Positions the screens and all UI elements that are positioned relative to the screen. 
     /// </summary>
-    private void PositionInterfaceElements() {
+    private void PositionInterfaceElements()
+    {
         //Calculate size of screen and robot controls
         float h = Mathf.Pow(_screenDiameter, 2) / (Mathf.Pow(_screenAspectRatio, 2) + 1);
         h = Mathf.Sqrt(h);
@@ -134,7 +138,8 @@ public class GuiController : MonoBehaviour {
     /// <summary>
     /// Checks player's head orientation to rotate seat
     /// </summary>
-    private void CheckControls() {
+    private void CheckControls()
+    {
         if (!RobotInterface.Instance.Parked) return;
 
         float headDirHor = AngleDir(VRController.Instance.Head.forward.normalized, VRController.Instance.transform.forward.normalized, transform.up);
@@ -147,27 +152,30 @@ public class GuiController : MonoBehaviour {
         Vector3 seatRightHeading = (_turnSeatRight.transform.parent.position - _viewportFrontCanvas.root.position).normalized;
         float directionToRight = AngleDir(seatRightHeading, VRController.Instance.transform.forward.normalized, transform.up);
 
-        if (headDirHor > directionToLeft) {
+        if (headDirHor > directionToLeft)
+        {
             VRController.Instance.RotateSeat((headDirHor - directionToLeft) * Time.deltaTime * headDirHor * -_seatRotationSpeed);
             rotateSeatLeft = true;
         }
-        else if (headDirHor < directionToRight) {
+        else if (headDirHor < directionToRight)
+        {
             VRController.Instance.RotateSeat((headDirHor - directionToRight) * Time.deltaTime * headDirHor * _seatRotationSpeed);
             rotateSeatRight = true;
         }
 
         _turnSeatLeft.color = rotateSeatLeft ? _arrowColorActive : _arrowColor;
         _turnSeatRight.color = rotateSeatRight ? _arrowColorActive : _arrowColor;
-
     }
 
-    private float AngleDir(Vector3 fwd, Vector3 targetDir, Vector3 up) {
+    private float AngleDir(Vector3 fwd, Vector3 targetDir, Vector3 up)
+    {
         Vector3 perp = Vector3.Cross(fwd, targetDir);
         float dir = Vector3.Dot(perp, up);
         return dir;
     }
 
-    public void HideUI() {
+    public void HideUI()
+    {
         _cmdController.HideCommandView();
         _keyboardController.HideKeyboard();
         _chatController.HideChat();
@@ -176,27 +184,32 @@ public class GuiController : MonoBehaviour {
         SetDrivingControlsVisibility(false);
     }
 
-    public void ShowUI() {
+    public void ShowUI()
+    {
         _cmdController.ShowCommandView();
         _keyboardController.ShowKeyboard();
         _chatController.ShowChat();
         SetInterfaceVisibility(true);
     }
 
-    public void SetRobotControlVisibility(bool isVisible) {
+    public void SetRobotControlVisibility(bool isVisible)
+    {
         _robotControlTrackPad.gameObject.SetActive(isVisible);
     }
 
-    public void SetSeatControlVisibility(bool isVisible) {
+    public void SetSeatControlVisibility(bool isVisible)
+    {
         _turnSeatLeft.transform.parent.gameObject.SetActive(isVisible);
         _turnSeatRight.transform.parent.gameObject.SetActive(isVisible);
     }
 
-    public void SetInterfaceVisibility(bool isVisible) {
+    public void SetInterfaceVisibility(bool isVisible)
+    {
         SetSeatControlVisibility(isVisible);
     }
 
-    public void SetDrivingControlsVisibility(bool isVisible) {
+    public void SetDrivingControlsVisibility(bool isVisible)
+    {
         _viewportRearCanvas.gameObject.SetActive(isVisible);
         _viewportDownCanvas.gameObject.SetActive(isVisible);
     }

@@ -11,8 +11,8 @@ public class Building
     public Dictionary<int, Floor> Floors = new Dictionary<int, Floor>();
     public Transform RenderedModel;
 
-    public override string ToString() {
+    public override string ToString()
+    {
         return string.Format("Building - Id:{0}, BuildingId:{1}, CampusId:{2}, Name:{3}, AccessLevel:{4}, FloorCount:{5}", Id, BuildingId, CampusId, Name, AccessLevel, Floors.Count);
     }
 }
-

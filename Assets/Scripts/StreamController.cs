@@ -6,13 +6,19 @@ using UnityEngine;
 //Controls the player experience and camera input
 public class StreamController : MonoBehaviour
 {
-    public enum ControlType { Head, Mouse, Eyes, Eyes_Mouse }
+    public enum ControlType
+    {
+        Head,
+        Mouse,
+        Eyes,
+        Eyes_Mouse
+    }
+
     public static StreamController Instance { get; private set; }
 
     [SerializeField] private ControlType _selectedControlType = ControlType.Head;
 
-    [Header("Cameras and Projection")]
-    [SerializeField] private ThetaWebcamStream _cameraStreamUSB;
+    [Header("Cameras and Projection")] [SerializeField] private ThetaWebcamStream _cameraStreamUSB;
     [SerializeField] private MeshRenderer _icosphere;
     [SerializeField] private MeshRenderer _icosphereDissolve;
     [SerializeField] private MeshRenderer _projectionSphere;
@@ -21,8 +27,7 @@ public class StreamController : MonoBehaviour
     [SerializeField] private Vector3 _drivingModeRotationalOffset;
     [SerializeField] private FollowObject _projectionCameraFrontFollowObject;
 
-    [Header("Chair Variables")]
-    [SerializeField] private float _chairMaxSpeed= 2;
+    [Header("Chair Variables")] [SerializeField] private float _chairMaxSpeed = 2;
     [SerializeField] private float _chairAcceleration = 1;
     [SerializeField] private float _chairDeaccelerationDistance = 1;
     [SerializeField] private Transform _chair;
@@ -34,15 +39,19 @@ public class StreamController : MonoBehaviour
     [SerializeField] private FollowObject _rotatingControlsFollow;
     [SerializeField] private FollowObject _seatInterfaceFollow;
 
-    [Space(5)]
-    [Header("Lights")]
-    [SerializeField] private List<Light> _shaftLights;
+    [Space(5)] [Header("Lights")] [SerializeField] private List<Light> _shaftLights;
     [SerializeField] private List<Light> _domePerimiterLights;
     [SerializeField] private Light _domeTopLight;
 
     public Transform ActiveChair { get; private set; }
 
-    private enum ChairState { Stopped, Accelerating, Moving, Deaccelerating }
+    private enum ChairState
+    {
+        Stopped,
+        Accelerating,
+        Moving,
+        Deaccelerating
+    }
 
     private bool _isLooping;
     private bool _isConnected;
@@ -79,27 +88,33 @@ public class StreamController : MonoBehaviour
             if (Vector3.Distance(ActiveChair.position, _chairEndPosition.position) < _chairDeaccelerationDistance && _currentChairState != ChairState.Stopped)
                 _currentChairState = ChairState.Deaccelerating;
 
-            if (_currentChairState == ChairState.Accelerating) {
+            if (_currentChairState == ChairState.Accelerating)
+            {
                 _currentChairSpeed = Mathf.Lerp(_currentChairSpeed, _chairMaxSpeed, _accelTimer += _chairAcceleration * Time.deltaTime);
-                if (_currentChairSpeed >= _chairMaxSpeed) {
+                if (_currentChairSpeed >= _chairMaxSpeed)
+                {
                     _currentChairSpeed = _chairMaxSpeed;
                     _currentChairState = ChairState.Moving;
                 }
             }
-            else if (_currentChairState == ChairState.Deaccelerating) {
+            else if (_currentChairState == ChairState.Deaccelerating)
+            {
                 _currentChairSpeed = _chairMaxSpeed - _chairMaxSpeed * (_chairDeaccelerationDistance - Vector3.Distance(ActiveChair.position, _chairEndPosition.position)) / _chairDeaccelerationDistance;
             }
 
             ActiveChair.Translate(Vector3.up * _currentChairSpeed * Time.deltaTime);
 
-            if (Vector3.Distance(ActiveChair.position, _loopEndPosition.position) < 1f) {
+            if (Vector3.Distance(ActiveChair.position, _loopEndPosition.position) < 1f)
+            {
                 if (_isLooping)
                     LoopChair();
-                else {
+                else
+                {
                     _shaftLid.gameObject.SetActive(false);
                 }
             }
-            if (Vector3.Distance(ActiveChair.position, _chairEndPosition.position) < 0.1f) {
+            if (Vector3.Distance(ActiveChair.position, _chairEndPosition.position) < 0.1f)
+            {
                 _currentChairState = ChairState.Stopped;
                 foreach (Light light in _shaftLights)
                     light.enabled = false;
@@ -159,7 +174,7 @@ public class StreamController : MonoBehaviour
     /// </summary>
     private IEnumerator ParkedModeSequence()
     {
-        foreach (Light light in _domePerimiterLights) 
+        foreach (Light light in _domePerimiterLights)
         {
             light.enabled = false;
         }
@@ -178,15 +193,16 @@ public class StreamController : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
         RobotInterface.Instance.DoneEnableParkMode();
-
     }
 
     /// <summary>
     /// Plays animation of lights and screes for disabling parked mode
     /// </summary>
-    private IEnumerator DriveModeSequence() {
+    private IEnumerator DriveModeSequence()
+    {
         float dissolve = 1;
-        while (dissolve > 0) {
+        while (dissolve > 0)
+        {
             dissolve -= Time.deltaTime * _sphereDissolveSpeed;
             _icosphereDissolve.material.SetFloat("_Cutoff", dissolve);
             yield return new WaitForEndOfFrame();
@@ -196,7 +212,8 @@ public class StreamController : MonoBehaviour
         _icosphereDissolve.enabled = false;
         yield return new WaitForSeconds(1f);
         _domeTopLight.enabled = true;
-        foreach (Light light in _domePerimiterLights) {
+        foreach (Light light in _domePerimiterLights)
+        {
             light.enabled = true;
         }
 

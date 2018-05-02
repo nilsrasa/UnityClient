@@ -4,8 +4,8 @@
 /// Generic subscriber that collects data received by ROS
 /// </summary>
 /// <typeparam name="T">Type of ROSBridgeMsg the subscriber should return when parsing</typeparam>
-public class ROSGenericPublisher : ROSBridgePublisher {
-
+public class ROSGenericPublisher : ROSBridgePublisher
+{
     private bool _isRunning;
 
     /// <param name="messageType">MessageType to receive</param>
@@ -14,5 +14,4 @@ public class ROSGenericPublisher : ROSBridgePublisher {
     {
         StartAgent(rosConnection, topicName, messageType);
     }
-    
 }

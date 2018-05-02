@@ -8,6 +8,7 @@ public class ROSLocomotionWaypoint : ROSAgent
     private ROSGenericPublisher _publisher;
 
     public delegate void DataReceived(ROSBridgeMsg msg);
+
     public event DataReceived OnDataReceived;
 
     public ROSLocomotionWaypoint(AgentJob job, ROSBridgeWebSocketConnection rosConnection, string topicName)
@@ -42,5 +43,4 @@ public class ROSLocomotionWaypoint : ROSAgent
         NavSatFixMsg navSatFix = new NavSatFixMsg(data.latitude, data.longitude, data.altitude);
         _publisher.PublishData(navSatFix);
     }
-
 }

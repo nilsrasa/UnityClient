@@ -10,7 +10,18 @@ public class SorroundPhotoController : MonoBehaviour
 {
     public enum Camera
     {
-        Cam0, Cam1, Cam2, Cam3, Cam4, Cam5, Cam6, Cam7, Cam8, Cam9, Cam10, Cam11,
+        Cam0,
+        Cam1,
+        Cam2,
+        Cam3,
+        Cam4,
+        Cam5,
+        Cam6,
+        Cam7,
+        Cam8,
+        Cam9,
+        Cam10,
+        Cam11,
     }
 
     public static SorroundPhotoController Instance { get; private set; }
@@ -52,7 +63,7 @@ public class SorroundPhotoController : MonoBehaviour
     private IEnumerator RenderPhoto(string path, MeshRenderer target)
     {
         Texture2D tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
-        using (WWW www = new WWW(@"file:///" +path)) 
+        using (WWW www = new WWW(@"file:///" + path))
         {
             yield return www;
             www.LoadImageIntoTexture(tex);
@@ -72,10 +83,10 @@ public class SorroundPhotoController : MonoBehaviour
         {
             DirectoryInfo dirInfo = new DirectoryInfo(directory);
             string[] split = dirInfo.Name.Split('_');
-            int id = int.Parse(split[0]); 
+            int id = int.Parse(split[0]);
             DateTime timestamp = DateTime.ParseExact(split[1], "dd-MM-yyyy", CultureInfo.InvariantCulture);
 
-            SorroundPictureMeta metaData = JsonUtility.FromJson<SorroundPictureMeta>(File.ReadAllText(directory+"/meta.json"));
+            SorroundPictureMeta metaData = JsonUtility.FromJson<SorroundPictureMeta>(File.ReadAllText(directory + "/meta.json"));
 
             if (!_photoLocations.ContainsKey(id))
             {
@@ -92,7 +103,6 @@ public class SorroundPhotoController : MonoBehaviour
 
             _photoLocations[id].Timestamps.Add(timestamp);
             _photoLocations[id].Timestamps = _photoLocations[id].Timestamps.OrderBy(time => time).ToList();
-            
         }
     }
 
@@ -113,14 +123,14 @@ public class SorroundPhotoController : MonoBehaviour
             string path = string.Format("{0}/{1}/IMAG{2}.JPG", imagePath, camera.Key, sId);
             StartCoroutine(RenderPhoto(path, camera.Value));
         }
-        
+
         //Load history
         if (_photoLocations[photoLocation.PictureId].Timestamps.Count > 2)
         {
             PlayerUIController.Instance.ResetTimeSlider();
             _timeSliderPoints = new List<RectTransform>();
             PlayerUIController.Instance.SetSliderVisibility(true);
-            DateTime lastTimestamp = _photoLocations[photoLocation.PictureId].Timestamps[_photoLocations[photoLocation.PictureId].Timestamps.Count-1];
+            DateTime lastTimestamp = _photoLocations[photoLocation.PictureId].Timestamps[_photoLocations[photoLocation.PictureId].Timestamps.Count - 1];
             double secondsBetweenFirstAndLast = lastTimestamp.Subtract(firstTimestamp).TotalSeconds;
 
             for (int i = 0; i < _photoLocations[photoLocation.PictureId].Timestamps.Count; i++)
@@ -128,8 +138,8 @@ public class SorroundPhotoController : MonoBehaviour
                 DateTime timePosition = _photoLocations[photoLocation.PictureId].Timestamps[i];
                 double secondsFromFirst = timePosition.Subtract(firstTimestamp).TotalSeconds;
                 float position = 0;
-                if (i > 0) 
-                    position = (float)(secondsFromFirst / secondsBetweenFirstAndLast);
+                if (i > 0)
+                    position = (float) (secondsFromFirst / secondsBetweenFirstAndLast);
 
                 PlayerUIController.Instance.InstantiateTimeSliderPoint(position, timePosition);
             }
@@ -175,5 +185,4 @@ public class SorroundPhotoController : MonoBehaviour
         public Camera Camera;
         public MeshRenderer Plane;
     }
-
 }

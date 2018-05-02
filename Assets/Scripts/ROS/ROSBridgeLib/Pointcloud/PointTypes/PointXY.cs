@@ -4,7 +4,7 @@
     {
         private float _x;
         private float _y;
-        
+
         public PointXY()
         {
             _x = _y = 0;

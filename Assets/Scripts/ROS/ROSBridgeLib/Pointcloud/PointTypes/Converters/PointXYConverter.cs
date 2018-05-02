@@ -42,7 +42,7 @@ namespace PointCloud.PointTypes.Converters
         {
             if (value is string)
             {
-                String stringRep = (String)value;
+                String stringRep = (String) value;
                 culture = new CultureInfo("en-US");
                 String[] splitted = stringRep.Split(' ');
                 return new PointXY(Convert.ToSingle(splitted[0], culture), Convert.ToSingle(splitted[1], culture));
@@ -65,7 +65,7 @@ namespace PointCloud.PointTypes.Converters
         {
             if (destinationType == typeof(string))
             {
-                PointXY point = (PointXY)value;
+                PointXY point = (PointXY) value;
                 return point.X + " " + point.Y;
             }
             return base.ConvertTo(context, culture, value, destinationType);

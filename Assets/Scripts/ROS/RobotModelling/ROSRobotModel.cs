@@ -5,6 +5,7 @@ using UrdfToUnity.Urdf.Models;
 /// This class holds a UrdfUnity Robot Model represenation to be
 /// attached to the corresponding GameObject.
 /// </summary>
-public class ROSRobotModel : MonoBehaviour {
+public class ROSRobotModel : MonoBehaviour
+{
     public Robot robot = null;
 }

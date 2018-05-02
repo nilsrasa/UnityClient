@@ -39,6 +39,7 @@ public class VirtualRobot : ROSController
 
     //Navigation
     private Vector3 _currentWaypoint;
+
     private float _waypointDistanceThreshhold = 0.1f;
 
     void Awake()
@@ -173,8 +174,7 @@ public class VirtualRobot : ROSController
         _rosOdometry = new ROSGenericPublisher(_rosBridge, "/robot_gps_pose", OdometryMsg.GetMessageType());
         _transformUpdateCoroutine = StartCoroutine(SendTransformUpdate(_publishInterval));
 
-        _rosLocomotionWaypointState =
-            new ROSLocomotionWaypointState(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/state");
+        _rosLocomotionWaypointState = new ROSLocomotionWaypointState(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/state");
         _rosLocomotionWaypoint = new ROSLocomotionWaypoint(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint");
         _rosLocomotionLinear = new ROSGenericPublisher(_rosBridge, "/waypoint/max_linear_speed", Float32Msg.GetMessageType());
         _rosLocomotionAngular = new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());

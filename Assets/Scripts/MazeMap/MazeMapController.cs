@@ -14,16 +14,17 @@ public class MazeMapController : MonoBehaviour
     public bool CampusLoaded { get; private set; }
     public int CampusId { get; private set; }
 
-    [Space(5)]
-    [SerializeField] private Transform _triggerFloor;
+    [Space(5)] [SerializeField] private Transform _triggerFloor;
     [SerializeField] private Material _lineMaterial;
     [SerializeField] private bool _shouldBackupMazemapData;
 
     public static MazeMapController Instance;
+
     //Key: BuildingId, Value: Building data
     public Dictionary<int, Building> Buildings;
 
     public delegate void WasFinishedGeneratingCampus(int campusId);
+
     public event WasFinishedGeneratingCampus OnFinishedGeneratingCampus;
 
     private const string REST_BUILDING_SEARCH = "https://api.mazemap.com/api/buildings/?campusid={0}&srid=4326";
@@ -35,8 +36,10 @@ public class MazeMapController : MonoBehaviour
 
     //Key: Floor FloorIndex, Value: Floor Transform
     private Dictionary<int, List<Floor>> _floorsByZ;
+
     //Key: Floor FloorIndex, Value: If layer is currently shown
     private Dictionary<int, bool> _zLayerActive;
+
     private float _lineWidth;
     private MazemapBackupFile _mazemapBackup;
     private MazeMapMeasurements _mazeMapMeasurements;
@@ -48,13 +51,14 @@ public class MazeMapController : MonoBehaviour
     [SerializeField] private GameObject _colliderPrefab;
 
     private int _buildingsLeftToDraw;
+
     private int BuildingsLeftToDraw
     {
         get { return _buildingsLeftToDraw; }
         set
         {
             _buildingsLeftToDraw = value;
-            PlayerUIController.Instance.UpdateLoadingProgress(1 - (float)_buildingsLeftToDraw / Buildings.Count);
+            PlayerUIController.Instance.UpdateLoadingProgress(1 - (float) _buildingsLeftToDraw / Buildings.Count);
         }
     }
 
@@ -76,7 +80,6 @@ public class MazeMapController : MonoBehaviour
 
         string measurementsPath = Application.streamingAssetsPath + "/MazeMap/Measurements.json";
         _mazeMapMeasurements = File.Exists(measurementsPath) ? JsonUtility.FromJson<MazeMapMeasurements>(File.ReadAllText(measurementsPath)) : new MazeMapMeasurements();
-
     }
 
     /// <summary>
@@ -91,7 +94,7 @@ public class MazeMapController : MonoBehaviour
         if (whenDone != null)
             whenDone(www.text);
     }
-    
+
     /// <summary>
     /// Parses GeoJSON into building objects and draws them
     /// </summary>
@@ -122,7 +125,8 @@ public class MazeMapController : MonoBehaviour
             if (_mazemapBackup.Campuses.ContainsKey(CampusId))
                 _mazemapBackup.Campuses.Remove(CampusId);
 
-            _mazemapBackup.Campuses.Add(CampusId, new CampusJson {
+            _mazemapBackup.Campuses.Add(CampusId, new CampusJson
+            {
                 BuildingsJson = text,
                 Floors = new SerializableDictionaryIntString(),
                 Rooms = new SerializableDictionaryIntString()
@@ -150,8 +154,8 @@ public class MazeMapController : MonoBehaviour
                     Name = floor["name"].str,
                     AccessLevel = (int) floor["accessLevel"].f,
                     FloorIndex = (int) floor["z"].f,
-                    FloorOutlineId = (int)floor["floorOutlineId"].f,
-            };
+                    FloorOutlineId = (int) floor["floorOutlineId"].f,
+                };
                 if (f.FloorIndex > 0)
                     f.FloorIndex--;
                 b.Floors.Add(f.Id, f);
@@ -179,7 +183,7 @@ public class MazeMapController : MonoBehaviour
             if (first)
                 first = false;
             else
-                routePoints.RemoveAt(routePoints.Count-2);
+                routePoints.RemoveAt(routePoints.Count - 2);
         }
         WaypointController.Instance.CreateRoute(routePoints.Select(point => point.ToUTM().ToUnity()).ToList());
     }
@@ -203,8 +207,10 @@ public class MazeMapController : MonoBehaviour
         if (OnFinishedGeneratingCampus != null)
             OnFinishedGeneratingCampus(CampusId);
 
-        foreach (KeyValuePair<int, Building> building in Buildings) {
-            foreach (KeyValuePair<int, Floor> floor in building.Value.Floors) {
+        foreach (KeyValuePair<int, Building> building in Buildings)
+        {
+            foreach (KeyValuePair<int, Floor> floor in building.Value.Floors)
+            {
                 CreateFloorColliders(floor.Value.RenderedModel);
             }
         }
@@ -216,7 +222,7 @@ public class MazeMapController : MonoBehaviour
     private IEnumerator DrawBuilding(Building building)
     {
         GameObject buildingObject = new GameObject(building.Name);
-        buildingObject.transform.parent = _campusParent; 
+        buildingObject.transform.parent = _campusParent;
         building.RenderedModel = buildingObject.transform;
         List<Transform> floorObjects = new List<Transform>();
 
@@ -229,10 +235,12 @@ public class MazeMapController : MonoBehaviour
             if (_isUsingBackup)
             {
                 string json;
-                if (_mazemapBackup.Campuses[CampusId].Floors.TryGetValue(floor.Id, out json)) {
+                if (_mazemapBackup.Campuses[CampusId].Floors.TryGetValue(floor.Id, out json))
+                {
                     wwwText = json;
                 }
-                else {
+                else
+                {
                     yield break;
                 }
             }
@@ -270,7 +278,7 @@ public class MazeMapController : MonoBehaviour
             {
                 _mazemapBackup.Campuses[CampusId].Floors.Add(pair.Key, wwwText);
             }
-        }   
+        }
 
         foreach (Transform t in floorObjects)
             t.SetParent(buildingObject.transform, true);
@@ -291,25 +299,25 @@ public class MazeMapController : MonoBehaviour
         floor.transform.position = Vector3.zero;
         List<Transform> points = new List<Transform>();
 
-        foreach (JSONObject feature in collection["features"]) 
+        foreach (JSONObject feature in collection["features"])
         {
             floor.name = feature["properties"]["floorIds"][0].f.ToString();
             JSONObject geometry = feature["geometry"];
-            foreach (JSONObject pos in geometry["coordinates"]) 
+            foreach (JSONObject pos in geometry["coordinates"])
             {
                 foreach (JSONObject coord in pos)
                 {
                     if (geometry["type"].str == "MultiPolygon")
                     {
                         GameObject multiPolygon = new GameObject("mp");
-                        
+
                         List<Transform> mpPoints = new List<Transform>();
                         foreach (JSONObject multiCoord in coord)
                         {
                             GameObject pointObject = InstantiatePoint(multiCoord);
                             mpPoints.Add(pointObject.transform);
                         }
-                        
+
                         foreach (Transform t in mpPoints)
                             t.SetParent(multiPolygon.transform, true);
 
@@ -330,7 +338,7 @@ public class MazeMapController : MonoBehaviour
 
         return floor;
     }
-    
+
     /// <summary>
     /// Instantiates point object from WGS84 or Mercator coordinates, by converting them to UCS
     /// </summary>
@@ -339,7 +347,8 @@ public class MazeMapController : MonoBehaviour
     private GameObject InstantiatePoint(JSONObject coordinate)
     {
         GeoPointUTM geoPointUtm;
-        var geoPointWGS84 = new GeoPointWGS84 {
+        var geoPointWGS84 = new GeoPointWGS84
+        {
             longitude = Double.Parse(coordinate[0].ToString(), NumberStyles.Float),
             latitude = Double.Parse(coordinate[1].ToString(), NumberStyles.Float),
         };
@@ -370,14 +379,14 @@ public class MazeMapController : MonoBehaviour
             for (int floorPointIndex = 0; floorPointIndex < floor.childCount; floorPointIndex++)
             {
                 Transform floorPoint = floor.GetChild(floorPointIndex);
-                if (floorPoint.childCount > 0) 
+                if (floorPoint.childCount > 0)
                 {
                     LineRenderer lr = floorPoint.gameObject.AddComponent<LineRenderer>();
                     lr.positionCount = floorPoint.childCount;
                     lr.material = _lineMaterial;
                     lr.startWidth = lr.endWidth = _lineWidth;
 
-                    for (int j = 0; j < floorPoint.childCount; j++) 
+                    for (int j = 0; j < floorPoint.childCount; j++)
                     {
                         lr.SetPosition(j, floorPoint.GetChild(j).position);
                     }
@@ -387,7 +396,7 @@ public class MazeMapController : MonoBehaviour
                     points.Add(floorPoint.position);
                 }
             }
-            if (points.Count > 0) 
+            if (points.Count > 0)
             {
                 LineRenderer lr = floor.gameObject.AddComponent<LineRenderer>();
                 lr.positionCount = points.Count;
@@ -421,25 +430,26 @@ public class MazeMapController : MonoBehaviour
 
     private IEnumerator DrawRoomsInBuilding(Building building)
     {
-        foreach (KeyValuePair<int, Floor> pair in building.Floors) {
+        foreach (KeyValuePair<int, Floor> pair in building.Floors)
+        {
             WWW www = new WWW(string.Format(REST_POI_SEARCH_BY_FLOORID, pair.Value.Id));
             yield return www;
             string wwwText = www.text;
 
-            if (_isUsingBackup) 
+            if (_isUsingBackup)
             {
                 string json;
-                if (_mazemapBackup.Campuses[CampusId].Rooms.TryGetValue(pair.Value.Id, out json)) 
+                if (_mazemapBackup.Campuses[CampusId].Rooms.TryGetValue(pair.Value.Id, out json))
                 {
                     wwwText = json;
                 }
-                else 
+                else
                 {
                     yield break;
                 }
             }
 
-            if (_shouldBackupMazemapData) 
+            if (_shouldBackupMazemapData)
             {
                 _mazemapBackup.Campuses[CampusId].Rooms.Add(pair.Value.Id, wwwText);
             }
@@ -447,7 +457,7 @@ public class MazeMapController : MonoBehaviour
             if (pois == null)
                 continue;
 
-            foreach (JSONObject poi in pois) 
+            foreach (JSONObject poi in pois)
             {
                 DrawPoiOutline(poi);
             }
@@ -468,7 +478,7 @@ public class MazeMapController : MonoBehaviour
     /// </summary>
     private void DrawPoiOutline(JSONObject poi)
     {
-        int z = (int)poi["z"].f;
+        int z = (int) poi["z"].f;
         if (z > 0) z--;
         string roomName = "Unnamed";
         if (poi["infos"].Count > 0)
@@ -483,7 +493,7 @@ public class MazeMapController : MonoBehaviour
             RenderedModel = roomObject.transform
         };
 
-        foreach (JSONObject pos in poi["geometry"]["coordinates"]) 
+        foreach (JSONObject pos in poi["geometry"]["coordinates"])
         {
             GameObject roomContainer = new GameObject("points");
             foreach (JSONObject coord in pos)
@@ -513,7 +523,8 @@ public class MazeMapController : MonoBehaviour
 
     private void SetFloorRoomsVisibility(int z, bool isVisible)
     {
-        foreach (Floor floor in _floorsByZ[z])    {
+        foreach (Floor floor in _floorsByZ[z])
+        {
             foreach (KeyValuePair<int, Room> pair in floor.Rooms)
             {
                 pair.Value.RenderedModel.gameObject.SetActive(isVisible);
@@ -588,12 +599,12 @@ public class MazeMapController : MonoBehaviour
 
         if (floorOutlinePoints.Count > 1)
             InstantiateCollidersForPointCollection(floorOutlinePoints, floor);
-        
     }
 
     private void InstantiateCollidersForPointCollection(List<Vector3> points, Transform parent)
     {
-        for (int mp = 0; mp < points.Count - 1; mp++) {
+        for (int mp = 0; mp < points.Count - 1; mp++)
+        {
             int targetIndex = mp + 1;
             if (mp == points.Count - 2)
                 targetIndex = 0;
@@ -619,7 +630,7 @@ public class MazeMapController : MonoBehaviour
             if (_zLayerActive[i])
                 SetLayerVisibility(i, false);
         }
-        
+
         //Set all layers below active layer to render
         for (int i = z; _floorsByZ.ContainsKey(i); i--)
         {
@@ -630,7 +641,6 @@ public class MazeMapController : MonoBehaviour
         if (CurrentActiveLevel >= 1) y = CurrentActiveLevel * FloorHeightAboveGround;
         if (CurrentActiveLevel < 1) y = CurrentActiveLevel * FloorHeightBelowGround;
         _triggerFloor.position = new Vector3(_triggerFloor.position.x, y, _triggerFloor.position.z);
-
     }
 
     public void ChangeActiveLayer(bool up)
@@ -647,7 +657,7 @@ public class MazeMapController : MonoBehaviour
         CampusId = id;
     }
 
-    public Building GetBuildingByName(string buildingName) 
+    public Building GetBuildingByName(string buildingName)
     {
         foreach (KeyValuePair<int, Building> pair in Buildings)
             if (pair.Value.Name == buildingName)
@@ -671,11 +681,9 @@ public class MazeMapController : MonoBehaviour
         GeoUtils.UtmOriginSet = false;
     }
 
-     public void GetPath(GeoPointWGS84 from, GeoPointWGS84 to)
+    public void GetPath(GeoPointWGS84 from, GeoPointWGS84 to)
     {
         string url = string.Format(PATH_SEARCH, from.latitude, from.longitude, to.latitude, to.longitude).Replace(',', '.');
         StartCoroutine(GetWWW(url, CreateRouteFromPath));
     }
-    
-
 }

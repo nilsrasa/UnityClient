@@ -1,12 +1,13 @@
 ﻿using System;
 using UnityEngine;
 
-public class SensorRepresentation : MonoBehaviour {
-
+public class SensorRepresentation : MonoBehaviour
+{
     public string SensorId { get; protected set; }
     public bool IsRunning { get; private set; }
 
-    public void SetRunning(bool isRunning) {
+    public void SetRunning(bool isRunning)
+    {
         IsRunning = isRunning;
     }
 
@@ -15,11 +16,14 @@ public class SensorRepresentation : MonoBehaviour {
         throw new NotImplementedException("Override me!");
     }
 
-    protected int GetLevelOfValue(float value, float maxValue, int steps) {
+    protected int GetLevelOfValue(float value, float maxValue, int steps)
+    {
         float stepSize = maxValue / steps;
 
-        for (int i = 0; i < steps; i++) {
-            if (value > i * stepSize && value < (i + 1) * stepSize) {
+        for (int i = 0; i < steps; i++)
+        {
+            if (value > i * stepSize && value < (i + 1) * stepSize)
+            {
                 return i;
             }
         }

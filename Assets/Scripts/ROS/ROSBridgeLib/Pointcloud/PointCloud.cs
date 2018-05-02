@@ -23,14 +23,14 @@ using PointCloud.Exceptions;
 
 namespace PointCloud
 {
-    public class PointCloud<T> where T:PointT
+    public class PointCloud<T> where T : PointT
     {
         private bool _isDense = true;
-        private List<T> _points; 
+        private List<T> _points;
 
         public PointCloud()
         {
-            _points = new List<T>();        
+            _points = new List<T>();
         }
 
         public PointCloud(IEnumerable<T> collection)
@@ -38,7 +38,9 @@ namespace PointCloud
             _points = new List<T>(collection);
         }
 
-        public ICollection<T> Points { get { return _points; }
+        public ICollection<T> Points
+        {
+            get { return _points; }
         }
 
         public void Add(T Object)
@@ -53,9 +55,9 @@ namespace PointCloud
 
         public T At(int column, int row)
         {
-            if(Height > 1)
+            if (Height > 1)
             {
-                return Points.ElementAt(row*this.Width + column);
+                return Points.ElementAt(row * this.Width + column);
             }
 
             throw new IsNotDenseException("Can't use 2D indexing with an unorganized pointcloud.");
@@ -79,9 +81,15 @@ namespace PointCloud
             set { _points[n] = value; }
         }
 
-        public int Size { get { return Points.Count; } }
+        public int Size
+        {
+            get { return Points.Count; }
+        }
 
-        public bool Empty { get { return Points.Count == 0; } }
+        public bool Empty
+        {
+            get { return Points.Count == 0; }
+        }
 
         public int Height { get; set; }
 

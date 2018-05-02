@@ -1,42 +1,43 @@
 ﻿using SimpleJSON;
 
-namespace ROSBridgeLib {
-	public abstract class ROSBridgeSubscriber : ROSAgent
-	{
-	    public delegate void DataWasReceived(ROSBridgeMsg data);
-	    public event DataWasReceived OnDataReceived;
+namespace ROSBridgeLib
+{
+    public abstract class ROSBridgeSubscriber : ROSAgent
+    {
+        public delegate void DataWasReceived(ROSBridgeMsg data);
 
-	    public string GetMessageTopic()
-	    {
-	        return TopicName;
-	    }
+        public event DataWasReceived OnDataReceived;
 
-	    public string GetMessageType()
-	    {
-	        return MessageType;
-	    }
+        public string GetMessageTopic()
+        {
+            return TopicName;
+        }
 
-	    public virtual void CallBack(ROSBridgeMsg msg)
-	    {
-	        if (OnDataReceived != null)
-	            OnDataReceived(msg);
-	    }
+        public string GetMessageType()
+        {
+            return MessageType;
+        }
 
-	    public abstract ROSBridgeMsg ParseMessage(JSONNode msg);
+        public virtual void CallBack(ROSBridgeMsg msg)
+        {
+            if (OnDataReceived != null)
+                OnDataReceived(msg);
+        }
 
-	    protected sealed override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
-	    {
-	        TopicName = topicName;
-	        MessageType = messageType;
-	        ROSConnection = rosConnection;
+        public abstract ROSBridgeMsg ParseMessage(JSONNode msg);
+
+        protected sealed override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
+        {
+            TopicName = topicName;
+            MessageType = messageType;
+            ROSConnection = rosConnection;
             ROSConnection.AddSubscriber(this);
-	    }
+        }
 
-	    public override void Stop()
-	    {
-	        if (ROSConnection == null) return;
-	        ROSConnection.RemoveSubcriber(this);
-	    }
+        public override void Stop()
+        {
+            if (ROSConnection == null) return;
+            ROSConnection.RemoveSubcriber(this);
+        }
     }
 }
-
