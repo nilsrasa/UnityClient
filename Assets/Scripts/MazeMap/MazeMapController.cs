@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 public class MazeMapController : MonoBehaviour
 {
@@ -685,5 +687,17 @@ public class MazeMapController : MonoBehaviour
     {
         string url = string.Format(PATH_SEARCH, from.latitude, from.longitude, to.latitude, to.longitude).Replace(',', '.');
         StartCoroutine(GetWWW(url, CreateRouteFromPath));
+    }
+
+    public float GetHeightAboveFloor(float height)
+    {
+        for (int i = 0; i < _floorsByZ.Count; i++)
+        {
+            if (height < i * FloorHeightAboveGround)
+            {
+                return height - (i-1) * FloorHeightAboveGround;
+            }
+        }
+        return 0;
     }
 }

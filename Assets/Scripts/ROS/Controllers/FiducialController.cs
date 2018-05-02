@@ -70,7 +70,8 @@ public class FiducialController : MonoBehaviour
             Position = newFiducial.transform.position.ToUTM().ToWGS84(),
             Rotation = newFiducial.transform.eulerAngles.ToGeoRotation()
         });
-
+        float heightAboveFloor = MazeMapController.Instance.GetHeightAboveFloor(newFiducial.transform.position.y);
+        newFiducial.InitaliseFloorMarker(heightAboveFloor);
         _initialised = true;
     }
 
@@ -83,6 +84,8 @@ public class FiducialController : MonoBehaviour
         newFiducial.FiducialId = fiducial.Id;
         _fiducials.Add(fiducial.Id, newFiducial);
 
+        float heightAboveFloor = MazeMapController.Instance.GetHeightAboveFloor(newFiducial.transform.position.y);
+        newFiducial.InitaliseFloorMarker(heightAboveFloor);
         return newFiducial;
     }
 

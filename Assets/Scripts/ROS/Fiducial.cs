@@ -6,6 +6,8 @@ public class Fiducial : MonoBehaviour
     [SerializeField] private TextMesh _backText;
     [SerializeField] private GameObject _front;
     [SerializeField] private GameObject _back;
+    [SerializeField] private Transform _floorMarker;
+    [SerializeField] private Transform _line;
 
     private int _fiducialId;
 
@@ -48,5 +50,15 @@ public class Fiducial : MonoBehaviour
     public void SetCollider(bool isEnabled)
     {
         _sphereCollider.enabled = isEnabled;
+    }
+
+    public void InitaliseFloorMarker(float heightAboveFloor)
+    {
+        _line.gameObject.SetActive(true);
+        _floorMarker.gameObject.SetActive(true);
+
+        _floorMarker.position = transform.position - new Vector3(0, heightAboveFloor, 0);
+        _line.transform.position = (transform.position + _floorMarker.position) / 2;
+        _line.transform.localScale = new Vector3(_line.transform.localScale.x, heightAboveFloor, _line.transform.localScale.z);
     }
 }
