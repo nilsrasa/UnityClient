@@ -128,6 +128,8 @@ public abstract class ROSController : MonoBehaviour
         */
     }
 
+    public virtual void ResetRobot() { }
+
     private void GenerateRobot(string robotDescription)
     {
         //_robot = RobotUrdfUtility.GenerateRobotGameObjectFromDescription(robotDescription, _alwaysGenerateRobot).transform;

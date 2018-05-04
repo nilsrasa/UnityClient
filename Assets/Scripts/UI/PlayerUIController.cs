@@ -73,37 +73,42 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Button _options;
 
     //Loading Panel
-    [Header("Loading Panel")] [SerializeField] private GameObject _loadingPanel;
-
+    [Header("Loading Panel")]
+    [SerializeField] private GameObject _loadingPanel;
     [SerializeField] private Image _loadingFill;
 
     //Floor indicators
-    [Header("Floor Level Panel")] [SerializeField] private GameObject _layerPanel;
-
+    [Header("Floor Level Panel")]
+    [SerializeField] private GameObject _layerPanel;
     [SerializeField] private Text _layerNumberText;
     [SerializeField] private Button _layerUp;
     [SerializeField] private Button _layerDown;
 
     //Sorround Photo UI
-    [Header("Sorround Photo Panel")] [SerializeField] private Button _backFromSorroundPhoto;
-
+    [Header("Sorround Photo Panel")]
+    [SerializeField] private Button _backFromSorroundPhoto;
     [SerializeField] private GameObject _sorroundPhotoPanel;
     [SerializeField] private Slider _timeSlider;
     [SerializeField] private GameObject _timeSliderPositionPrefab;
     [SerializeField] private Text _timeSliderDateText;
 
-    [Header("Options Panel")] [SerializeField] private GameObject _optionsPanel;
+    [Header("Options Panel")]
+    [SerializeField] private GameObject _optionsPanel;
     [SerializeField] private Button _addFiducial;
     [SerializeField] private Button _updateFiducial;
     [SerializeField] private Button _deleteFiducial;
+    [SerializeField] private Button _saveFiducials;
     [SerializeField] private Button _overrideRobotPosition;
+    [SerializeField] private Button _resetRobot;
     [SerializeField] private Button _exitApplication;
     [SerializeField] private Button _closeOptions;
 
-    [Header("Info Panel")] [SerializeField] private GameObject _infoPanel;
+    [Header("Info Panel")]
+    [SerializeField] private GameObject _infoPanel;
     [SerializeField] private Text _infoText;
 
-    [Header("Add Fiducial Panel")] [SerializeField] private GameObject _addFiducialPanel;
+    [Header("Add Fiducial Panel")]
+    [SerializeField] private GameObject _addFiducialPanel;
     [SerializeField] private InputField _addFidId;
     [SerializeField] private InputField _addFidPosX;
     [SerializeField] private InputField _addFidPosY;
@@ -111,20 +116,31 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private InputField _addFidRotX;
     [SerializeField] private InputField _addFidRotY;
     [SerializeField] private InputField _addFidRotZ;
+    [SerializeField] private InputField _addFidLon;
+    [SerializeField] private InputField _addFidAlt;
+    [SerializeField] private InputField _addFidLat;
     [SerializeField] private Button _addFidAccept;
     [SerializeField] private Button _addFidCancel;
 
-    [Header("Done Panel")] [SerializeField] private GameObject _donePanel;
+    [Header("Done Panel")]
+    [SerializeField] private GameObject _donePanel;
     [SerializeField] private Button _doneAccept;
     [SerializeField] private Button _doneCancel;
 
-    [Header("Robot Panel")] [SerializeField] private GameObject _robotPanel;
+    [Header("Robot Panel")]
+    [SerializeField] private GameObject _robotPanel;
     [SerializeField] private Button _robotListRefreshList;
     [SerializeField] private Button _robotListClose;
     [SerializeField] private Text _robotRefreshText;
     [SerializeField] private RectTransform _listContentsParent;
     [SerializeField] private GameObject _robotListPrefab;
     [SerializeField] private RefreshButton _refreshButton;
+
+    [Header("Legend Panel")]
+    [SerializeField] private GameObject _legendPanel;
+    [SerializeField] private Button _legendShow;
+    [SerializeField] private Toggle _legendSorroundPhotoToggle;
+    [SerializeField] private Toggle _legendFiducialToggle;
 
     private WaypointMode CurrentWaypointMode
     {
@@ -149,6 +165,8 @@ public class PlayerUIController : MonoBehaviour
             {
                 case UIState.Navigation:
                     ActivatePanels(_rightPanel, _layerPanel);
+                    if (MazeMapController.Instance.CampusLoaded)
+                        ActivatePanels(_legendPanel);
                     SorroundPhotoController.Instance.SetCameraPositionVisibility(true);
                     break;
                 case UIState.Options:
@@ -157,6 +175,7 @@ public class PlayerUIController : MonoBehaviour
                 case UIState.PlacingFiducial:
                     ActivatePanels(_addFiducialPanel, _layerPanel);
                     SetInfoText("You can place a Fiducial on the ceiling by left-clicking on the map.");
+                    FiducialController.Instance.SetFiducialVisibility(true);
                     break;
                 case UIState.UpdatingFiducial:
                     ActivatePanels(_addFiducialPanel, _layerPanel, _donePanel);
@@ -244,6 +263,7 @@ public class PlayerUIController : MonoBehaviour
         }
     }
 
+    private Canvas _canvas;
     private WaypointMode _currentWaypointMode = WaypointMode.Point;
     private UIState _currentUIState = UIState.Loading;
     private RobotDrivingUIState _currentRobotDrivingUiState = RobotDrivingUIState.NoRobotSelected;
@@ -265,10 +285,13 @@ public class PlayerUIController : MonoBehaviour
     private bool _shouldUpdateRobotList;
     private Vector3 _robotOverridePosition;
     private Quaternion _robotOverrideOrientation;
+    private bool _isLegendVisible;
+    private bool _isLegendAnimating;
 
     void Awake()
     {
         Instance = this;
+        _canvas = GetComponent<Canvas>();
         _generateCampus.onClick.AddListener(GenerateCampusButtonOnClick);
         _goToBuilding.onClick.AddListener(GoToBuildingOnClick);
         _selectRobot.onValueChanged.AddListener(OnSelectedRobotValueChanged);
@@ -287,13 +310,16 @@ public class PlayerUIController : MonoBehaviour
         _closeOptions.onClick.AddListener(OptionsCloseClick);
         _addFidAccept.onClick.AddListener(AddFiducialAcceptClick);
         _addFidCancel.onClick.AddListener(AddFiducialCancelClick);
-        _addFidPosX.onEndEdit.AddListener(OnAddFiducialValuesChanged);
-        _addFidPosY.onEndEdit.AddListener(OnAddFiducialValuesChanged);
-        _addFidPosZ.onEndEdit.AddListener(OnAddFiducialValuesChanged);
-        _addFidRotX.onEndEdit.AddListener(OnAddFiducialValuesChanged);
-        _addFidRotY.onEndEdit.AddListener(OnAddFiducialValuesChanged);
-        _addFidRotZ.onEndEdit.AddListener(OnAddFiducialValuesChanged);
-        _addFidId.onEndEdit.AddListener(OnAddFiducialValuesChanged);
+        _addFidPosX.onEndEdit.AddListener(OnAddFiducialPositionValuesChanged);
+        _addFidPosY.onEndEdit.AddListener(OnAddFiducialPositionValuesChanged);
+        _addFidPosZ.onEndEdit.AddListener(OnAddFiducialPositionValuesChanged);
+        _addFidRotX.onEndEdit.AddListener(OnAddFiducialRotationValuesChanged);
+        _addFidRotY.onEndEdit.AddListener(OnAddFiducialRotationValuesChanged);
+        _addFidRotZ.onEndEdit.AddListener(OnAddFiducialRotationValuesChanged);
+        _addFidLon.onEndEdit.AddListener(OnAddFiducialGPSValuesChanged);
+        _addFidLat.onEndEdit.AddListener(OnAddFiducialGPSValuesChanged);
+        _addFidAlt.onEndEdit.AddListener(OnAddFiducialGPSValuesChanged);
+        _addFidId.onEndEdit.AddListener(OnAddFiducialPositionValuesChanged);
         _updateFiducial.onClick.AddListener(UpdateFiducialClick);
         _deleteFiducial.onClick.AddListener(DeleteFiducialClick);
         _doneAccept.onClick.AddListener(DoneAcceptClick);
@@ -302,6 +328,10 @@ public class PlayerUIController : MonoBehaviour
         _robotListRefreshList.onClick.AddListener(RobotListRefreshClick);
         _robotList.onClick.AddListener(RobotListClick);
         _overrideRobotPosition.onClick.AddListener(OverrideRobotPositionClick);
+        _saveFiducials.onClick.AddListener(SaveFiducialsToFileClick);
+        _legendFiducialToggle.onValueChanged.AddListener(LegendToggleValueChanged);
+        _legendSorroundPhotoToggle.onValueChanged.AddListener(LegendToggleValueChanged);
+        _legendShow.onClick.AddListener(LegendShowClick);
 
         _toggleWaypointPointColorBlock = _toggleWaypointMode.colors;
 
@@ -313,9 +343,6 @@ public class PlayerUIController : MonoBehaviour
         _driveRobotColorBlock = _driveRobot.colors;
 
         _driveRobotStopColorBlock = _driveRobot.colors;
-        //_driveRobotStopColorBlock.normalColor = _driveRobotStopColorNormal;
-        // _driveRobotStopColorBlock.highlightedColor = _driveRobotStopColorHovered;
-        // _driveRobotStopColorBlock.pressedColor = _driveRobotStopColorDown;
 
         _pauseRobotColorBlock = _pauseRobot.colors;
 
@@ -371,6 +398,7 @@ public class PlayerUIController : MonoBehaviour
         _layerPanel.SetActive(false);
         _donePanel.SetActive(false);
         _robotPanel.SetActive(false);
+        _legendPanel.SetActive(false);
         HideInfoText();
     }
 
@@ -396,6 +424,9 @@ public class PlayerUIController : MonoBehaviour
         _addFiducial.interactable = true;
         _updateFiducial.interactable = true;
         _deleteFiducial.interactable = true;
+        _saveFiducials.interactable = true;
+        if (CurrentUIState == UIState.Navigation)
+            ActivatePanels(_legendPanel);
     }
 
     private void Cleanup()
@@ -522,6 +553,9 @@ public class PlayerUIController : MonoBehaviour
         _addFidRotX.text = "0.0";
         _addFidRotY.text = "0.0";
         _addFidRotZ.text = "0.0";
+        _addFidLon.text = "0.0";
+        _addFidAlt.text = "0.0";
+        _addFidLat.text = "0.0";
     }
 
     private void ExitApplicationClick()
@@ -656,11 +690,72 @@ public class PlayerUIController : MonoBehaviour
         RegisterMouseClick();
     }
 
+    private void SaveFiducialsToFileClick()
+    {
+        FiducialController.Instance.SaveFiducials();
+    }
+
+    private void LegendShowClick()
+    {
+        if (_isLegendAnimating) return;
+        if (_isLegendVisible)
+        {
+            iTween.MoveBy(_legendPanel, iTween.Hash("y", -75 * _canvas.scaleFactor, "time", 0.5f, "oncomplete", "OnLegendAnimationDone", "oncompletetarget", gameObject));
+        }
+        else
+        {
+            iTween.MoveBy(_legendPanel, iTween.Hash("y", 75 * _canvas.scaleFactor, "time", 0.5f, "oncomplete", "OnLegendAnimationDone", "oncompletetarget", gameObject));
+        }
+        _isLegendVisible = !_isLegendVisible;
+        _isLegendAnimating = true;
+    }
+
     #endregion
 
     #region OnValueChangeEvents
 
-    private void OnAddFiducialValuesChanged(string value)
+    private void OnAddFiducialPositionValuesChanged(string value)
+    {
+        Vector3 position = new Vector3(float.Parse(_addFidPosX.text, CultureInfo.InvariantCulture),
+            float.Parse(_addFidPosY.text, CultureInfo.InvariantCulture), float.Parse(_addFidPosZ.text, CultureInfo.InvariantCulture));
+        Vector3 rotation = new Vector3(float.Parse(_addFidRotX.text, CultureInfo.InvariantCulture),
+            float.Parse(_addFidRotY.text, CultureInfo.InvariantCulture), float.Parse(_addFidRotZ.text, CultureInfo.InvariantCulture));
+        int id = int.Parse(_addFidId.text);
+        GeoPointWGS84 gps = position.ToUTM().ToWGS84();
+        _addFidLon.text = gps.longitude.ToString(CultureInfo.InvariantCulture);
+        _addFidAlt.text = gps.altitude.ToString(CultureInfo.InvariantCulture);
+        _addFidLat.text = gps.latitude.ToString(CultureInfo.InvariantCulture);
+
+        if (CurrentUIState == UIState.PlacingFiducial)
+            FiducialController.Instance.PlaceOrUpdateNewFiducial(int.Parse(_addFidId.text), position, rotation);
+        else if (CurrentUIState == UIState.UpdatingFiducial)
+            FiducialController.Instance.UpdateFiducial(id, position, rotation);
+    }
+
+    private void OnAddFiducialGPSValuesChanged(string value)
+    {
+        Vector3 rotation = new Vector3(float.Parse(_addFidRotX.text, CultureInfo.InvariantCulture),
+            float.Parse(_addFidRotY.text, CultureInfo.InvariantCulture), float.Parse(_addFidRotZ.text, CultureInfo.InvariantCulture));
+        int id = int.Parse(_addFidId.text);
+        GeoPointWGS84 gps = new GeoPointWGS84
+        {
+            altitude = double.Parse(_addFidAlt.text, CultureInfo.InvariantCulture),
+            latitude = double.Parse(_addFidLat.text, CultureInfo.InvariantCulture),
+            longitude = double.Parse(_addFidLon.text, CultureInfo.InvariantCulture)
+        };
+
+        Vector3 unityPos = gps.ToUTM().ToUnity();
+        _addFidPosX.text = unityPos.x.ToString(CultureInfo.InvariantCulture);
+        _addFidPosY.text = unityPos.y.ToString(CultureInfo.InvariantCulture);
+        _addFidPosZ.text = unityPos.z.ToString(CultureInfo.InvariantCulture);
+
+        if (CurrentUIState == UIState.PlacingFiducial)
+            FiducialController.Instance.PlaceOrUpdateNewFiducial(int.Parse(_addFidId.text), unityPos, rotation);
+        else if (CurrentUIState == UIState.UpdatingFiducial)
+            FiducialController.Instance.UpdateFiducial(id, unityPos, rotation);
+    }
+
+    private void OnAddFiducialRotationValuesChanged(string value)
     {
         Vector3 position = new Vector3(float.Parse(_addFidPosX.text, CultureInfo.InvariantCulture),
             float.Parse(_addFidPosY.text, CultureInfo.InvariantCulture), float.Parse(_addFidPosZ.text, CultureInfo.InvariantCulture));
@@ -709,6 +804,12 @@ public class PlayerUIController : MonoBehaviour
         DateTime selectedDateTime = _timeSliderPositions[_timeSlider.value].Timestamp;
         _timeSliderDateText.text = selectedDateTime.ToString("dd-MM-yyyy");
         SorroundPhotoController.Instance.ChangeTimeOnLoadedPhoto(selectedDateTime);
+    }
+
+    private void LegendToggleValueChanged(bool isOn)
+    {
+        SorroundPhotoController.Instance.SetCameraPositionVisibility(_legendSorroundPhotoToggle.isOn);
+        FiducialController.Instance.SetFiducialVisibility(_legendFiducialToggle.isOn);
     }
 
     #endregion
@@ -773,6 +874,12 @@ public class PlayerUIController : MonoBehaviour
         _addFidRotX.text = fiducialToUpdate.eulerAngles.x.ToString(CultureInfo.InvariantCulture);
         _addFidRotY.text = fiducialToUpdate.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
         _addFidRotZ.text = fiducialToUpdate.eulerAngles.z.ToString(CultureInfo.InvariantCulture);
+
+        GeoPointWGS84 gps = fiducialToUpdate.position.ToUTM().ToWGS84();
+        _addFidLon.text = gps.longitude.ToString(CultureInfo.InvariantCulture);
+        _addFidAlt.text = gps.altitude.ToString(CultureInfo.InvariantCulture);
+        _addFidLat.text = gps.latitude.ToString(CultureInfo.InvariantCulture);
+
         _addFidId.text = FiducialController.Instance.StartUpdateFiducial(fiducialToUpdate).ToString();
         _donePanel.SetActive(false);
     }
@@ -792,11 +899,14 @@ public class PlayerUIController : MonoBehaviour
         _addFidRotY.text = "0.0";
         _addFidRotZ.text = "0.0";
 
+        GeoPointWGS84 gps = clickPos.ToUTM().ToWGS84();
+        _addFidLon.text = gps.longitude.ToString(CultureInfo.InvariantCulture);
+        _addFidAlt.text = gps.altitude.ToString(CultureInfo.InvariantCulture);
+        _addFidLat.text = gps.latitude.ToString(CultureInfo.InvariantCulture);
+
         Vector3 position = new Vector3(float.Parse(_addFidPosX.text, CultureInfo.InvariantCulture),
             float.Parse(_addFidPosY.text, CultureInfo.InvariantCulture), float.Parse(_addFidPosZ.text, CultureInfo.InvariantCulture));
-        Vector3 rotation = new Vector3(float.Parse(_addFidRotX.text, CultureInfo.InvariantCulture),
-            float.Parse(_addFidRotY.text, CultureInfo.InvariantCulture), float.Parse(_addFidRotZ.text, CultureInfo.InvariantCulture));
-        FiducialController.Instance.PlaceOrUpdateNewFiducial(int.Parse(_addFidId.text), position, rotation);
+        FiducialController.Instance.PlaceOrUpdateNewFiducial(int.Parse(_addFidId.text), position, Vector3.zero);
     }
 
     public void PhotoClicked()
@@ -805,6 +915,11 @@ public class PlayerUIController : MonoBehaviour
     }
 
     #endregion
+
+    private void OnLegendAnimationDone()
+    {
+        _isLegendAnimating = false;
+    }
 
     private void ClearTimeSliderHighlights()
     {
@@ -890,6 +1005,7 @@ public class PlayerUIController : MonoBehaviour
             _routeName.interactable = false;
             _loadRoute.interactable = false;
             _saveRoute.interactable = false;
+            _resetRobot.interactable = false;
         }
         else
         {
@@ -899,6 +1015,7 @@ public class PlayerUIController : MonoBehaviour
             _routeName.interactable = true;
             _loadRoute.interactable = true;
             _saveRoute.interactable = true;
+            _resetRobot.interactable = true;
             if (robot.CurrenLocomotionType == ROSController.RobotLocomotionType.DIRECT)
             {
                 CurrentRobotDrivingUIState = RobotDrivingUIState.RobotStopped;

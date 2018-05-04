@@ -14,7 +14,6 @@ public class FiducialController : MonoBehaviour
     private const string FIDUCIAL_RESOURCE_NAME = "FiducialMarker";
 
     [SerializeField] private float _publishInterval = 3;
-    [SerializeField] private bool _saveFiducials;
 
     private ROSBridgeWebSocketConnection _rosBridge;
     private ROSGenericPublisher _rosFiducialMapPublisher;
@@ -41,15 +40,6 @@ public class FiducialController : MonoBehaviour
     {
         _zeroLocation = ConfigManager.ConfigFile.ZeroFiducial;
         MazeMapController.Instance.OnFinishedGeneratingCampus += LoadFiducials;
-    }
-
-    void Update()
-    {
-        if (_saveFiducials)
-        {
-            _saveFiducials = false;
-            SaveFiducials();
-        }
     }
 
     private void Initialise()
@@ -99,7 +89,7 @@ public class FiducialController : MonoBehaviour
     /// <summary>
     /// Serializes FiducialMap into json file and saves files to AppData/LocalLow/DTU-R3 folder.
     /// </summary>
-    private void SaveFiducials()
+    public void SaveFiducials()
     {
         if (_fiducialObjects.Count == 0) return;
         if (_fiducialCollectionFile == null)
@@ -196,6 +186,7 @@ public class FiducialController : MonoBehaviour
         {
             _tempFiducial.transform.SetPositionAndRotation(position, Quaternion.Euler(rotation));
         }
+        _tempFiducial.InitaliseFloorMarker(MazeMapController.Instance.GetHeightAboveFloor(position.y));
         _tempFiducial.FiducialId = _tempFiducialId;
         return _tempFiducialId;
     }
@@ -293,6 +284,7 @@ public class FiducialController : MonoBehaviour
     {
         _tempFiducial.transform.position = newPosition;
         _tempFiducial.transform.eulerAngles = newRotation;
+        _tempFiducial.FiducialId = id;
     }
 
     public void FinalizeUpdate()
@@ -352,6 +344,14 @@ public class FiducialController : MonoBehaviour
         StopCoroutine(_publishLoop);
         _rosFiducialMapPublisher.Stop();
         _rosBridge = null;
+    }
+
+    public void SetFiducialVisibility(bool isVisible)
+    {
+        foreach (KeyValuePair<int, Fiducial> fiducial in _fiducials)
+        {
+            fiducial.Value.gameObject.SetActive(isVisible);
+        }
     }
 }
 

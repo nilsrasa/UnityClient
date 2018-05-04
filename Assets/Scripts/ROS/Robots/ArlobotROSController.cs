@@ -20,6 +20,7 @@ public class ArlobotROSController : ROSController
     private ROSGenericSubscriber<StringMsg> _rosUltrasound;
     private ROSGenericSubscriber<OdometryMsg> _rosOdometry;
     private ROSGenericPublisher _rosOdometryOverride;
+    private ROSGenericPublisher _rosReset;
 
     private bool _hasOdometryDataToConsume;
 
@@ -129,6 +130,7 @@ public class ArlobotROSController : ROSController
         _rosLocomotionLinear = new ROSGenericPublisher(_rosBridge, "/waypoint/max_linear_speed", Float32Msg.GetMessageType());
         _rosLocomotionAngular = new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());
         _rosOdometryOverride = new ROSGenericPublisher(_rosBridge, "/odo_calib_pose", OdometryMsg.GetMessageType());
+        _rosReset = new ROSGenericPublisher(_rosBridge, "arlobot/reset_motorBoard", BoolMsg.GetMessageType());
 
         _rosUltrasound = new ROSGenericSubscriber<StringMsg>(_rosBridge, "/ultrasonic_data", StringMsg.GetMessageType(), (msg) => new StringMsg(msg));
         _rosUltrasound.OnDataReceived += ReceivedUltrasoundUpdata;
@@ -242,6 +244,12 @@ public class ArlobotROSController : ROSController
 
         OdometryMsg odometryOverride = new OdometryMsg(pose);
         _rosOdometryOverride.PublishData(odometryOverride);
+    }
+
+    public override void ResetRobot()
+    {
+        base.ResetRobot();
+        _rosReset.PublishData(new BoolMsg(true));
     }
 
     private struct OdometryData
