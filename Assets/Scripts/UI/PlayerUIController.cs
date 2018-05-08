@@ -44,8 +44,6 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Button _generateCampus;
     [SerializeField] private Button _goToBuilding;
     [SerializeField] private Dropdown _selectRobot;
-    [SerializeField] private Button _toggleWaypointMode;
-    [SerializeField] private Text _toggleWaypointModeText;
     [SerializeField] private Color _routeColorNormal;
     [SerializeField] private Color _routeColorHovered;
     [SerializeField] private Color _routeColorDown;
@@ -142,17 +140,6 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Toggle _legendSorroundPhotoToggle;
     [SerializeField] private Toggle _legendFiducialToggle;
 
-    private WaypointMode CurrentWaypointMode
-    {
-        get { return _currentWaypointMode; }
-        set
-        {
-            _currentWaypointMode = value;
-            _toggleWaypointModeText.text = _currentWaypointMode.ToString() + " Mode";
-            _toggleWaypointMode.colors = _currentWaypointMode == WaypointMode.Point ? _toggleWaypointPointColorBlock : _toggleWaypointRouteColorBlock;
-        }
-    }
-
     private UIState CurrentUIState
     {
         get { return _currentUIState; }
@@ -167,7 +154,8 @@ public class PlayerUIController : MonoBehaviour
                     ActivatePanels(_rightPanel, _layerPanel);
                     if (MazeMapController.Instance.CampusLoaded)
                         ActivatePanels(_legendPanel);
-                    SorroundPhotoController.Instance.SetCameraPositionVisibility(true);
+                    if (_legendSorroundPhotoToggle.isOn)
+                        SorroundPhotoController.Instance.SetCameraPositionVisibility(true);
                     break;
                 case UIState.Options:
                     ActivatePanels(_rightPanel, _optionsPanel, _layerPanel);
@@ -175,7 +163,8 @@ public class PlayerUIController : MonoBehaviour
                 case UIState.PlacingFiducial:
                     ActivatePanels(_addFiducialPanel, _layerPanel);
                     SetInfoText("You can place a Fiducial on the ceiling by left-clicking on the map.");
-                    FiducialController.Instance.SetFiducialVisibility(true);
+                    if (_legendFiducialToggle.isOn)
+                        FiducialController.Instance.SetFiducialVisibility(true);
                     break;
                 case UIState.UpdatingFiducial:
                     ActivatePanels(_addFiducialPanel, _layerPanel, _donePanel);
@@ -215,19 +204,27 @@ public class PlayerUIController : MonoBehaviour
             _driveRobot.interactable = false;
             _pauseRobot.interactable = false;
             _returnToBase.interactable = false;
+            _loadRoute.interactable = false;
+            _saveRoute.interactable = false;
+            _clearAllWaypoints.interactable = false;
             switch (value)
             {
                 case RobotDrivingUIState.NoRobotSelected:
                     SetDriveMode(false);
+                    _isDriving = false;
+                    _clearAllWaypoints.interactable = true;
                     break;
                 case RobotDrivingUIState.RobotStopped:
                     SetDriveMode(false);
                     IsPaused = false;
-                    _driveRobot.interactable = true;
+                    _driveRobot.interactable = WaypointController.Instance.GetPath().Count > 0;
                     _returnToBase.interactable = true;
                     _driveRobot.colors = _driveRobotColorBlock;
                     _driveRobotText.text = "Drive";
                     _isDriving = false;
+                    _loadRoute.interactable = true;
+                    _saveRoute.interactable = true;
+                    _clearAllWaypoints.interactable = true;
                     break;
                 case RobotDrivingUIState.RobotDriving:
                     SetDriveMode(true);
@@ -241,8 +238,6 @@ public class PlayerUIController : MonoBehaviour
                     break;
                 case RobotDrivingUIState.RobotPaused:
                     IsPaused = true;
-                    _driveRobot.interactable = true;
-                    _pauseRobot.interactable = true;
                     _returnToBase.interactable = true;
                     _driveRobot.colors = _driveRobotStopColorBlock;
                     _driveRobotText.text = "Stop";
@@ -264,11 +259,8 @@ public class PlayerUIController : MonoBehaviour
     }
 
     private Canvas _canvas;
-    private WaypointMode _currentWaypointMode = WaypointMode.Point;
     private UIState _currentUIState = UIState.Loading;
     private RobotDrivingUIState _currentRobotDrivingUiState = RobotDrivingUIState.NoRobotSelected;
-    private ColorBlock _toggleWaypointPointColorBlock;
-    private ColorBlock _toggleWaypointRouteColorBlock;
     private ColorBlock _driveRobotColorBlock;
     private ColorBlock _driveRobotStopColorBlock;
     private ColorBlock _pauseRobotColorBlock;
@@ -295,7 +287,6 @@ public class PlayerUIController : MonoBehaviour
         _generateCampus.onClick.AddListener(GenerateCampusButtonOnClick);
         _goToBuilding.onClick.AddListener(GoToBuildingOnClick);
         _selectRobot.onValueChanged.AddListener(OnSelectedRobotValueChanged);
-        _toggleWaypointMode.onClick.AddListener(ToggleWaypointModeOnClick);
         _clearAllWaypoints.onClick.AddListener(ClearAllWaypointsOnClick);
         _driveRobot.onClick.AddListener(DriveRobotOnClick);
         _loadRoute.onClick.AddListener(LoadRouteClick);
@@ -332,13 +323,7 @@ public class PlayerUIController : MonoBehaviour
         _legendFiducialToggle.onValueChanged.AddListener(LegendToggleValueChanged);
         _legendSorroundPhotoToggle.onValueChanged.AddListener(LegendToggleValueChanged);
         _legendShow.onClick.AddListener(LegendShowClick);
-
-        _toggleWaypointPointColorBlock = _toggleWaypointMode.colors;
-
-        _toggleWaypointRouteColorBlock = _toggleWaypointMode.colors;
-        _toggleWaypointRouteColorBlock.normalColor = _routeColorNormal;
-        _toggleWaypointRouteColorBlock.highlightedColor = _routeColorHovered;
-        _toggleWaypointRouteColorBlock.pressedColor = _routeColorDown;
+        _resetRobot.onClick.AddListener(ResetRobotClick);
 
         _driveRobotColorBlock = _driveRobot.colors;
 
@@ -474,12 +459,6 @@ public class PlayerUIController : MonoBehaviour
         {
             PlayerController.Instance.FocusCameraOn(building.Floors.First().Value.RenderedModel);
         }
-    }
-
-    private void ToggleWaypointModeOnClick()
-    {
-        CurrentWaypointMode = CurrentWaypointMode == WaypointMode.Point ? WaypointMode.Route : WaypointMode.Point;
-        WaypointController.Instance.ToggleWaypointMode();
     }
 
     private void ClearAllWaypointsOnClick()
@@ -641,6 +620,7 @@ public class PlayerUIController : MonoBehaviour
             case UIState.SetRobotPosition:
             case UIState.SetRobotOrientation:
                 CurrentUIState = UIState.Navigation;
+                UnregisterMouseClick();
                 break;
         }
     }
@@ -648,9 +628,9 @@ public class PlayerUIController : MonoBehaviour
     private void PauseRobotClick()
     {
         if (_isPaused)
-            RobotMasterController.SelectedRobot.PausePath();
-        else
             RobotMasterController.SelectedRobot.ResumePath();
+        else
+            RobotMasterController.SelectedRobot.PausePath();
 
         IsPaused = !IsPaused;
     }
@@ -708,6 +688,11 @@ public class PlayerUIController : MonoBehaviour
         }
         _isLegendVisible = !_isLegendVisible;
         _isLegendAnimating = true;
+    }
+
+    private void ResetRobotClick()
+    {
+        RobotMasterController.SelectedRobot.ResetRobot();
     }
 
     #endregion
@@ -952,7 +937,6 @@ public class PlayerUIController : MonoBehaviour
     {
         _driveRobot.colors = isDriving ? _driveRobotStopColorBlock : _driveRobotColorBlock;
         _driveRobotText.text = isDriving ? "Stop" : "Drive";
-        _isDriving = isDriving;
         if (!isDriving)
             IsPaused = false;
         _pauseRobot.interactable = _isDriving;
@@ -1000,7 +984,6 @@ public class PlayerUIController : MonoBehaviour
             CurrentRobotDrivingUIState = RobotDrivingUIState.NoRobotSelected;
             WaypointController.Instance.ClearAllWaypoints();
             _overrideRobotPosition.interactable = false;
-            _toggleWaypointMode.interactable = false;
             _clearAllWaypoints.interactable = false;
             _routeName.interactable = false;
             _loadRoute.interactable = false;
@@ -1010,16 +993,11 @@ public class PlayerUIController : MonoBehaviour
         else
         {
             _overrideRobotPosition.interactable = true;
-            _toggleWaypointMode.interactable = true;
             _clearAllWaypoints.interactable = true;
             _routeName.interactable = true;
-            _loadRoute.interactable = true;
-            _saveRoute.interactable = true;
             _resetRobot.interactable = true;
             if (robot.CurrenLocomotionType == ROSController.RobotLocomotionType.DIRECT)
-            {
                 CurrentRobotDrivingUIState = RobotDrivingUIState.RobotStopped;
-            }
             else
             {
                 if (robot.CurrentRobotLocomotionState == ROSController.RobotLocomotionState.MOVING)
@@ -1086,11 +1064,6 @@ public class PlayerUIController : MonoBehaviour
             }
         }
         _selectRobot.RefreshShownValue();
-    }
-
-    public void SetRouteStatus(bool isRoute)
-    {
-        CurrentWaypointMode = isRoute ? WaypointMode.Route : WaypointMode.Point;
     }
 
     public void SelectDefaultRobot()

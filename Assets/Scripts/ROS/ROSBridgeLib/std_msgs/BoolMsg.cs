@@ -35,12 +35,12 @@ namespace ROSBridgeLib
 
             public override string ToString()
             {
-                return "Bool [data=" + _data + "]";
+                return "Bool [data=" + _data.ToString().ToLower() + "]";
             }
 
             public override string ToYAMLString()
             {
-                return "{\"data\" : " + _data + "}";
+                return "{\"data\" : " + _data.ToString().ToLower() + "}";
             }
         }
     }

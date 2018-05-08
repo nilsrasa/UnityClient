@@ -220,6 +220,7 @@ public class RobotMasterController : MonoBehaviour
             SelectedRobot.OnSelected();
             PlayerController.Instance.FocusCameraOn(SelectedRobot.transform);
         }
+        PlayerUIController.Instance.UpdateUI(rosController);
     }
 
     public class Robot

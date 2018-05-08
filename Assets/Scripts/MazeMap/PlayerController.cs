@@ -46,10 +46,15 @@ public class PlayerController : MonoBehaviour
     }
 
     private Camera _camera;
-    private Vector3 _currentSelectedWaypoint;
-    private Coroutine _mouseClickCheck;
-    private bool _isMouseClick;
+    private Coroutine _mouseLeftClickCheck;
+    private bool _isLeftMouseClick;
+    private Coroutine _mouseRightClickCheck;
+    private bool _isRightMouseClick;
     private MouseObject _hoveredMouseObject;
+    private bool _isDraggingObject;
+    private Vector2 _lastMousePos;
+    private DragObject _dragObject;
+    private float _dragOffset;
 
     void Awake()
     {
@@ -98,33 +103,71 @@ public class PlayerController : MonoBehaviour
             UnHoverMouseObject();
         }
 
-        //Check if left mouse button was clicked or held
+        //Check if left/right mouse button was clicked or held
         if (Input.GetMouseButtonDown(0))
         {
-            _mouseClickCheck = StartCoroutine(CheckForClick(_mouseClickSpeed));
+            RaycastHit raycastHit;
+            int layer = 1 << 15;
+            if (Physics.Raycast(ray, out raycastHit, 1000, layer))
+            {
+                if (!_isDraggingObject)
+                    StartDrag(raycastHit.transform.GetComponent<DragObject>());
+            }
+            else
+            {
+                _mouseLeftClickCheck = StartCoroutine(CheckForLeftClick(_mouseClickSpeed));
+            }
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            _mouseRightClickCheck = StartCoroutine(CheckForRightClick(_mouseClickSpeed));
         }
 
         if (Input.GetMouseButtonUp(0))
         {
-            if (_isMouseClick)
-                MouseClicked();
-            _isMouseClick = false;
-            if (_mouseClickCheck != null)
-                StopCoroutine(_mouseClickCheck);
+            if (_isDraggingObject)
+            {
+                StopDrag();
+            }
+            else
+            {
+                if (_isLeftMouseClick)
+                    LeftMouseClicked();
+                _isLeftMouseClick = false;
+                if (_mouseLeftClickCheck != null)
+                    StopCoroutine(_mouseLeftClickCheck);
+            }
         }
 
-        if (Input.GetMouseButton(0) && !_isMouseClick)
+        if (Input.GetMouseButtonUp(1))
         {
-            _camera.transform.rotation = Quaternion.Euler(
-                _camera.transform.eulerAngles.x + _mouseMovementSpeed * -Input.GetAxis("Mouse Y"),
-                _camera.transform.eulerAngles.y + 0,
-                _camera.transform.eulerAngles.z + 0);
-            transform.eulerAngles = new Vector3(transform.eulerAngles.x,
-                transform.eulerAngles.y + _mouseMovementSpeed * Input.GetAxis("Mouse X"),
-                transform.eulerAngles.z);
+            if (_isRightMouseClick)
+                RightMouseClicked();
+            _isRightMouseClick = false;
+            if (_mouseRightClickCheck != null)
+                StopCoroutine(_mouseRightClickCheck);
         }
 
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButton(0) && !_isLeftMouseClick)
+        {
+            if (_isDraggingObject)
+            {
+                _dragObject.OnDrag(Vector3.Distance(Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, _dragOffset)), _dragObject.transform.position));
+            }
+            else
+            {
+                _camera.transform.rotation = Quaternion.Euler(
+                    _camera.transform.eulerAngles.x + _mouseMovementSpeed * -Input.GetAxis("Mouse Y"),
+                    _camera.transform.eulerAngles.y + 0,
+                    _camera.transform.eulerAngles.z + 0);
+                transform.eulerAngles = new Vector3(transform.eulerAngles.x,
+                    transform.eulerAngles.y + _mouseMovementSpeed * Input.GetAxis("Mouse X"),
+                    transform.eulerAngles.z);
+            }
+        }
+
+        if (Input.GetMouseButton(1) && !_isRightMouseClick)
         {
             transform.Translate(_mouseMovementSpeed * -Input.GetAxis("Mouse X"),
                 0,
@@ -137,6 +180,7 @@ public class PlayerController : MonoBehaviour
         }
 
         _triggerFloor.position = new Vector3(transform.position.x, _triggerFloor.position.y, transform.position.z);
+
     }
 
     private void UnHoverMouseObject()
@@ -146,19 +190,31 @@ public class PlayerController : MonoBehaviour
         _hoveredMouseObject = null;
     }
 
-    private IEnumerator CheckForClick(float time)
+    private IEnumerator CheckForLeftClick(float time)
     {
         float timer = 0;
-        _isMouseClick = true;
+        _isLeftMouseClick = true;
         while (timer < time)
         {
             yield return new WaitForEndOfFrame();
             timer += Time.deltaTime;
         }
-        _isMouseClick = false;
+        _isLeftMouseClick = false;
     }
 
-    private void MouseClicked()
+    private IEnumerator CheckForRightClick(float time)
+    {
+        float timer = 0;
+        _isRightMouseClick = true;
+        while (timer < time)
+        {
+            yield return new WaitForEndOfFrame();
+            timer += Time.deltaTime;
+        }
+        _isRightMouseClick = false;
+    }
+
+    private void LeftMouseClicked()
     {
         //Checks if UI was clicked
         if (EventSystem.current.IsPointerOverGameObject()) return;
@@ -182,14 +238,66 @@ public class PlayerController : MonoBehaviour
             WaypointMarker marker = hit.collider.GetComponent<WaypointMarker>();
             if (marker != null)
             {
-                WaypointController.Instance.DeleteMarker(marker);
+                if (RobotMasterController.SelectedRobot != null)
+                {
+                    if (RobotMasterController.SelectedRobot.CurrenLocomotionType == ROSController.RobotLocomotionType.DIRECT || RobotMasterController.SelectedRobot.CurrentRobotLocomotionState == ROSController.RobotLocomotionState.STOPPED)
+                    {
+                        WaypointController.Instance.DeleteMarker(marker);
+                    }
+                }
+                else
+                {
+                    WaypointController.Instance.DeleteMarker(marker);
+                }
+
                 return;
             }
             if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Floor")) return;
 
             if (RobotMasterController.SelectedRobot != null)
-                WaypointController.Instance.CreateWaypoint(hit.point);
+                if (RobotMasterController.SelectedRobot.CurrenLocomotionType == ROSController.RobotLocomotionType.DIRECT || RobotMasterController.SelectedRobot.CurrentRobotLocomotionState == ROSController.RobotLocomotionState.STOPPED)
+                    WaypointController.Instance.CreateWaypoint(hit.point);
         }
+    }
+
+    private void RightMouseClicked()
+    {
+        Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
+
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, 1000))
+        {
+            WaypointMarker marker = hit.collider.GetComponent<WaypointMarker>();
+            if (marker != null)
+            {
+                if (RobotMasterController.SelectedRobot != null)
+                {
+                    if (RobotMasterController.SelectedRobot.CurrenLocomotionType == ROSController.RobotLocomotionType.DIRECT || RobotMasterController.SelectedRobot.CurrentRobotLocomotionState == ROSController.RobotLocomotionState.STOPPED)
+                    {
+                        WaypointController.Instance.ClickedWaypointMarker(marker);
+                    }
+                }
+                else
+                {
+                    WaypointController.Instance.ClickedWaypointMarker(marker);
+                }
+            }
+        }
+    }
+
+    private void StartDrag(DragObject target)
+    {
+        _isDraggingObject = true;
+        _dragObject = target;
+        target.StartDrag();
+        _dragOffset = Camera.main.WorldToScreenPoint(_dragObject.transform.position).z;
+    }
+
+    private void StopDrag()
+    {
+        _dragObject.StopDrag();
+        _isDraggingObject = false;
+        _dragObject = null;
     }
 
     public void FocusCameraOn(Transform target)

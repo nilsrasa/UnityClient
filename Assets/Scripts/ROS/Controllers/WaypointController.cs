@@ -1,27 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class WaypointController : MonoBehaviour
 {
-    public enum WaypointMode
-    {
-        Single,
-        Route
-    }
-
     public static WaypointController Instance { get; private set; }
 
     [SerializeField] private GameObject _waypointMarkerPrefab;
+    [SerializeField] private ThresholdZoneType _defaultZoneType = ThresholdZoneType.Precise;
+    [SerializeField] private ThresholdZone[] _thresholdZones;
 
-    [Header("Rendering")] [SerializeField] private Color32 _singleWaypointColor;
-    [SerializeField] private Color32 _waypointRouteColor;
+    public enum ThresholdZoneType
+    {
+        Precise = 0,
+        Medium = 1, 
+        Fast = 2,
+        Custom = 3
+    }
 
-    private WaypointMode _currentWaypointMode = WaypointMode.Single;
     private List<WaypointMarker> _waypointMarkers;
     private LineRenderer _lineRendererRoute;
     private LineRenderer _lineRendererRobot;
     private readonly Dictionary<string, List<GeoPointWGS84>> _savedRoutes = new Dictionary<string, List<GeoPointWGS84>>();
+    private readonly Dictionary<ThresholdZoneType, ThresholdZone> _thresholdZoneDict = new Dictionary<ThresholdZoneType, ThresholdZone>();
 
     void Awake()
     {
@@ -29,6 +31,11 @@ public class WaypointController : MonoBehaviour
         _waypointMarkers = new List<WaypointMarker>();
         _lineRendererRoute = GetComponent<LineRenderer>();
         _lineRendererRobot = transform.GetChild(0).GetComponent<LineRenderer>();
+
+        foreach (ThresholdZone zone in _thresholdZones)
+        {
+            _thresholdZoneDict.Add(zone.ThresholdZoneType, zone);
+        }
     }
 
     void Start()
@@ -41,12 +48,11 @@ public class WaypointController : MonoBehaviour
         if (_waypointMarkers.Count <= 0)
         {
             _lineRendererRobot.positionCount = 0;
-            return;
         }
         else
         {
             _lineRendererRobot.positionCount = 2;
-            _lineRendererRobot.SetPositions(new Vector3[] {RobotMasterController.SelectedRobot.transform.position, _waypointMarkers[0].transform.position});
+            _lineRendererRobot.SetPositions(new [] {RobotMasterController.SelectedRobot.transform.position, _waypointMarkers[0].transform.position});
         }
     }
 
@@ -69,52 +75,35 @@ public class WaypointController : MonoBehaviour
     public void CreateRoute(List<Vector3> route)
     {
         ClearAllWaypoints();
-        if (_currentWaypointMode == WaypointMode.Single)
-            ToggleWaypointMode();
 
         route.ForEach(CreateWaypoint);
     }
 
     public void CreateWaypoint(Vector3 waypointPosition)
     {
-        if (_currentWaypointMode == WaypointMode.Single)
-        {
-            ClearAllWaypoints();
-        }
-        else
-        {
-            foreach (WaypointMarker marker in _waypointMarkers)
-                marker.SetLock(true);
-            _lineRendererRoute.positionCount++;
-            _lineRendererRoute.SetPosition(_lineRendererRoute.positionCount - 1, waypointPosition);
-        }
+        foreach (WaypointMarker marker in _waypointMarkers)
+            marker.SetLock(true);
+        _lineRendererRoute.positionCount++;
+        _lineRendererRoute.SetPosition(_lineRendererRoute.positionCount - 1, waypointPosition);
 
         WaypointMarker waypoint = Instantiate(_waypointMarkerPrefab, waypointPosition, Quaternion.identity).GetComponent<WaypointMarker>();
-        waypoint.SetColour(_currentWaypointMode == WaypointMode.Single ? _singleWaypointColor : _waypointRouteColor);
+        ThresholdZone zone = _thresholdZoneDict[_defaultZoneType];
+        waypoint.SetThresholdZone(zone.ThresholdZoneType, zone.Threshold, zone.ZoneColor);
         _waypointMarkers.Add(waypoint);
-    }
-
-    public void ToggleWaypointMode()
-    {
-        _currentWaypointMode = _currentWaypointMode == WaypointMode.Single ? WaypointMode.Route : WaypointMode.Single;
-        if (_currentWaypointMode == WaypointMode.Route)
-        {
-            if (_waypointMarkers.Count > 0)
-            {
-                _waypointMarkers[0].SetColour(_waypointRouteColor);
-                _lineRendererRoute.positionCount = 1;
-                _lineRendererRoute.SetPosition(0, _waypointMarkers[0].transform.position);
-            }
-        }
-        PlayerUIController.Instance.SetRouteStatus(_currentWaypointMode == WaypointMode.Route);
+        PlayerUIController.Instance.UpdateUI(RobotMasterController.SelectedRobot);
     }
 
     public void DeleteMarker(WaypointMarker toDelete)
     {
+        if (toDelete.IsLocked) return;
         if (_lineRendererRoute.positionCount > 0)
             _lineRendererRoute.positionCount--;
         Destroy(_waypointMarkers[_waypointMarkers.Count - 1].gameObject);
         _waypointMarkers.RemoveAt(_waypointMarkers.Count - 1);
+        if (_waypointMarkers.Count == 0)
+            PlayerUIController.Instance.UpdateUI(RobotMasterController.SelectedRobot);
+        else if (_waypointMarkers.Count > 0)
+            _waypointMarkers[_waypointMarkers.Count-1].SetLock(false);
     }
 
     public List<Vector3> GetPath()
@@ -124,10 +113,12 @@ public class WaypointController : MonoBehaviour
 
     public void ClearAllWaypoints()
     {
+        if (_waypointMarkers.Count == 0) return;
         foreach (WaypointMarker marker in _waypointMarkers)
             Destroy(marker.gameObject);
         _waypointMarkers = new List<WaypointMarker>();
         _lineRendererRoute.positionCount = 0;
+        if (_waypointMarkers.Count == 0) PlayerUIController.Instance.UpdateUI(RobotMasterController.SelectedRobot);
     }
 
     public void LoadRoute(string routeName)
@@ -155,5 +146,23 @@ public class WaypointController : MonoBehaviour
             _savedRoutes.Add(routeName, route);
         }
         ConfigManager.SaveRoute(routeName, route);
+    }
+
+    public void ClickedWaypointMarker(WaypointMarker marker)
+    {
+        int currentType = (int)marker.ThresholdZoneType;
+        currentType++;
+        if (currentType > 3)
+            currentType = 0;
+        ThresholdZone newZone = _thresholdZoneDict[(ThresholdZoneType) currentType];
+        marker.SetThresholdZone(newZone.ThresholdZoneType, newZone.Threshold, newZone.ZoneColor);
+    }
+
+    [Serializable]
+    private struct ThresholdZone
+    {
+        public ThresholdZoneType ThresholdZoneType;
+        public float Threshold;
+        public Color ZoneColor;
     }
 }
