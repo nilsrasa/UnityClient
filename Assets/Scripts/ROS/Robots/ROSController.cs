@@ -29,7 +29,7 @@ public abstract class ROSController : MonoBehaviour
 
     protected bool _robotModelInitialised;
     protected ROSBridgeWebSocketConnection _rosBridge;
-    protected List<GeoPointWGS84> Waypoints = new List<GeoPointWGS84>();
+    protected List<WaypointController.Waypoint> Waypoints = new List<WaypointController.Waypoint>();
 
     protected virtual void OnApplicationQuit()
     {
@@ -63,7 +63,7 @@ public abstract class ROSController : MonoBehaviour
 
     public abstract void MoveDirect(Vector2 movementCommand);
 
-    public abstract void MovePath(List<GeoPointWGS84> waypoints);
+    public abstract void MovePath(List<WaypointController.Waypoint> waypoints);
 
     public abstract void PausePath();
 

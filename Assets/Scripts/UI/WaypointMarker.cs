@@ -16,11 +16,11 @@ public class WaypointMarker : MonoBehaviour
     private float _scaleCurveIndex;
     private float _bobbingCurveIndex;
     private Vector3 _startLocation;
+    private float _startCustomeZoneScale;
 
     private float _customZoneRadius = 0.5f;
 
-    public float ThresholdZoneRadius { get; private set; }
-    public WaypointController.ThresholdZoneType ThresholdZoneType { get; private set; }
+    public WaypointController.Waypoint Waypoint;
     public bool IsLocked { get; private set; }
 
     private CapsuleCollider _collider;
@@ -53,29 +53,34 @@ public class WaypointMarker : MonoBehaviour
         _top.GetComponent<SpriteRenderer>().color = color;
     }
 
-    public void SetThresholdZone(WaypointController.ThresholdZoneType zoneType, float radius, Color color)
+    public void SetWaypoint(WaypointController.Waypoint waypoint)
     {
-        ThresholdZoneType = zoneType;
-        if (zoneType != WaypointController.ThresholdZoneType.Custom)
-        {
-            ThresholdZoneRadius = radius;
-            _bottom.localScale = new Vector3(radius, radius, 1);
-            _handle.gameObject.SetActive(false);
-        }
-        else
-        {
-            _bottom.localScale = new Vector3(_customZoneRadius, _customZoneRadius, 1);
-            _handle.gameObject.SetActive(true);
-            _handle.position = transform.position + Vector3.right * _customZoneRadius;
-        }
-
-        _bottom.GetComponent<SpriteRenderer>().color = color;
+        Waypoint = waypoint;
+        SetThresholdZone(waypoint.ThresholdZone);
     }
 
-    public void UpdateCustomScale(float newScale)
+    public void SetThresholdZone(WaypointController.ThresholdZone zone)
     {
-        _customZoneRadius = newScale;
+        Waypoint.ThresholdZone = zone;
+        _bottom.localScale = new Vector3(zone.Threshold, zone.Threshold, 1);
+        _handle.gameObject.SetActive(zone.ThresholdZoneType == WaypointController.ThresholdZoneType.Custom);
+        _handle.position = transform.position + Vector3.right * zone.Threshold;
+
+        _bottom.GetComponent<SpriteRenderer>().color = zone.ZoneColor;
+    }
+
+    public void UpdateCustomScale(float newScale, Vector3 directionOfHandle)
+    {
+        _customZoneRadius =  newScale;
         _bottom.localScale = new Vector3(_customZoneRadius, _customZoneRadius, 1);
+        if (directionOfHandle != Vector3.zero)
+            _handle.position = transform.position + directionOfHandle * _customZoneRadius;
+    }
+
+    public void EndUpdateCustomScale()
+    {
+        Waypoint.ThresholdZone.Threshold = _customZoneRadius;
+        WaypointController.Instance.UpdateMarker(this);
     }
 
     /// <summary>

@@ -2,7 +2,6 @@
 	"Campuses": [ 89, 88 ],
 	"RosBridgeUri": "Raspi-ROS-02",
 	"RosBridgePort": 9090,
-	"WaypointDistanceThreshold": 0.44999998807907107,
 	"MaxLinearSpeed": 1.0,
 	"MaxAngularSpeed": 1.0,
 	"LinearSpeedParameter": 2.0,

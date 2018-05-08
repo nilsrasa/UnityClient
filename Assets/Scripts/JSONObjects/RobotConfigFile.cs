@@ -6,7 +6,6 @@ public class RobotConfigFile
     public int[] Campuses;
     public string RosBridgeUri;
     public int RosBridgePort;
-    public float WaypointDistanceThreshold;
     public float MaxLinearSpeed;
     public float MaxAngularSpeed;
     public float LinearSpeedParameter;

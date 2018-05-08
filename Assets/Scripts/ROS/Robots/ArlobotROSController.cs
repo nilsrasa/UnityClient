@@ -32,7 +32,6 @@ public class ArlobotROSController : ROSController
     //Navigation
     private Vector3 _currentWaypoint;
 
-    private float _waypointDistanceThreshhold = 0.1f;
     private float _maxLinearSpeed;
     private float _maxAngularSpeed;
 
@@ -49,7 +48,7 @@ public class ArlobotROSController : ROSController
         if (CurrenLocomotionType != RobotLocomotionType.DIRECT && CurrentRobotLocomotionState != RobotLocomotionState.STOPPED)
         {
             //Waypoint reached
-            if (Vector3.Distance(transform.position, _currentWaypoint) < _waypointDistanceThreshhold)
+            if (Vector3.Distance(transform.position, _currentWaypoint) < Waypoints[0].ThresholdZone.Threshold)
             {
                 if (Waypoints.Count > 1)
                     MoveToNextWaypoint();
@@ -90,14 +89,14 @@ public class ArlobotROSController : ROSController
     {
         if (Waypoints.Count == 0) return;
         CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
-        _currentWaypoint = Waypoints[0].ToUTM().ToUnity();
+        _currentWaypoint = Waypoints[0].Point.ToUTM().ToUnity();
         Move(_currentWaypoint);
     }
 
     private void MoveToNextWaypoint()
     {
         Waypoints = Waypoints.GetRange(1, Waypoints.Count - 1);
-        _currentWaypoint = Waypoints[0].ToUTM().ToUnity();
+        _currentWaypoint = Waypoints[0].Point.ToUTM().ToUnity();
         Move(_currentWaypoint);
         WaypointController.Instance.CreateRoute(Waypoints);
     }
@@ -107,7 +106,7 @@ public class ArlobotROSController : ROSController
         StopRobot();
         if (RobotMasterController.SelectedRobot == this)
             PlayerUIController.Instance.UpdateUI(this);
-        Waypoints = new List<GeoPointWGS84>();
+        Waypoints = new List<WaypointController.Waypoint>();
         WaypointController.Instance.ClearAllWaypoints();
     }
     /*
@@ -137,7 +136,6 @@ public class ArlobotROSController : ROSController
         _rosOdometry = new ROSGenericSubscriber<OdometryMsg>(_rosBridge, "/robot_gps_pose", OdometryMsg.GetMessageType(), (msg) => new OdometryMsg(msg));
         _rosOdometry.OnDataReceived += ReceivedOdometryUpdate;
 
-        _waypointDistanceThreshhold = RobotConfig.WaypointDistanceThreshold;
         _maxLinearSpeed = RobotConfig.MaxLinearSpeed;
         _maxAngularSpeed = RobotConfig.MaxAngularSpeed;
 
@@ -175,7 +173,7 @@ public class ArlobotROSController : ROSController
         FiducialController.Instance.Unregister(_rosBridge);
     }
 
-    public override void MovePath(List<GeoPointWGS84> waypoints)
+    public override void MovePath(List<WaypointController.Waypoint> waypoints)
     {
         Waypoints = waypoints;
         StartWaypointRoute();

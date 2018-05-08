@@ -54,7 +54,7 @@ public class PlayerController : MonoBehaviour
     private bool _isDraggingObject;
     private Vector2 _lastMousePos;
     private DragObject _dragObject;
-    private float _dragOffset;
+    private Vector3 _dragReferencePoint;
 
     void Awake()
     {
@@ -111,7 +111,18 @@ public class PlayerController : MonoBehaviour
             if (Physics.Raycast(ray, out raycastHit, 1000, layer))
             {
                 if (!_isDraggingObject)
-                    StartDrag(raycastHit.transform.GetComponent<DragObject>());
+                {
+                    RaycastHit floorHit;
+                    int floorLayer = 1 << 10;
+                    if (Physics.Raycast(ray, out floorHit, float.PositiveInfinity, floorLayer))
+                    {
+                        StartDrag(raycastHit.transform.GetComponent<DragObject>());
+                    }
+                    else
+                    {
+                        Debug.Log("Attempted drag but didn't find floor reference point");
+                    }
+                }
             }
             else
             {
@@ -153,7 +164,14 @@ public class PlayerController : MonoBehaviour
         {
             if (_isDraggingObject)
             {
-                _dragObject.OnDrag(Vector3.Distance(Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, _dragOffset)), _dragObject.transform.position));
+                RaycastHit floorHit;
+                int floorLayer = 1 << 10;
+                if (Physics.Raycast(ray, out floorHit, float.PositiveInfinity, floorLayer))
+                {
+                    float distance = Vector3.Distance(_dragReferencePoint, floorHit.point);
+                    Vector3 direction = (floorHit.point - _dragReferencePoint).normalized;
+                    _dragObject.OnDrag(distance, direction);
+                }
             }
             else
             {
@@ -289,8 +307,7 @@ public class PlayerController : MonoBehaviour
     {
         _isDraggingObject = true;
         _dragObject = target;
-        target.StartDrag();
-        _dragOffset = Camera.main.WorldToScreenPoint(_dragObject.transform.position).z;
+        _dragReferencePoint = target.StartDrag();
     }
 
     private void StopDrag()
@@ -309,4 +326,5 @@ public class PlayerController : MonoBehaviour
         //Vector3 pos = target.position - _camera.transform.forward * target.position.y;
         //transform.position = new Vector3(pos.x, transform.position.y, pos.z);
     }
+    
 }

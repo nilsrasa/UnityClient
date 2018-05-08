@@ -48,12 +48,12 @@ public class ConfigManager
         File.WriteAllText(ConfigPath + UserConfigName, JsonUtility.ToJson(ConfigFile));
     }
 
-    public static void SaveRoute(string name, List<GeoPointWGS84> route)
+    public static void SaveRoute(string name, List<WaypointController.Waypoint> route)
     {
         ConfigFile.WaypointRoute wpRoute = new ConfigFile.WaypointRoute
         {
             Name = name,
-            Points = route
+            Waypoints = route
         };
 
         bool saved = false;

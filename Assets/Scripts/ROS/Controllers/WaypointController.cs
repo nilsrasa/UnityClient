@@ -22,7 +22,7 @@ public class WaypointController : MonoBehaviour
     private List<WaypointMarker> _waypointMarkers;
     private LineRenderer _lineRendererRoute;
     private LineRenderer _lineRendererRobot;
-    private readonly Dictionary<string, List<GeoPointWGS84>> _savedRoutes = new Dictionary<string, List<GeoPointWGS84>>();
+    private readonly Dictionary<string, List<Waypoint>> _savedRoutes = new Dictionary<string, List<Waypoint>>();
     private readonly Dictionary<ThresholdZoneType, ThresholdZone> _thresholdZoneDict = new Dictionary<ThresholdZoneType, ThresholdZone>();
 
     void Awake()
@@ -61,7 +61,20 @@ public class WaypointController : MonoBehaviour
         List<ConfigFile.WaypointRoute> jsonRoutes = ConfigManager.ConfigFile.Routes;
         foreach (ConfigFile.WaypointRoute route in jsonRoutes)
         {
-            _savedRoutes.Add(route.Name, route.Points);
+            List<Waypoint> waypoints = new List<Waypoint>();
+           
+            _savedRoutes.Add(route.Name, route.Waypoints);
+        }
+    }
+
+    public void CreateRoute(List<Waypoint> route)
+    {
+        ClearAllWaypoints();
+
+        foreach (Waypoint waypoint in route)
+        {
+            WaypointMarker marker = CreateWaypoint(waypoint.Point.ToUTM().ToUnity());
+            marker.SetWaypoint(waypoint);
         }
     }
 
@@ -76,10 +89,13 @@ public class WaypointController : MonoBehaviour
     {
         ClearAllWaypoints();
 
-        route.ForEach(CreateWaypoint);
+        foreach (Vector3 point in route)
+        {
+            CreateWaypoint(point);
+        }
     }
 
-    public void CreateWaypoint(Vector3 waypointPosition)
+    public WaypointMarker CreateWaypoint(Vector3 waypointPosition)
     {
         foreach (WaypointMarker marker in _waypointMarkers)
             marker.SetLock(true);
@@ -88,9 +104,10 @@ public class WaypointController : MonoBehaviour
 
         WaypointMarker waypoint = Instantiate(_waypointMarkerPrefab, waypointPosition, Quaternion.identity).GetComponent<WaypointMarker>();
         ThresholdZone zone = _thresholdZoneDict[_defaultZoneType];
-        waypoint.SetThresholdZone(zone.ThresholdZoneType, zone.Threshold, zone.ZoneColor);
+        waypoint.SetWaypoint(new Waypoint{Point = waypointPosition.ToUTM().ToWGS84(), ThresholdZone = zone});
         _waypointMarkers.Add(waypoint);
         PlayerUIController.Instance.UpdateUI(RobotMasterController.SelectedRobot);
+        return waypoint;
     }
 
     public void DeleteMarker(WaypointMarker toDelete)
@@ -106,9 +123,9 @@ public class WaypointController : MonoBehaviour
             _waypointMarkers[_waypointMarkers.Count-1].SetLock(false);
     }
 
-    public List<Vector3> GetPath()
+    public List<Waypoint> GetPath()
     {
-        return _waypointMarkers.Select(marker => marker.transform.position).ToList();
+        return _waypointMarkers.Select(marker => marker.Waypoint).ToList();
     }
 
     public void ClearAllWaypoints()
@@ -126,43 +143,50 @@ public class WaypointController : MonoBehaviour
         if (!MazeMapController.Instance.CampusLoaded) return;
         if (_savedRoutes.ContainsKey(routeName))
         {
-            ClearAllWaypoints();
-            List<GeoPointWGS84> routePoints = _savedRoutes[routeName];
-            foreach (GeoPointWGS84 point in routePoints)
-            {
-                CreateWaypoint(point.ToUTM().ToUnity());
-            }
+            CreateRoute(_savedRoutes[routeName]);
         }
     }
 
     public void SaveRoute(string routeName)
     {
         if (_waypointMarkers.Count == 0) return;
-        List<GeoPointWGS84> route = GetPath().Select(point => point.ToUTM().ToWGS84()).ToList();
         if (_savedRoutes.ContainsKey(routeName))
-            _savedRoutes[routeName] = route;
+            _savedRoutes[routeName] = GetPath();
         else
         {
-            _savedRoutes.Add(routeName, route);
+            _savedRoutes.Add(routeName, GetPath());
         }
-        ConfigManager.SaveRoute(routeName, route);
+        ConfigManager.SaveRoute(routeName, GetPath());
     }
 
     public void ClickedWaypointMarker(WaypointMarker marker)
     {
-        int currentType = (int)marker.ThresholdZoneType;
+        int currentType = (int)marker.Waypoint.ThresholdZone.ThresholdZoneType;
         currentType++;
         if (currentType > 3)
             currentType = 0;
         ThresholdZone newZone = _thresholdZoneDict[(ThresholdZoneType) currentType];
-        marker.SetThresholdZone(newZone.ThresholdZoneType, newZone.Threshold, newZone.ZoneColor);
+        marker.SetThresholdZone(newZone);
+        UpdateMarker(marker);
+    }
+
+    public void UpdateMarker(WaypointMarker marker)
+    {
+        _waypointMarkers[_waypointMarkers.IndexOf(marker)].Waypoint = marker.Waypoint;
     }
 
     [Serializable]
-    private struct ThresholdZone
+    public struct ThresholdZone
     {
         public ThresholdZoneType ThresholdZoneType;
         public float Threshold;
         public Color ZoneColor;
+    }
+
+    [Serializable]
+    public struct Waypoint
+    {
+        public GeoPointWGS84 Point;
+        public ThresholdZone ThresholdZone;
     }
 }

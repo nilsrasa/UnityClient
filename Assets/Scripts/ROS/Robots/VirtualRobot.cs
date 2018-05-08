@@ -40,8 +40,6 @@ public class VirtualRobot : ROSController
     //Navigation
     private Vector3 _currentWaypoint;
 
-    private float _waypointDistanceThreshhold = 0.1f;
-
     void Awake()
     {
         _rosAgents = new Dictionary<Type, ROSAgent>();
@@ -75,7 +73,7 @@ public class VirtualRobot : ROSController
             CurrentRobotLocomotionState != RobotLocomotionState.STOPPED)
         {
             //Waypoint reached
-            if (Vector3.Distance(transform.position, _currentWaypoint) < _waypointDistanceThreshhold)
+            if (Vector3.Distance(transform.position, _currentWaypoint) < Waypoints[0].ThresholdZone.Threshold)
             {
                 if (Waypoints.Count > 1)
                     MoveToNextWaypoint();
@@ -180,8 +178,6 @@ public class VirtualRobot : ROSController
         _rosLocomotionAngular = new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());
         _rosLocomotionControlParams = new ROSLocomotionControlParams(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/control_parameters");
 
-        _waypointDistanceThreshhold = RobotConfig.WaypointDistanceThreshold;
-
         _rosLocomotionLinear.PublishData(new Float32Msg(RobotConfig.MaxLinearSpeed));
         _rosLocomotionAngular.PublishData(new Float32Msg(RobotConfig.MaxAngularSpeed));
         _rosLocomotionControlParams.PublishData(RobotConfig.LinearSpeedParameter, RobotConfig.RollSpeedParameter, RobotConfig.PitchSpeedParameter, RobotConfig.AngularSpeedParameter);
@@ -200,14 +196,14 @@ public class VirtualRobot : ROSController
     {
         if (Waypoints.Count == 0) return;
         CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
-        _currentWaypoint = Waypoints[0].ToUTM().ToUnity();
+        _currentWaypoint = Waypoints[0].Point.ToUTM().ToUnity();
         Move(_currentWaypoint);
     }
 
     private void MoveToNextWaypoint()
     {
         Waypoints = Waypoints.GetRange(1, Waypoints.Count - 1);
-        _currentWaypoint = Waypoints[0].ToUTM().ToUnity();
+        _currentWaypoint = Waypoints[0].Point.ToUTM().ToUnity();
         Move(_currentWaypoint);
         WaypointController.Instance.CreateRoute(Waypoints);
     }
@@ -217,7 +213,7 @@ public class VirtualRobot : ROSController
         StopRobot();
         if (RobotMasterController.SelectedRobot == this)
             PlayerUIController.Instance.UpdateUI(this);
-        Waypoints = new List<GeoPointWGS84>();
+        Waypoints = new List<WaypointController.Waypoint>();
         WaypointController.Instance.ClearAllWaypoints();
     }
 
@@ -231,7 +227,7 @@ public class VirtualRobot : ROSController
         CurrentRobotLocomotionState = RobotLocomotionState.MOVING;
     }
 
-    public override void MovePath(List<GeoPointWGS84> waypoints)
+    public override void MovePath(List<WaypointController.Waypoint> waypoints)
     {
         Waypoints = waypoints;
         StartWaypointRoute();

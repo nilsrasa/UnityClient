@@ -145,17 +145,19 @@ public class PlayerUIController : MonoBehaviour
         get { return _currentUIState; }
         set
         {
-            if (_currentUIState == value) return;
             _currentUIState = value;
             HideAllPanels();
             switch (_currentUIState)
             {
                 case UIState.Navigation:
                     ActivatePanels(_rightPanel, _layerPanel);
-                    if (MazeMapController.Instance.CampusLoaded)
-                        ActivatePanels(_legendPanel);
                     if (_legendSorroundPhotoToggle.isOn)
                         SorroundPhotoController.Instance.SetCameraPositionVisibility(true);
+                    if (MazeMapController.Instance.CampusLoaded)
+                    {
+                        SetInfoText("Left click to place waypoints. Left click on last waypoint to remove it.\nRight click on waypoint to change precision.");
+                        ActivatePanels(_legendPanel);
+                    }
                     break;
                 case UIState.Options:
                     ActivatePanels(_rightPanel, _optionsPanel, _layerPanel);
@@ -411,7 +413,7 @@ public class PlayerUIController : MonoBehaviour
         _deleteFiducial.interactable = true;
         _saveFiducials.interactable = true;
         if (CurrentUIState == UIState.Navigation)
-            ActivatePanels(_legendPanel);
+            CurrentUIState = UIState.Navigation;
     }
 
     private void Cleanup()
@@ -481,8 +483,7 @@ public class PlayerUIController : MonoBehaviour
         }
         else
         {
-            List<GeoPointWGS84> path = WaypointController.Instance.GetPath().Select(point => point.ToUTM().ToWGS84()).ToList();
-            RobotMasterController.SelectedRobot.MovePath(path);
+            RobotMasterController.SelectedRobot.MovePath(WaypointController.Instance.GetPath());
             CurrentRobotDrivingUIState = RobotDrivingUIState.RobotDriving;
         }
     }

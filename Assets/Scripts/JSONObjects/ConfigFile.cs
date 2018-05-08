@@ -16,6 +16,6 @@ public class ConfigFile
     public struct WaypointRoute
     {
         public string Name;
-        public List<GeoPointWGS84> Points;
+        public List<WaypointController.Waypoint> Waypoints;
     }
 }
