@@ -15,9 +15,11 @@ public class WheelchairSimConnector : RobotModule
     private float _publishingTimer = 0;
     private ROSLocomotionDirect _locomotionDirect;
     private Connector _connector;
+    private bool _isRunning;
 
     void Update()
     {
+        if (!_isRunning) return;
         _publishingTimer -= Time.deltaTime;
         if (_publishingTimer <= 0)
         {
@@ -44,6 +46,13 @@ public class WheelchairSimConnector : RobotModule
         _connector = new Connector();
         Debug.Log(_connector.AutoConnect());
         _locomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Publisher, _rosBridge, "/cmd_vel");
+        _isRunning = true;
+    }
+
+    public override void StopModule()
+    {
+        _isRunning = false;
+        _connector.Disconnect();
     }
 }
 

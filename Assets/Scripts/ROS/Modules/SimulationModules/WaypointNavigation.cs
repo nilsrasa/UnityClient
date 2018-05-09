@@ -133,6 +133,7 @@ public class WaypointNavigation : MonoBehaviour
 
     public void InitialiseRos(ROSBridgeWebSocketConnection rosConnection)
     {
+        Debug.Log("INIT");
         _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Publisher, rosConnection, "/cmd_vel");
         _rosLocomotionState = new ROSGenericPublisher(rosConnection, "/waypoint/robot_state", StringMsg.GetMessageType());
 

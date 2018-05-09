@@ -9,4 +9,6 @@ public abstract class RobotModule : MonoBehaviour
     {
         _rosBridge = rosBridge;
     }
+
+    public abstract void StopModule();
 }

@@ -12692,7 +12692,7 @@ MonoBehaviour:
     Threshold: 0.8
     ZoneColor: {r: 0, g: 1, b: 0, a: 0.328}
   - ThresholdZoneType: 3
-    Threshold: 0.5
+    Threshold: 0.8
     ZoneColor: {r: 0, g: 0, b: 1, a: 0.328}
 --- !u!1 &1713961167
 GameObject:

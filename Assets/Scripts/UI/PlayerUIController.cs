@@ -647,6 +647,10 @@ public class PlayerUIController : MonoBehaviour
         _refreshingRobotList = true;
         _robotsLeftToRefresh = RobotMasterController.Robots.Count;
         _refreshButton.ShouldRotate = true;
+        foreach (KeyValuePair<RobotMasterController.Robot, RobotListItem> pair in _robotListItems)
+        {
+            pair.Value.ResetListItem();
+        }
         RobotMasterController.Instance.RefreshRobotConnections();
     }
 

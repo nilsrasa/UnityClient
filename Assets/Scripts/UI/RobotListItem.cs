@@ -101,4 +101,9 @@ public class RobotListItem : MonoBehaviour
         _robotName = robotName;
         Connected = connected;
     }
+
+    public void ResetListItem()
+    {
+        Connected = false;
+    }
 }

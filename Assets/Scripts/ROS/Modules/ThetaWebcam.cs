@@ -10,6 +10,8 @@ public class ThetaWebcam : RobotModule
     [SerializeField] private Texture _dummyImage;
     [SerializeField] private Texture _text;
 
+    private WebCamTexture mycam;
+
     public override void Initialise(ROSBridgeWebSocketConnection rosBridge)
     {
         if (_useDummyImage)
@@ -17,11 +19,16 @@ public class ThetaWebcam : RobotModule
             _primarySphere.material.mainTexture = _dummyImage;
             return;
         }
-        WebCamTexture mycam = new WebCamTexture();
+        mycam = new WebCamTexture();
         string camName = "THETA UVC FullHD Blender";
         mycam.deviceName = camName;
         _primarySphere.sharedMaterial.mainTexture = mycam;
         _text = mycam;
         mycam.Play();
+    }
+
+    public override void StopModule()
+    {
+        mycam.Stop();
     }
 }

@@ -156,6 +156,7 @@ public class ArlobotROSController : ROSController
 
     public override void StopRobot()
     {
+        Debug.Log("STOP!");
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
         _rosLocomotionDirect.PublishData(0, 0);

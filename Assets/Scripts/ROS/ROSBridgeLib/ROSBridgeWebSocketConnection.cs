@@ -281,7 +281,7 @@ namespace ROSBridgeLib
             if (WebSocket != null)
             {
                 string s = ROSBridgeMsg.CallService(service, args);
-                Debug.Log("Sending " + s);
+                //Debug.Log("Sending " + s);
                 WebSocket.Send(s);
             }
         }

@@ -10,7 +10,6 @@ public class VirtualRobot : ROSController
 {
     [SerializeField] private float _publishInterval = 0.05f;
 
-    private SensorBusController _sensorBusController;
     private Dictionary<Type, ROSAgent> _rosAgents;
     private List<Type> _agentsWaitingToStart;
     private Rigidbody _rigidbody;
@@ -50,11 +49,6 @@ public class VirtualRobot : ROSController
 
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
-    }
-
-    void Start()
-    {
-        _sensorBusController = new SensorBusController(this);
     }
 
     void Update()

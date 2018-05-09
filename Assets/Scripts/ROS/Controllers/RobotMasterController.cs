@@ -135,7 +135,7 @@ public class RobotMasterController : MonoBehaviour
 
     public void RobotLostConnection(ROSController robot)
     {
-        Debug.LogError("Robot [" + robot.gameObject.name + "] lost connection!");
+        //Debug.LogError("Robot [" + robot.gameObject.name + "] lost connection!");
         DisconnectRobot(robot.RobotName);
         PlayerUIController.Instance.UpdateRobotList();
         if (ActiveRobots.Count > 0)
@@ -150,12 +150,6 @@ public class RobotMasterController : MonoBehaviour
     {
         foreach (KeyValuePair<string, Robot> pair in Robots)
         {
-            if (pair.Value.IsActive)
-            {
-                PlayerUIController.Instance.RobotRefreshed();
-                continue;
-            }
-
             pair.Value.RosBridge.Connect(ConnectionResult);
         }
     }
