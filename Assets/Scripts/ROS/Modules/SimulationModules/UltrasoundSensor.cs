@@ -36,6 +36,6 @@ public class UltrasoundSensor : SensorModule
     {
         JSONObject json = new JSONObject();
         json.AddField(_sensorId, GetSensorData());
-        //_rosUltrasoundPublisher.PublishData(new StringMsg(json.ToString()));
+        _rosUltrasoundPublisher.PublishData(new StringMsg(json.ToString()));
     }
 }

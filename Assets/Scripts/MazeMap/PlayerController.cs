@@ -192,7 +192,7 @@ public class PlayerController : MonoBehaviour
                 _mouseMovementSpeed * -Input.GetAxis("Mouse Y"));
         }
 
-        if (Input.GetAxis("Mouse ScrollWheel") != 0)
+        if (Input.GetAxis("Mouse ScrollWheel") != 0 && !PlayerUIController.Instance.ScrollLocked)
         {
             transform.Translate(_camera.transform.forward * Input.GetAxis("Mouse ScrollWheel") * _mouseScrollSpeed, Space.World);
         }

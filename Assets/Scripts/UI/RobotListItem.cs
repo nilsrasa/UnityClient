@@ -48,10 +48,10 @@ public class RobotListItem : MonoBehaviour
 
     private bool _connected;
 
-    private bool Connected
+    public bool Connected
     {
         get { return _connected; }
-        set
+        private set
         {
             _connected = value;
             _connect.colors = value ? _disconnectColorBlock : _connectColorBlock;

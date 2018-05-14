@@ -4,7 +4,7 @@ using ROSBridgeLib.sensor_msgs;
 using ROSBridgeLib.std_msgs;
 using UnityEngine;
 
-public class WaypointNavigation : MonoBehaviour
+public class WaypointNavigation : RobotModule
 {
     [SerializeField] private float _publishInterval = 0.2f;
 
@@ -46,6 +46,7 @@ public class WaypointNavigation : MonoBehaviour
 
     void Update()
     {
+        if (_rosBridge == null) return;
         if (!goal_set)
         {
             if (!_sentCommand)
@@ -131,21 +132,21 @@ public class WaypointNavigation : MonoBehaviour
         }
     }
 
-    public void InitialiseRos(ROSBridgeWebSocketConnection rosConnection)
+    public override void Initialise(ROSBridgeWebSocketConnection rosBridge)
     {
-        Debug.Log("INIT");
-        _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Publisher, rosConnection, "/cmd_vel");
-        _rosLocomotionState = new ROSGenericPublisher(rosConnection, "/waypoint/robot_state", StringMsg.GetMessageType());
+        base.Initialise(rosBridge);
+        _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Publisher, rosBridge, "/cmd_vel");
+        _rosLocomotionState = new ROSGenericPublisher(rosBridge, "/waypoint/robot_state", StringMsg.GetMessageType());
 
-        _rosLocomotionWaypoint = new ROSLocomotionWaypoint(ROSAgent.AgentJob.Subscriber, rosConnection, "/waypoint");
+        _rosLocomotionWaypoint = new ROSLocomotionWaypoint(ROSAgent.AgentJob.Subscriber, rosBridge, "/waypoint");
         _rosLocomotionWaypoint.OnDataReceived += ReceivedWaypoint;
-        _rosLocomotionWaypointState = new ROSLocomotionWaypointState(ROSAgent.AgentJob.Subscriber, rosConnection, "/waypoint/state");
+        _rosLocomotionWaypointState = new ROSLocomotionWaypointState(ROSAgent.AgentJob.Subscriber, rosBridge, "/waypoint/state");
         _rosLocomotionWaypointState.OnDataReceived += ReceivedNavigationState;
-        _rosLocomotionControlParams = new ROSLocomotionControlParams(ROSAgent.AgentJob.Subscriber, rosConnection, "/waypoint/control_parameters");
+        _rosLocomotionControlParams = new ROSLocomotionControlParams(ROSAgent.AgentJob.Subscriber, rosBridge, "/waypoint/control_parameters");
         _rosLocomotionControlParams.OnDataReceived += ReceivedNavigationParameters;
-        _rosLocomotionAngular = new ROSGenericSubscriber<Float32Msg>(rosConnection, "/waypoint/max_angular_speed", Float32Msg.GetMessageType(), (msg) => new Float32Msg(msg));
+        _rosLocomotionAngular = new ROSGenericSubscriber<Float32Msg>(rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType(), (msg) => new Float32Msg(msg));
         _rosLocomotionAngular.OnDataReceived += ReceivedNavigationAngularSpeedParameter;
-        _rosLocomotionLinear = new ROSGenericSubscriber<Float32Msg>(rosConnection, "/waypoint/max_linear_speed", Float32Msg.GetMessageType(), (msg) => new Float32Msg(msg));
+        _rosLocomotionLinear = new ROSGenericSubscriber<Float32Msg>(rosBridge, "/waypoint/max_linear_speed", Float32Msg.GetMessageType(), (msg) => new Float32Msg(msg));
         _rosLocomotionLinear.OnDataReceived += ReceivedNavigationLinearSpeedParameter;
     }
 
@@ -201,5 +202,10 @@ public class WaypointNavigation : MonoBehaviour
         goal = coordinate.ToUTM().ToUnity();
         goal_set = true;
         subState = "STOP";
+    }
+
+    public override void StopModule()
+    {
+        this.enabled = false;
     }
 }

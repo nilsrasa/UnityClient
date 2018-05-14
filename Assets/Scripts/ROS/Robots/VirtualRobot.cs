@@ -10,8 +10,6 @@ public class VirtualRobot : ROSController
 {
     [SerializeField] private float _publishInterval = 0.05f;
 
-    private Dictionary<Type, ROSAgent> _rosAgents;
-    private List<Type> _agentsWaitingToStart;
     private Rigidbody _rigidbody;
 
     //Subscribers
@@ -32,36 +30,23 @@ public class VirtualRobot : ROSController
     private ROSGenericPublisher _rosLocomotionAngular;
     private ROSLocomotionControlParams _rosLocomotionControlParams;
     private ROSGenericPublisher _rosOdometry;
-
-    //Modules
-    private WaypointNavigation _waypointNavigationModule;
+    private ROSGenericPublisher _rosLogger;
 
     //Navigation
     private Vector3 _currentWaypoint;
 
+    private RobotLogger _robotLogger;
+
     void Awake()
     {
-        _rosAgents = new Dictionary<Type, ROSAgent>();
-        _agentsWaitingToStart = new List<Type>();
         _rigidbody = GetComponent<Rigidbody>();
-        _waypointNavigationModule = GetComponent<WaypointNavigation>();
-        OnRosStarted += _waypointNavigationModule.InitialiseRos;
-
+        _robotLogger = GetComponent<RobotLogger>();
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
     }
 
     void Update()
     {
-        if (_agentsWaitingToStart.Count > 0)
-        {
-            foreach (Type type in _agentsWaitingToStart)
-            {
-                StartAgent(type);
-            }
-            _agentsWaitingToStart = new List<Type>();
-        }
-
         //Navigation to waypoint
         if (CurrenLocomotionType != RobotLocomotionType.DIRECT &&
             CurrentRobotLocomotionState != RobotLocomotionState.STOPPED)
@@ -69,6 +54,7 @@ public class VirtualRobot : ROSController
             //Waypoint reached
             if (Vector3.Distance(transform.position, _currentWaypoint) < Waypoints[0].ThresholdZone.Threshold)
             {
+                _rosLogger.PublishData(new StringMsg("Reached waypoint"));
                 if (Waypoints.Count > 1)
                     MoveToNextWaypoint();
                 else
@@ -122,37 +108,10 @@ public class VirtualRobot : ROSController
         }
     }
 
-    //TODO: Rework SIM
-    private void TransmitSensorData()
-    {
-        /*
-        foreach (SensorBus sensorBus in _sensorBusController.SensorBusses)
-        {
-            if (!_rosAgents.ContainsKey(sensorBus.ROSAgentType)) continue;
-            _rosAgents[sensorBus.ROSAgentType].PublishData(sensorBus.GetSensorData());
-        }
-        */
-    }
-
     protected override void StopROS()
     {
         base.StopROS();
         StopCoroutine(_transformUpdateCoroutine);
-    }
-
-    //TODO: Rework SIM
-    public void StartAgent(Type agentType)
-    {
-        /*
-        if (_rosBridge != null)
-        {
-            _agentsWaitingToStart.Add(agentType);
-            return;
-        }
-        ROSAgent agent = (ROSAgent) Activator.CreateInstance(agentType);
-        agent.StartAgent();
-        _rosAgents.Add(agentType, agent);
-        */
     }
 
     protected override void StartROS()
@@ -171,6 +130,7 @@ public class VirtualRobot : ROSController
         _rosLocomotionLinear = new ROSGenericPublisher(_rosBridge, "/waypoint/max_linear_speed", Float32Msg.GetMessageType());
         _rosLocomotionAngular = new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());
         _rosLocomotionControlParams = new ROSLocomotionControlParams(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/control_parameters");
+        _rosLogger = new ROSGenericPublisher(_rosBridge, "/debug_output", StringMsg.GetMessageType());
 
         _rosLocomotionLinear.PublishData(new Float32Msg(RobotConfig.MaxLinearSpeed));
         _rosLocomotionAngular.PublishData(new Float32Msg(RobotConfig.MaxAngularSpeed));
@@ -189,6 +149,7 @@ public class VirtualRobot : ROSController
     private void StartWaypointRoute()
     {
         if (Waypoints.Count == 0) return;
+        _rosLogger.PublishData(new StringMsg("Starting new waypoint route"));
         CurrenLocomotionType = RobotLocomotionType.WAYPOINT;
         _currentWaypoint = Waypoints[0].Point.ToUTM().ToUnity();
         Move(_currentWaypoint);
@@ -196,6 +157,7 @@ public class VirtualRobot : ROSController
 
     private void MoveToNextWaypoint()
     {
+        _rosLogger.PublishData(new StringMsg("Moving to next waypoint"));
         Waypoints = Waypoints.GetRange(1, Waypoints.Count - 1);
         _currentWaypoint = Waypoints[0].Point.ToUTM().ToUnity();
         Move(_currentWaypoint);
@@ -204,6 +166,7 @@ public class VirtualRobot : ROSController
 
     private void EndWaypointPath()
     {
+        _rosLogger.PublishData(new StringMsg("Route ended"));
         StopRobot();
         if (RobotMasterController.SelectedRobot == this)
             PlayerUIController.Instance.UpdateUI(this);
@@ -213,6 +176,7 @@ public class VirtualRobot : ROSController
 
     private void Move(Vector3 position)
     {
+        _rosLogger.PublishData(new StringMsg("Moving to: " + position.ToUTM().ToWGS84()));
         GeoPointWGS84 point = position.ToUTM().ToWGS84();
         _rosLocomotionWaypoint.PublishData(point);
         _currentWaypoint = position;
@@ -239,6 +203,7 @@ public class VirtualRobot : ROSController
 
     public override void StopRobot()
     {
+        _rosLogger.PublishData(new StringMsg("Stopping"));
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
         _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
         _rosLocomotionDirect.PublishData(0, 0);
@@ -246,11 +211,17 @@ public class VirtualRobot : ROSController
 
     public override void OverridePositionAndOrientation(Vector3 newPosition, Quaternion newOrientation)
     {
+        _rosLogger.PublishData(new StringMsg("Odometry overwritten"));
         transform.SetPositionAndRotation(newPosition, newOrientation);
     }
 
     public override void OnDeselected()
     {
         //throw new NotImplementedException();
+    }
+
+    public override List<RobotLog> GetRobotLogs()
+    {
+        return _robotLogger.GetLogs();
     }
 }

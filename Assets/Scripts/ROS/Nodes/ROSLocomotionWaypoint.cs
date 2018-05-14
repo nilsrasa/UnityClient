@@ -32,7 +32,6 @@ public class ROSLocomotionWaypoint : ROSAgent
 
     protected override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
     {
-        throw new NotImplementedException();
     }
 
     /// <param name="data">X: Angular speed in meter/s, Y: Linear speed in meter/s</param>

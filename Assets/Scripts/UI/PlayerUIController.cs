@@ -10,6 +10,8 @@ public class PlayerUIController : MonoBehaviour
 {
     public static PlayerUIController Instance { get; private set; }
 
+    public bool ScrollLocked { get; private set; }
+
     private enum UIState
     {
         Navigation,
@@ -21,7 +23,8 @@ public class PlayerUIController : MonoBehaviour
         Loading,
         RobotList,
         SetRobotPosition,
-        SetRobotOrientation
+        SetRobotOrientation,
+        RobotDebug
     }
 
     private enum RobotDrivingUIState
@@ -98,6 +101,7 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private Button _saveFiducials;
     [SerializeField] private Button _overrideRobotPosition;
     [SerializeField] private Button _resetRobot;
+    [SerializeField] private Button _robotDebug;
     [SerializeField] private Button _exitApplication;
     [SerializeField] private Button _closeOptions;
 
@@ -134,6 +138,13 @@ public class PlayerUIController : MonoBehaviour
     [SerializeField] private GameObject _robotListPrefab;
     [SerializeField] private RefreshButton _refreshButton;
 
+    [Header("Robot Debug Panel")]
+    [SerializeField] private GameObject _robotDebugPanel;
+    [SerializeField] private Button _robotDebugClose;
+    [SerializeField] private RectTransform _robotDebugContentsParent;
+    [SerializeField] private GameObject _robotDebugMessagePrefab;
+    [SerializeField] private Dropdown _robotDebugSelectRobot;
+
     [Header("Legend Panel")]
     [SerializeField] private GameObject _legendPanel;
     [SerializeField] private Button _legendShow;
@@ -146,7 +157,10 @@ public class PlayerUIController : MonoBehaviour
         set
         {
             _currentUIState = value;
+            ScrollLocked = false;
             HideAllPanels();
+            if (_robotLogListenLoop != null)
+                StopCoroutine(_robotLogListenLoop);
             switch (_currentUIState)
             {
                 case UIState.Navigation:
@@ -178,12 +192,16 @@ public class PlayerUIController : MonoBehaviour
                     break;
                 case UIState.SorroundPhoto:
                     ActivatePanels(_sorroundPhotoPanel);
+                    ScrollLocked = true;
                     break;
                 case UIState.Loading:
                     ActivatePanels(_loadingPanel);
+                    ScrollLocked = true;
                     break;
                 case UIState.RobotList:
                     ActivatePanels(_rightPanel, _robotPanel);
+                    RobotListRefreshClick();
+                    ScrollLocked = true;
                     break;
                 case UIState.SetRobotPosition:
                     ActivatePanels(_donePanel);
@@ -192,6 +210,20 @@ public class PlayerUIController : MonoBehaviour
                 case UIState.SetRobotOrientation:
                     ActivatePanels(_donePanel);
                     SetInfoText("Click to set robot orientation (Robot will face this point)");
+                    break;
+                case UIState.RobotDebug:
+                    ActivatePanels(_rightPanel, _robotDebugPanel);
+                    if (_selectRobot.options.Count > 1)
+                    {
+                        _robotDebugSelectRobot.options = _selectRobot.options.GetRange(1, _selectRobot.options.Count - 1);
+                        _robotDebugSelectRobot.value = _selectRobot.value+1;
+
+                        //string selectedRobot = _robotDebugSelectRobot.options[_selectRobot.value + 1].text;
+                        //InitialiseRobotDebugPanel(RobotMasterController.Instance.GetRosControllerFromName(selectedRobot).GetRobotLogs());
+
+                        _robotLogListenLoop = StartCoroutine(RobotDebugListen());
+                    }
+                    ScrollLocked = true;
                     break;
             }
         }
@@ -281,6 +313,8 @@ public class PlayerUIController : MonoBehaviour
     private Quaternion _robotOverrideOrientation;
     private bool _isLegendVisible;
     private bool _isLegendAnimating;
+    private Coroutine _robotLogListenLoop;
+    private List<RobotDebugListItem> _robotDebugListItems;
 
     void Awake()
     {
@@ -326,6 +360,9 @@ public class PlayerUIController : MonoBehaviour
         _legendSorroundPhotoToggle.onValueChanged.AddListener(LegendToggleValueChanged);
         _legendShow.onClick.AddListener(LegendShowClick);
         _resetRobot.onClick.AddListener(ResetRobotClick);
+        _robotDebugClose.onClick.AddListener(RobotDebugCloseClick);
+        _robotDebug.onClick.AddListener(RobotDebugClick);
+        _robotDebugSelectRobot.onValueChanged.AddListener(OnRobotDebugListValueChanged);
 
         _driveRobotColorBlock = _driveRobot.colors;
 
@@ -351,6 +388,7 @@ public class PlayerUIController : MonoBehaviour
         CurrentUIState = UIState.Navigation;
         CurrentRobotDrivingUIState = RobotDrivingUIState.NoRobotSelected;
         MazeMapController.Instance.OnFinishedGeneratingCampus += OnFinishedGeneratingCampus;
+        _robotDebugListItems = new List<RobotDebugListItem>();
     }
 
     void Update()
@@ -386,6 +424,7 @@ public class PlayerUIController : MonoBehaviour
         _donePanel.SetActive(false);
         _robotPanel.SetActive(false);
         _legendPanel.SetActive(false);
+        _robotDebugPanel.SetActive(false);
         HideInfoText();
     }
 
@@ -639,7 +678,6 @@ public class PlayerUIController : MonoBehaviour
     private void RobotListClick()
     {
         CurrentUIState = UIState.RobotList;
-        RobotListRefreshClick();
     }
 
     private void RobotListRefreshClick()
@@ -649,7 +687,8 @@ public class PlayerUIController : MonoBehaviour
         _refreshButton.ShouldRotate = true;
         foreach (KeyValuePair<RobotMasterController.Robot, RobotListItem> pair in _robotListItems)
         {
-            pair.Value.ResetListItem();
+            if (!pair.Value.Connected)
+                pair.Value.ResetListItem();
         }
         RobotMasterController.Instance.RefreshRobotConnections();
     }
@@ -667,6 +706,16 @@ public class PlayerUIController : MonoBehaviour
         }
         else
             RobotMasterController.Instance.DisconnectRobot(name);
+    }
+
+    private void RobotDebugClick()
+    {
+        CurrentUIState = UIState.RobotDebug;
+    }
+
+    private void RobotDebugCloseClick()
+    {
+        CurrentUIState = UIState.Navigation;
     }
 
     private void OverrideRobotPositionClick()
@@ -760,7 +809,7 @@ public class PlayerUIController : MonoBehaviour
 
     private void OnSelectedRobotValueChanged(int newIndex)
     {
-        ROSController selectedRobot = RobotMasterController.Instance.GetRosControllerFromName(MazeMapController.Instance.CampusId, _selectRobot.options[newIndex].text);
+        ROSController selectedRobot = RobotMasterController.Instance.GetRosControllerFromName(_selectRobot.options[newIndex].text);
         UpdateUI(selectedRobot);
         RobotMasterController.Instance.SelectRobot(selectedRobot);
     }
@@ -802,6 +851,11 @@ public class PlayerUIController : MonoBehaviour
         FiducialController.Instance.SetFiducialVisibility(_legendFiducialToggle.isOn);
     }
 
+    private void OnRobotDebugListValueChanged(int newIndex)
+    {
+        string selectedRobot = _robotDebugSelectRobot.options[newIndex].text;
+        InitialiseRobotDebugPanel(RobotMasterController.Instance.GetRosControllerFromName(selectedRobot).GetRobotLogs());
+    }
     #endregion
 
     #region MouseClickEvents
@@ -906,6 +960,21 @@ public class PlayerUIController : MonoBehaviour
 
     #endregion
 
+    private void InitialiseRobotDebugPanel(List<RobotLog> logs)
+    {
+        foreach (RobotDebugListItem item in _robotDebugListItems)
+        {
+            DestroyImmediate(item.gameObject);
+        }
+        _robotDebugListItems = new List<RobotDebugListItem>();
+        foreach (RobotLog log in logs)
+        {
+            RobotDebugListItem item = Instantiate(_robotDebugMessagePrefab, _robotDebugContentsParent).GetComponent<RobotDebugListItem>();
+            item.Initialise(log.Timestamp, log.Message);
+            _robotDebugListItems.Add(item);
+        }
+    }
+
     private void OnLegendAnimationDone()
     {
         _isLegendAnimating = false;
@@ -936,6 +1005,16 @@ public class PlayerUIController : MonoBehaviour
         RobotMasterController.SelectedRobot.OverridePositionAndOrientation(_robotOverridePosition, _robotOverrideOrientation);
         UnregisterMouseClick();
         CurrentUIState = UIState.Navigation;
+    }
+
+    private IEnumerator RobotDebugListen()
+    {
+        while (true)
+        {
+            string selectedRobot = _robotDebugSelectRobot.options[_robotDebugSelectRobot.value].text;
+            InitialiseRobotDebugPanel(RobotMasterController.Instance.GetRosControllerFromName(selectedRobot).GetRobotLogs());
+            yield return new WaitForSeconds(1);
+        }
     }
 
     public void SetDriveMode(bool isDriving)
@@ -1046,6 +1125,8 @@ public class PlayerUIController : MonoBehaviour
 
     public void AddRobotToList(string robotName)
     {
+        if (_selectRobot.options.Count <= 1)
+            _robotDebug.interactable = true;
         _selectRobot.options.Add(new Dropdown.OptionData(robotName));
         _selectRobot.RefreshShownValue();
     }
@@ -1069,6 +1150,8 @@ public class PlayerUIController : MonoBehaviour
             }
         }
         _selectRobot.RefreshShownValue();
+        if (_selectRobot.options.Count <= 1)
+            _robotDebug.interactable = false;
     }
 
     public void SelectDefaultRobot()
@@ -1083,4 +1166,5 @@ public class PlayerUIController : MonoBehaviour
         }
         _selectRobot.RefreshShownValue();
     }
+
 }

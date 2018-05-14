@@ -11,7 +11,7 @@ public class test : MonoBehaviour
     private float timer;
     private float pollRate = 2;
     private ROSGenericPublisher _genericPub;
-    private ROSGenericSubscriber<BoolMsg> _genericSub;
+    private ROSGenericSubscriber<StringMsg> _genericSub;
     private bool _running = false;
 
 
@@ -46,15 +46,16 @@ public class test : MonoBehaviour
             PathMsg msg = new PathMsg(header, new PoseStampedMsg[] {ps, ps, ps});
 
             BoolMsg boolmsg = new BoolMsg(true);
-            _genericPub.PublishData(boolmsg);
+            StringMsg str = new StringMsg("This is a test");
+            _genericPub.PublishData(str);
         }
     }
 
     private void Initialise()
     {
         ros = new ROSBridgeWebSocketConnection("ws://192.168.255.40", 9090, "Test");
-        _genericPub = new ROSGenericPublisher(ros, "/pat", BoolMsg.GetMessageType());
-        _genericSub = new ROSGenericSubscriber<BoolMsg>(ros, "/pat", BoolMsg.GetMessageType(), msg => new BoolMsg(msg));
+        _genericPub = new ROSGenericPublisher(ros, "/debug_output", StringMsg.GetMessageType());
+        _genericSub = new ROSGenericSubscriber<StringMsg>(ros, "/debug_output", StringMsg.GetMessageType(), msg => new StringMsg(msg));
         _genericSub.OnDataReceived += OnDataReceived;
         ros.Connect();
         ros.Render();

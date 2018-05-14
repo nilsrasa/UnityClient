@@ -105,19 +105,19 @@ public class RobotMasterController : MonoBehaviour
             Robots[robotName].RosBridge.Disconnect();
     }
 
-    public Robot GetRobotFromName(int campusId, string robotName)
+    public Robot GetRobotFromName(string robotName)
     {
         Robot robot = null;
 
         if (Robots.TryGetValue(robotName, out robot))
         {
-            if (robot.Campuses.Contains(campusId))
+            if (robot.Campuses.Contains(MazeMapController.Instance.CampusId))
                 return robot;
         }
         return null;
     }
 
-    public ROSController GetRosControllerFromName(int campusId, string robotName)
+    public ROSController GetRosControllerFromName(string robotName)
     {
         ROSController rosController = null;
         if (ActiveRobots.TryGetValue(robotName, out rosController))

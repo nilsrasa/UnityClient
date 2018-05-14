@@ -118,4 +118,6 @@ public abstract class ROSController : MonoBehaviour
 
     public virtual void ResetRobot() { }
 
+    public abstract List<RobotLog> GetRobotLogs();
+
 }

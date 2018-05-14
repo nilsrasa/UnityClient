@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using ROSBridgeLib.geometry_msgs;
 using ROSBridgeLib.nav_msgs;
 using ROSBridgeLib.std_msgs;
@@ -21,10 +22,12 @@ public class ArlobotROSController : ROSController
     private ROSGenericSubscriber<OdometryMsg> _rosOdometry;
     private ROSGenericPublisher _rosOdometryOverride;
     private ROSGenericPublisher _rosReset;
+    private ROSGenericPublisher _rosLogger;
 
     private bool _hasOdometryDataToConsume;
 
     private OdometryData _odometryDataToConsume;
+    private RobotLogger _robotLogger;
     //private CompressedImageMsg _cameraDataToConsume;
     //private CameraInfo _cameraInfoToConsume;
     //private bool _hasCameraDataToConsume;
@@ -40,6 +43,7 @@ public class ArlobotROSController : ROSController
         Instance = this;
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
+        _robotLogger = GetComponent<RobotLogger>();
     }
 
     void Update()
@@ -74,6 +78,15 @@ public class ArlobotROSController : ROSController
                 _hasCameraDataToConsume = false;
             }
         }*/
+    }
+
+    private IEnumerator publisher()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1);
+            _rosLogger.PublishData(new StringMsg("DEBUG MESSAGE!"));
+        }
     }
 
     public override void MoveDirect(Vector2 command)
@@ -130,6 +143,7 @@ public class ArlobotROSController : ROSController
         _rosLocomotionAngular = new ROSGenericPublisher(_rosBridge, "/waypoint/max_angular_speed", Float32Msg.GetMessageType());
         _rosOdometryOverride = new ROSGenericPublisher(_rosBridge, "/odo_calib_pose", OdometryMsg.GetMessageType());
         _rosReset = new ROSGenericPublisher(_rosBridge, "arlobot/reset_motorBoard", BoolMsg.GetMessageType());
+        _rosLogger = new ROSGenericPublisher(_rosBridge, "/debug_output", StringMsg.GetMessageType());
 
         _rosUltrasound = new ROSGenericSubscriber<StringMsg>(_rosBridge, "/ultrasonic_data", StringMsg.GetMessageType(), (msg) => new StringMsg(msg));
         _rosUltrasound.OnDataReceived += ReceivedUltrasoundUpdata;
@@ -142,6 +156,7 @@ public class ArlobotROSController : ROSController
         _rosLocomotionLinear.PublishData(new Float32Msg(_maxLinearSpeed));
         _rosLocomotionAngular.PublishData(new Float32Msg(_maxAngularSpeed));
         _rosLocomotionControlParams.PublishData(RobotConfig.LinearSpeedParameter, RobotConfig.RollSpeedParameter, RobotConfig.PitchSpeedParameter, RobotConfig.AngularSpeedParameter);
+        StartCoroutine(publisher());
     }
 
     private void Move(Vector3 position)
@@ -249,6 +264,11 @@ public class ArlobotROSController : ROSController
     {
         base.ResetRobot();
         _rosReset.PublishData(new BoolMsg(true));
+    }
+
+    public override List<RobotLog> GetRobotLogs()
+    {
+        return _robotLogger.GetLogs();
     }
 
     private struct OdometryData
