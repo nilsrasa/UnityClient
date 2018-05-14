@@ -22,7 +22,6 @@ public class FiducialController : MonoBehaviour
     private string _fiducialSavePath;
     private FiducialData _zeroLocation;
     private FiducialCollectionFile _fiducialCollectionFile;
-    private bool _initialised;
 
     private int _tempFiducialId;
     private Fiducial _tempFiducial;
@@ -62,7 +61,6 @@ public class FiducialController : MonoBehaviour
         });
         float heightAboveFloor = MazeMapController.Instance.GetHeightAboveFloor(newFiducial.transform.position.y);
         newFiducial.InitaliseFloorMarker(heightAboveFloor);
-        _initialised = true;
     }
 
     private Fiducial InstantiateFiducial(FiducialObject fiducial)

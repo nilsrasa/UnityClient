@@ -61,8 +61,6 @@ public class WaypointController : MonoBehaviour
         List<ConfigFile.WaypointRoute> jsonRoutes = ConfigManager.ConfigFile.Routes;
         foreach (ConfigFile.WaypointRoute route in jsonRoutes)
         {
-            List<Waypoint> waypoints = new List<Waypoint>();
-           
             _savedRoutes.Add(route.Name, route.Waypoints);
         }
     }

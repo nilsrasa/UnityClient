@@ -35,13 +35,13 @@ This google drive folder contains the following builds:
 - Add hostname of both ROS Bridge and Unity client to their respective host files.
 
 #### VRTelerobot
-- Setup config file in Data folder/StreamingAssets/Config/Telerobot_ThetaS.json
+- Setup config file in `Data folder/StreamingAssets/Config/Telerobot_ThetaS.json` (The data folder is created when building and is named `#buildname#_Data`)
 - Make sure FOVE VR HMD is connected and set up.
 - Run build
 - Press 'C' on the keyboard to center head
 
 #### MazemapRobotInterface
-- Setup config file in Data folder/StreamingAssets/Config/ (See [Config File Section](#robot-config))
+- Setup config file in `Data folder/StreamingAssets/Config/` (See [Config File Section](#robot-config))
 - Load campus from MazeMap by inputting campus id and pressing the Generate Campus button. (Easiest way to find campus id is by going to [use.mazemap.com](https://use.mazemap.com), selecting the wanted campus, and looking for the "campusid=" variable)
 - Open Robot List and connect to the robot. 
 - Select robot from dropdown list.
@@ -52,28 +52,44 @@ This google drive folder contains the following builds:
 ### Robots
 A robot representation consists of these elements:
 
-* A robot control script that extends a `ROSController` (See `ArlobotROSController.cs` or `VirtualRobot.cs`) Which contains:
+* A robot control script that  Which contains:
 	* Robot behaviour
 	* ROS nodes and modules necessary for robot
 	* Robot modules attached to robot
+* A prefab that contains the 3D model and the scripts.
+* A robot config file with the same name as the prefab, that contains information such as hostname and port for connecting to the robot.  
+
+A robot can only be connected to when it has all these 3 elements. Unity checks if there's a config file and prefab with the same name, and then tries to initialise the robot control script attached to the gameobject when connected.
+The prefab and robot control scripts can only be made in editor, so before a build is made, but the robot config files can still be changed after a build is made.
+
+### Robot Control Script
+The robot control script defines the robot behaviour as the name implies. This script is attached to the robot gameobject and is responsible for subscribing/advertising to the correct topics. In the current version, all robots have the same basic behaviours, such as waypoint navigation.  
+The script extends a `ROSController.cs` (See `ArlobotROSController.cs` or `VirtualRobot.cs`).  
 
 ![alt text](https://github.com/DTU-R3/UnityClient/blob/master/Screenshots/RosControllerFileLocation.PNG?raw=true)
-* A prefab that contains the 3D model and the scripts.
 
-![alt text](https://github.com/DTU-R3/UnityClient/blob/master/Screenshots/RobotPrefabFileLocation.PNG?raw=true)
-* A robot config file with the same name as the prefab, that contains information such as hostname and port for connecting to the robot.
+### Robot prefab
+The prefab is the gameobject instantiated by Unity when you connect to a robot. This gameobject should have the robot control script attached, and can also contain a 3D representation of the robot.  
 
-![alt text](https://github.com/DTU-R3/UnityClient/blob/master/Screenshots/RobotFileLocation.PNG?raw=true)
+![alt text](https://github.com/DTU-R3/UnityClient/blob/rosbridge/Screenshots/ROSPrefabLocation.PNG?raw=true)
 
-The prefab and robot control scripts can only be made in editor, so before a build is made, but the robot config files can still be changed after a build is made.
-They will be located in: #buildname#_Data/StreamingAssets/Config/Robots.
+
+#### Robot Models
+Robot models can be created in external 3D editing software and imported into Unity (see [Unity documentation](https://docs.unity3d.com/Manual/HOWTO-importObject.html)), but we also support creating 3D models semi-dynamically from [URDF files](https://github.com/DTU-R3/URDF-ROS).  
+This can however only be done in the Unity Editor - not in builds.  
+To generate models from URDF, put any URDF files into `Assets/StreamingAssets/URDF` and run the scene `URDF_Model_Generation`.
+The project comes with a few models already created as prefabs, that can simply be dragged into the robot prefab (make sure it's centered and facing forward).  
+Models can be found in `Assets/Prefabs/RobotModels`.
 
 ### Robot config
+
+![alt text](https://github.com/DTU-R3/UnityClient/blob/master/Screenshots/RobotFileLocation.PNG?raw=true)
 Robot config files consists of 3 important fields that needs to be correct to start the robot:
 "Campuses", "RosMasterUri", and "RosMasterPort".
 **Campuses:** An int array of the mazemap campus Ids where the robot is available. Make sure your campus id is included here.
 **RosBridgeUri:** ROS Bridge Uri (IP or Hostname) that was added to the host file. (Example: "Raspi-ROS-02")
 **RosBridgePort:** Port to ROS bridge.
+The config files can be found in `Assets/StreamingAssets/Config(/Robots)` before the project is built, and `Data folder/StreamingAssets/Config(/Robots)` after the project is built.
 
 ### User Config
 

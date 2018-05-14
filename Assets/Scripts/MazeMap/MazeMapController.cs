@@ -49,7 +49,6 @@ public class MazeMapController : MonoBehaviour
     private bool _isUsingBackup;
     private Transform _campusParent;
 
-    private List<Vector3> _testpoints = new List<Vector3>();
     [SerializeField] private GameObject _colliderPrefab;
 
     private int _buildingsLeftToDraw;

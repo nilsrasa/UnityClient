@@ -205,6 +205,7 @@ public class Connector
                 }
                 catch (Exception e)
                 {
+                    Debug.LogError(e.Message);
                     return null;
                 }
 
@@ -243,9 +244,9 @@ public class Connector
             Console.WriteLine(portName + " occupied");
             return null;
         }
-        catch (IOException ex)
+        catch (IOException e)
         {
-            Console.WriteLine("Not connected");
+            Console.WriteLine("Not connected - " + e.Message);
             return null;
         }
 

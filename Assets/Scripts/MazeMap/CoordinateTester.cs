@@ -21,8 +21,6 @@ public class CoordinateTester : MonoBehaviour
     [Header("Move to distance")] [SerializeField] private float _moveDistance;
     [SerializeField] private bool _moveToDistance;
 
-    private int i = 10;
-
     // Update is called once per frame
     void Update()
     {

@@ -25,8 +25,9 @@
             ROSConnection.AddPublisher(this);
         }
 
-        public virtual void Stop()
+        public override void Stop()
         {
+            base.Stop();
             if (ROSConnection == null) return;
             ROSConnection.RemovePublisher(this);
         }

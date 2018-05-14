@@ -22,8 +22,9 @@ public class ROSGenericSubscriber<T> : ROSBridgeSubscriber where T : ROSBridgeMs
     ///<summary>
     ///Stops advertising loop
     ///</summary>
-    public void Stop()
+    public override void Stop()
     {
+        base.Stop();
         _isRunning = false;
     }
 

@@ -114,24 +114,8 @@ public abstract class ROSController : MonoBehaviour
         if (OnRosStarted != null)
             OnRosStarted(rosBridge);
 
-        /*
-        if (Param.has("robot_description"))
-        {
-            string robotDescription = "";
-            Debug.Log("Generating robot from robot description");
-            Param.get("robot_description", ref robotDescription);
-            GenerateRobot(robotDescription);
-        }
-        else
-            Debug.Log("---No robot description available - could not automatically generate robot---");
-        _robotModelInitialised = true;
-        */
     }
 
     public virtual void ResetRobot() { }
 
-    private void GenerateRobot(string robotDescription)
-    {
-        //_robot = RobotUrdfUtility.GenerateRobotGameObjectFromDescription(robotDescription, _alwaysGenerateRobot).transform;
-    }
 }

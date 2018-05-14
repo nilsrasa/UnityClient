@@ -35,7 +35,6 @@ public class SorroundPhotoController : MonoBehaviour
     private UnityEngine.Camera _camera;
     private bool _active;
     private Dictionary<int, SorroundPhotoLocation> _photoLocations;
-    private List<RectTransform> _timeSliderPoints;
     private SorroundPhotoLocation _currentLoadedPhotoLocation;
 
     void Awake()
@@ -128,7 +127,6 @@ public class SorroundPhotoController : MonoBehaviour
         if (_photoLocations[photoLocation.PictureId].Timestamps.Count > 2)
         {
             PlayerUIController.Instance.ResetTimeSlider();
-            _timeSliderPoints = new List<RectTransform>();
             PlayerUIController.Instance.SetSliderVisibility(true);
             DateTime lastTimestamp = _photoLocations[photoLocation.PictureId].Timestamps[_photoLocations[photoLocation.PictureId].Timestamps.Count - 1];
             double secondsBetweenFirstAndLast = lastTimestamp.Subtract(firstTimestamp).TotalSeconds;
