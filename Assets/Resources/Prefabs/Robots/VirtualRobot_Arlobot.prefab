@@ -3256,13 +3256,13 @@ MonoBehaviour:
     PitchSpeedParameter: 0
   RobotName: 
   _robotModules:
+  - {fileID: 114561066700090596}
+  - {fileID: 114547383846960554}
   - {fileID: 114300074222286376}
   - {fileID: 114056423677053596}
   - {fileID: 114256614887108542}
   - {fileID: 114161459896586992}
-  - {fileID: 114561066700090596}
-  - {fileID: 114547383846960554}
-  _publishInterval: 0.05
+  _publishInterval: 0.3
 --- !u!114 &114547383846960554
 MonoBehaviour:
   m_ObjectHideFlags: 1

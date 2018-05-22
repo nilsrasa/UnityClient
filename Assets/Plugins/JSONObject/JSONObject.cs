@@ -913,7 +913,8 @@ public class JSONObject : IEnumerable {
 				builder.Append(str);
 				break;
 			case Type.STRING:
-				builder.AppendFormat("\"{0}\"", str);
+
+                builder.AppendFormat("\"{0}\"", str.Replace("\"", "\\\""));
 				break;
 			case Type.NUMBER:
 				if(useInt) {

@@ -1,4 +1,5 @@
 using SimpleJSON;
+using UnityEngine;
 
 /* 
  * @brief ROSBridgeLib
@@ -40,7 +41,9 @@ namespace ROSBridgeLib
 
             public override string ToYAMLString()
             {
-                return "{\"data\" : \"" + _data + "\"}";
+                JSONObject json = new JSONObject();
+                json.AddField("data", _data);
+                return json.ToString();
             }
         }
     }
