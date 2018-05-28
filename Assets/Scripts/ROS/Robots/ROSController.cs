@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ROSBridgeLib;
 using UnityEngine;
 
+[RequireComponent(typeof(RobotLogger))]
 public abstract class ROSController : MonoBehaviour
 {
     public enum RobotLocomotionState
@@ -30,6 +32,12 @@ public abstract class ROSController : MonoBehaviour
     protected bool _robotModelInitialised;
     protected ROSBridgeWebSocketConnection _rosBridge;
     protected List<WaypointController.Waypoint> Waypoints = new List<WaypointController.Waypoint>();
+    protected RobotLogger _robotLogger;
+
+    protected virtual void Awake()
+    {
+        _robotLogger = GetComponent<RobotLogger>();
+    }
 
     protected virtual void OnApplicationQuit()
     {
@@ -79,7 +87,7 @@ public abstract class ROSController : MonoBehaviour
     /// </summary>
     public virtual void OnSelected()
     {
-        if (Waypoints != null)
+        if (Waypoints != null && RobotMasterController.SelectedRobot == this)
             WaypointController.Instance.CreateRoute(Waypoints);
     }
 
@@ -119,5 +127,16 @@ public abstract class ROSController : MonoBehaviour
     public virtual void ResetRobot() { }
 
     public abstract List<RobotLog> GetRobotLogs();
+
+    public virtual void SubscribeToRobotLogsUpdate(RobotLogger.ReceivedRobotLog subscriber)
+    {
+        _robotLogger.OnReceivedRobotLog += subscriber;
+    }
+
+    public virtual void UnsubscribeToRobotLogsUpdate(RobotLogger.ReceivedRobotLog subscriber)
+    {
+        if (_robotLogger != null)
+            _robotLogger.OnReceivedRobotLog -= subscriber;
+    }
 
 }

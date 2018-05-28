@@ -35,18 +35,35 @@ public class VirtualRobot : ROSController
     //Navigation
     private Vector3 _currentWaypoint;
 
-    private RobotLogger _robotLogger;
-
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         _rigidbody = GetComponent<Rigidbody>();
         _robotLogger = GetComponent<RobotLogger>();
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
     }
 
+    private IEnumerator adsjio()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(2);
+
+            _rosLogger.PublishData(new StringMsg("Hi!"));
+        }
+
+    }
+
+    void Start()
+    {
+        StartCoroutine(adsjio());
+    }
+
     void Update()
     {
+
+
         //Navigation to waypoint
         if (CurrenLocomotionType != RobotLocomotionType.DIRECT &&
             CurrentRobotLocomotionState != RobotLocomotionState.STOPPED)

@@ -10,8 +10,6 @@ public class ArlobotROSController : ROSController
 {
     [SerializeField] private RawImage _cameraImage;
 
-    public static ArlobotROSController Instance { get; private set; }
-
     private ROSLocomotionDirect _rosLocomotionDirect;
     private ROSLocomotionWaypoint _rosLocomotionWaypoint;
     private ROSLocomotionWaypointState _rosLocomotionWaypointState;
@@ -27,7 +25,6 @@ public class ArlobotROSController : ROSController
     private bool _hasOdometryDataToConsume;
 
     private OdometryData _odometryDataToConsume;
-    private RobotLogger _robotLogger;
     //private CompressedImageMsg _cameraDataToConsume;
     //private CameraInfo _cameraInfoToConsume;
     //private bool _hasCameraDataToConsume;
@@ -38,9 +35,9 @@ public class ArlobotROSController : ROSController
     private float _maxLinearSpeed;
     private float _maxAngularSpeed;
 
-    void Awake()
+    protected override void Awake()
     {
-        Instance = this;
+        base.Awake();
         CurrenLocomotionType = RobotLocomotionType.DIRECT;
         CurrentRobotLocomotionState = RobotLocomotionState.STOPPED;
         _robotLogger = GetComponent<RobotLogger>();
@@ -78,15 +75,6 @@ public class ArlobotROSController : ROSController
                 _hasCameraDataToConsume = false;
             }
         }*/
-    }
-
-    private IEnumerator publisher()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(1);
-            _rosLogger.PublishData(new StringMsg("DEBUG MESSAGE!"));
-        }
     }
 
     public override void MoveDirect(Vector2 command)
@@ -156,7 +144,6 @@ public class ArlobotROSController : ROSController
         _rosLocomotionLinear.PublishData(new Float32Msg(_maxLinearSpeed));
         _rosLocomotionAngular.PublishData(new Float32Msg(_maxAngularSpeed));
         _rosLocomotionControlParams.PublishData(RobotConfig.LinearSpeedParameter, RobotConfig.RollSpeedParameter, RobotConfig.PitchSpeedParameter, RobotConfig.AngularSpeedParameter);
-        StartCoroutine(publisher());
     }
 
     private void Move(Vector3 position)

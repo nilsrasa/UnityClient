@@ -5,11 +5,26 @@ using ROSBridgeLib.std_msgs;
 
 public class RobotLogger : RobotModule
 {
+    public delegate void ReceivedRobotLog(RobotLog log);
+    public event ReceivedRobotLog OnReceivedRobotLog;
+
     private const int MaxNumberOfLogs = 50;
 
     private ROSGenericSubscriber<StringMsg> _subscriber;
     private List<RobotLog> _logs;
     private int _rollingOffset;
+    private RobotLog _dataReceived;
+    private bool _hasDataReceived;
+
+    void Update()
+    {
+        if (_hasDataReceived)
+        {
+            if (OnReceivedRobotLog != null)
+                OnReceivedRobotLog(_dataReceived);
+            _hasDataReceived = false;
+        }
+    }
 
     private void LogReceivedData(ROSBridgeMsg msg)
     {
@@ -29,6 +44,8 @@ public class RobotLogger : RobotModule
             if (_rollingOffset >= MaxNumberOfLogs)
                 _rollingOffset = 0;
         }
+        _dataReceived = log;
+        _hasDataReceived = true;
     }
 
     public override void Initialise(ROSBridgeWebSocketConnection rosBridge)

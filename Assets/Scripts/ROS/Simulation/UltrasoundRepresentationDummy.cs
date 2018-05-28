@@ -14,7 +14,8 @@ public class UltrasoundRepresentationDummy : SensorRepresentation
 
     void Update()
     {
-        Ray ray = new Ray(transform.position - transform.right * 0.25f, transform.right * 3);
+        Ray ray = new Ray(transform.position - transform.right * 0.15f, transform.right * 3);
+        Debug.DrawRay(ray.origin, ray.direction * 3);
         RaycastHit hit;
         float sensorData = 3;
         if (Physics.Raycast(ray, out hit))
