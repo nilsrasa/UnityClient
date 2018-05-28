@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using ProBuilder2.Common;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -175,13 +176,21 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                _camera.transform.rotation = Quaternion.Euler(
-                    _camera.transform.eulerAngles.x + _mouseMovementSpeed * -Input.GetAxis("Mouse Y"),
-                    _camera.transform.eulerAngles.y + 0,
-                    _camera.transform.eulerAngles.z + 0);
-                transform.eulerAngles = new Vector3(transform.eulerAngles.x,
-                    transform.eulerAngles.y + _mouseMovementSpeed * Input.GetAxis("Mouse X"),
-                    transform.eulerAngles.z);
+                transform.Rotate(Vector3.up, _mouseMovementSpeed * Input.GetAxis("Mouse X"));
+                _camera.transform.Rotate(Vector3.right, _mouseMovementSpeed * -Input.GetAxis("Mouse Y"));
+                if (_camera.transform.localEulerAngles.y > 90)
+                {
+                    if (_camera.transform.localEulerAngles.x < 180)
+                    {
+                        float angle = 89 - _camera.transform.localEulerAngles.x;
+                        _camera.transform.Rotate(Vector3.right, -angle);
+                    }
+                    else
+                    {
+                        float angle = 269 - _camera.transform.localEulerAngles.x;
+                        _camera.transform.Rotate(Vector3.right, -angle);
+                    }
+                }
             }
         }
 
