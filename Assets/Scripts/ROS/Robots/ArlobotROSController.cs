@@ -43,8 +43,9 @@ public class ArlobotROSController : ROSController
         _robotLogger = GetComponent<RobotLogger>();
     }
 
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         //Navigation to waypoint
         if (CurrenLocomotionType != RobotLocomotionType.DIRECT && CurrentRobotLocomotionState != RobotLocomotionState.STOPPED)
         {

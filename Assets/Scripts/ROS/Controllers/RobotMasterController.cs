@@ -30,6 +30,8 @@ public class RobotMasterController : MonoBehaviour
 
     private string _configPath;
     private string _robotPrefabPath;
+    private bool _hasRobotLostConnection;
+    private ROSController _robotLostConnection;
 
     void Awake()
     {
@@ -47,6 +49,12 @@ public class RobotMasterController : MonoBehaviour
 
     void Update()
     {
+        if (_hasRobotLostConnection)
+        {
+            _hasRobotLostConnection = false;
+            CleanUpDisconnectedRobot(_robotLostConnection);
+        }
+
         foreach (KeyValuePair<string, Robot> bridge in Robots)
         {
             if (bridge.Value.IsActive)
@@ -105,6 +113,20 @@ public class RobotMasterController : MonoBehaviour
             Robots[robotName].RosBridge.Disconnect();
     }
 
+    private void CleanUpDisconnectedRobot(ROSController robot)
+    {
+        Debug.LogError("Robot [" + robot.gameObject.name + "] lost connection!");
+        DisconnectRobot(robot.RobotName);
+        PlayerUIController.Instance.UpdateRobotList();
+        PlayerUIController.Instance.RobotWasDisconnected(Robots[robot.RobotName]);
+        if (ActiveRobots.Count > 0)
+            SelectRobot(ActiveRobots.First().Value);
+        else
+        {
+            WaypointController.Instance.ClearAllWaypoints();
+        }
+    }
+
     public Robot GetRobotFromName(string robotName)
     {
         Robot robot = null;
@@ -135,15 +157,8 @@ public class RobotMasterController : MonoBehaviour
 
     public void RobotLostConnection(ROSController robot)
     {
-        //Debug.LogError("Robot [" + robot.gameObject.name + "] lost connection!");
-        DisconnectRobot(robot.RobotName);
-        PlayerUIController.Instance.UpdateRobotList();
-        if (ActiveRobots.Count > 0)
-            SelectRobot(ActiveRobots.First().Value);
-        else
-        {
-            WaypointController.Instance.ClearAllWaypoints();
-        }
+        _hasRobotLostConnection = true;
+        _robotLostConnection = robot;
     }
 
     public void RefreshRobotConnections()
@@ -161,7 +176,7 @@ public class RobotMasterController : MonoBehaviour
         Robot robot = Robots[robotName];
         GameObject robotObject = Instantiate(Resources.Load(_robotPrefabPath + robot.Name)) as GameObject;
         ROSController rosController = robotObject.GetComponent<ROSController>();
-        rosController.InitialiseRobot(robot.RosBridge, robot.RobotConfig, robot.Name);
+        rosController.InitialiseRobot(robot.RosBridge, robot.RobotConfig, robotName);
         ActiveRobots.Add(robotName, rosController);
 
         PlayerUIController.Instance.AddRobotToList(robot.Name);
@@ -170,6 +185,7 @@ public class RobotMasterController : MonoBehaviour
     public void DisconnectRobot(string robotName)
     {
         Robots[robotName].Connected = false;
+        Robots[robotName].IsActive = false;
         ActiveRobots[robotName].Destroy();
         ActiveRobots.Remove(robotName);
 

@@ -33,10 +33,19 @@ public abstract class ROSController : MonoBehaviour
     protected ROSBridgeWebSocketConnection _rosBridge;
     protected List<WaypointController.Waypoint> Waypoints = new List<WaypointController.Waypoint>();
     protected RobotLogger _robotLogger;
+    protected bool _shouldClose;
 
     protected virtual void Awake()
     {
         _robotLogger = GetComponent<RobotLogger>();
+    }
+
+    protected virtual void Update()
+    {
+        if (_shouldClose)
+        {
+            StopROS();
+        }
     }
 
     protected virtual void OnApplicationQuit()
@@ -57,7 +66,6 @@ public abstract class ROSController : MonoBehaviour
     protected virtual void LostConnection()
     {
         RobotMasterController.Instance.RobotLostConnection(this);
-        StopROS();
     }
 
     /// <summary>
@@ -106,6 +114,7 @@ public abstract class ROSController : MonoBehaviour
     /// <param name="robotConfig">Config file that contains robot parameters.</param>
     public virtual void InitialiseRobot(ROSBridgeWebSocketConnection rosBridge, RobotConfigFile robotConfig, string robotName)
     {
+        RobotName = robotName;
         _rosBridge = rosBridge;
         _rosBridge.OnDisconnect += clean =>
         {

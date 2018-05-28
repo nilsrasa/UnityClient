@@ -1207,4 +1207,9 @@ public class PlayerUIController : MonoBehaviour
         _selectRobot.RefreshShownValue();
     }
 
+    public void RobotWasDisconnected(RobotMasterController.Robot robot)
+    {
+        _robotListItems[robot].Connected = false;
+    }
+
 }

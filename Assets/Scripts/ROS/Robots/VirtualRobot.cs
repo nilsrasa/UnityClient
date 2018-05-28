@@ -60,9 +60,9 @@ public class VirtualRobot : ROSController
         StartCoroutine(adsjio());
     }
 
-    void Update()
+    protected override void Update()
     {
-
+        base.Update();
 
         //Navigation to waypoint
         if (CurrenLocomotionType != RobotLocomotionType.DIRECT &&
