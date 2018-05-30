@@ -2,6 +2,7 @@
 using ROSBridgeLib;
 using ROSBridgeLib.geometry_msgs;
 using ROSBridgeLib.nav_msgs;
+using ROSBridgeLib.sensor_msgs;
 using ROSBridgeLib.std_msgs;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ public class test : MonoBehaviour
     private float timer;
     private float pollRate = 2;
     private ROSGenericPublisher _genericPub;
-    private ROSGenericSubscriber<StringMsg> _genericSub;
+    private ROSGenericSubscriber<CameraInfoMsg> _genericSub;
     private bool _running = false;
 
 
@@ -24,10 +25,11 @@ public class test : MonoBehaviour
 
     void Update()
     {
+        ros.Render();
+
         if (!_running) return;
 
         timer -= Time.deltaTime;
-        ros.Render();
 
         if (timer <= 0)
         {
@@ -47,15 +49,18 @@ public class test : MonoBehaviour
 
             BoolMsg boolmsg = new BoolMsg(true);
             StringMsg str = new StringMsg("This is a test");
-            _genericPub.PublishData(str);
+            RegionOfInterestMsg roi = new RegionOfInterestMsg(0, 1, 2, 3, true);
+            CameraInfoMsg caminfo = new CameraInfoMsg(header, 100, 200, "plumb_bob", new double[5] , new double[9], new double[9], new double[12] , 14, 123, roi);
+
+            _genericPub.PublishData(caminfo);
         }
     }
 
     private void Initialise()
     {
         ros = new ROSBridgeWebSocketConnection("ws://192.168.255.40", 9090, "Test");
-        _genericPub = new ROSGenericPublisher(ros, "/debug_output", StringMsg.GetMessageType());
-        _genericSub = new ROSGenericSubscriber<StringMsg>(ros, "/debug_output", StringMsg.GetMessageType(), msg => new StringMsg(msg));
+        _genericPub = new ROSGenericPublisher(ros, "/raspicam_node/camera_info", CameraInfoMsg.GetMessageType());
+        _genericSub = new ROSGenericSubscriber<CameraInfoMsg>(ros, "/raspicam_node/camera_info", CameraInfoMsg.GetMessageType(), msg => new CameraInfoMsg(msg));
         _genericSub.OnDataReceived += OnDataReceived;
         ros.Connect();
         ros.Render();

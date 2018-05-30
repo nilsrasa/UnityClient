@@ -76,8 +76,7 @@ public class MazeMapController : MonoBehaviour
         FloorHeightBelowGround = ConfigManager.ConfigFile.FloorHeightBelowGround;
         _lineWidth = ConfigManager.ConfigFile.FloorLineWidth;
 
-        _backupPath = Application.streamingAssetsPath + "/Backup/MazemapBackup.json";
-        _mazemapBackup = File.Exists(_backupPath) ? JsonUtility.FromJson<MazemapBackupFile>(File.ReadAllText(_backupPath)) : new MazemapBackupFile();
+        _backupPath = Application.streamingAssetsPath + "/Backup/MazemapBackup{0}.json";
 
         string measurementsPath = Application.streamingAssetsPath + "/MazeMap/Measurements.json";
         _mazeMapMeasurements = File.Exists(measurementsPath) ? JsonUtility.FromJson<MazeMapMeasurements>(File.ReadAllText(measurementsPath)) : new MazeMapMeasurements();
@@ -102,9 +101,12 @@ public class MazeMapController : MonoBehaviour
     /// <param name="text">GeoJSON string</param>
     private void GetBuildings(string text)
     {
+        _mazemapBackup = File.Exists(string.Format(_backupPath, CampusId)) ? JsonUtility.FromJson<MazemapBackupFile>(File.ReadAllText(string.Format(_backupPath, CampusId))) : new MazemapBackupFile();
+
         if (string.IsNullOrEmpty(text))
         {
             CampusJson campus;
+
             if (_mazemapBackup.Campuses.TryGetValue(CampusId, out campus))
             {
                 Debug.Log("Couldn't connect to Mazemap: Initialising from backup");
@@ -119,7 +121,7 @@ public class MazeMapController : MonoBehaviour
             }
         }
 
-        if (_shouldBackupMazemapData)
+        if (_shouldBackupMazemapData && _mazemapBackup != null)
         {
             if (_mazemapBackup.Campuses == null)
                 _mazemapBackup.Campuses = new SerializableDictionaryCampusJson();
@@ -203,7 +205,7 @@ public class MazeMapController : MonoBehaviour
         }
         SetActiveLayer(CurrentActiveLevel);
         CampusLoaded = true;
-        File.WriteAllText(_backupPath, JsonUtility.ToJson(_mazemapBackup));
+        File.WriteAllText(string.Format(_backupPath, CampusId), JsonUtility.ToJson(_mazemapBackup));
 
         if (OnFinishedGeneratingCampus != null)
             OnFinishedGeneratingCampus(CampusId);
@@ -654,8 +656,8 @@ public class MazeMapController : MonoBehaviour
 
     public void GenerateCampus(int id)
     {
-        StartCoroutine(GetWWW(string.Format(REST_BUILDING_SEARCH, id), GetBuildings));
         CampusId = id;
+        StartCoroutine(GetWWW(string.Format(REST_BUILDING_SEARCH, id), GetBuildings));
     }
 
     public Building GetBuildingByName(string buildingName)

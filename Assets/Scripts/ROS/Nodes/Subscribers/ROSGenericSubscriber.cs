@@ -1,6 +1,7 @@
 ﻿using System;
 using ROSBridgeLib;
 using SimpleJSON;
+using UnityEngine;
 
 /// <summary>
 /// Generic subscriber that collects data received by ROS

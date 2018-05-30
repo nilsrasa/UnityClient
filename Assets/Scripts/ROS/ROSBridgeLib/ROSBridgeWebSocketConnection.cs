@@ -229,6 +229,7 @@ namespace ROSBridgeLib
                                 if (!found)
                                     _taskQ.Add(newTask);
                             }
+                            
                         }
                     }
                 }
