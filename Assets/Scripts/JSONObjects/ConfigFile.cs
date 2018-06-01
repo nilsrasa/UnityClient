@@ -9,7 +9,7 @@ public class ConfigFile
     public float FloorLineWidth;
     public int UtmZone;
     public bool IsUtmNorth;
-    public FiducialData ZeroFiducial;
+    public List<ZeroFiducial> ZeroFiducials;
     public List<WaypointRoute> Routes;
 
     [Serializable]
@@ -17,5 +17,12 @@ public class ConfigFile
     {
         public string Name;
         public List<WaypointController.Waypoint> Waypoints;
+    }
+
+    [Serializable]
+    public struct ZeroFiducial
+    {
+        public int CampusId;
+        public FiducialData FiducialData;
     }
 }

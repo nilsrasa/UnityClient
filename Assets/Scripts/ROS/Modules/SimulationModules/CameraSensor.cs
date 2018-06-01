@@ -11,6 +11,32 @@ public class CameraSensor : SensorModule
     [SerializeField] private int _resolutionWidth = 1640;
     [SerializeField] private int _resolutionHeight = 1232;
 
+    private readonly double[] CameraMatrix = 
+    {
+        1065.695548, 0.000000, 820.064061,
+        0.000000, 1065.690554,  615.986085,
+        0.000000, 0.000000, 1.000000,
+    };
+
+    private readonly double[] Distortion =
+    {
+        0.000253, -0.000084, -0.000021, -0.000002, 0.000000
+    };
+
+    private readonly double[] Rectification =
+    {
+        1.000000, 0.000000, 0.000000,
+        0.000000, 1.000000, 0.000000,
+        0.000000, 0.000000, 1.000000
+    };
+
+    private readonly double[] Projection =
+    {
+        1065.894043, 0.000000, 820.059106, 0.000000,
+        0.000000, 1065.867065, 615.950719, 0.000000,
+        0.000000, 0.000000, 1.000000, 0.000000
+    };
+
     private Camera _camera;
     private ROSGenericPublisher _cameraInfoPublisher;
     private ROSCameraSensorPublisher _cameraSensorPublisher;
@@ -48,7 +74,7 @@ public class CameraSensor : SensorModule
 
         HeaderMsg header = new HeaderMsg(_sequenceId, new TimeMsg(0, 0), "raspicam");
         RegionOfInterestMsg roi = new RegionOfInterestMsg(0, 0, 0, 0, false);
-        CameraInfoMsg camInfo = new CameraInfoMsg(header, (uint)_resolutionHeight, (uint)_resolutionWidth, "plumb_bob", new double[5], new double[9], new double[9], new double[12], 0, 0, roi);
+        CameraInfoMsg camInfo = new CameraInfoMsg(header, (uint)_resolutionHeight, (uint)_resolutionWidth, "plumb_bob", Distortion, CameraMatrix, Rectification, Projection, 0, 0, roi);
         _cameraSensorPublisher.PublishData(_texture2D, _cameraQualityLevel, _sequenceId);
         _cameraInfoPublisher.PublishData(camInfo);
 

@@ -1,1 +1,110 @@
-{"FloorHeightAboveGround":4.0,"FloorHeightBelowGround":4.0,"FloorLineWidth":0.10000000149011612,"UtmZone":34,"IsUtmNorth":true,"ZeroFiducial":{"FiducialId":100,"Position":{"longitude":12.514173060177,"latitude":55.7827023805766,"altitude":10.253},"Rotation":{"x":0.0,"y":-83.5,"z":180.0}},"Routes":[{"Name":"test","Waypoints":[{"Point":{"longitude":12.40029140320403,"latitude":55.730425555415958,"altitude":0.009999999776482582},"ThresholdZone":{"ThresholdZoneType":0,"Threshold":0.30000001192092898,"ZoneColor":{"r":1.0,"g":0.0,"b":0.0,"a":0.328000009059906}}},{"Point":{"longitude":12.40038637080423,"latitude":55.730438922219239,"altitude":0.009999999776482582},"ThresholdZone":{"ThresholdZoneType":2,"Threshold":0.800000011920929,"ZoneColor":{"r":0.0,"g":1.0,"b":0.0,"a":0.328000009059906}}},{"Point":{"longitude":12.400462975320514,"latitude":55.73045416315703,"altitude":0.009999999776482582},"ThresholdZone":{"ThresholdZoneType":3,"Threshold":3.853577136993408,"ZoneColor":{"r":0.0,"g":0.0,"b":1.0,"a":0.328000009059906}}},{"Point":{"longitude":12.400388820171786,"latitude":55.730407335097648,"altitude":0.009999999776482582},"ThresholdZone":{"ThresholdZoneType":1,"Threshold":0.5,"ZoneColor":{"r":1.0,"g":1.0,"b":0.0,"a":0.328000009059906}}},{"Point":{"longitude":12.400308962189106,"latitude":55.73038533847799,"altitude":0.009999999776482582},"ThresholdZone":{"ThresholdZoneType":3,"Threshold":0.23640084266662599,"ZoneColor":{"r":0.0,"g":0.0,"b":1.0,"a":0.328000009059906}}}]}]}
+{
+	"FloorHeightAboveGround": 4.0,
+	"FloorHeightBelowGround": 4.0,
+	"FloorLineWidth": 0.10000000149011612,
+	"UtmZone": 34,
+	"IsUtmNorth": true,
+	"ZeroFiducials": [{
+			"CampusId": 89,
+			"ZeroFiducial": {
+				"FiducialId": 100,
+				"Position": {
+					"longitude": 12.514173060177,
+					"latitude": 55.7827023805766,
+					"altitude": 10.253
+				},
+				"Rotation": {
+					"x": 0,
+					"y": -83.5,
+					"z": 180
+				}
+			}
+		}
+	],
+	"Routes": [{
+			"Name": "test",
+			"Waypoints": [{
+					"Point": {
+						"longitude": 12.40029140320403,
+						"latitude": 55.730425555415958,
+						"altitude": 0.009999999776482582
+					},
+					"ThresholdZone": {
+						"ThresholdZoneType": 0,
+						"Threshold": 0.30000001192092898,
+						"ZoneColor": {
+							"r": 1.0,
+							"g": 0.0,
+							"b": 0.0,
+							"a": 0.328000009059906
+						}
+					}
+				}, {
+					"Point": {
+						"longitude": 12.40038637080423,
+						"latitude": 55.730438922219239,
+						"altitude": 0.009999999776482582
+					},
+					"ThresholdZone": {
+						"ThresholdZoneType": 2,
+						"Threshold": 0.800000011920929,
+						"ZoneColor": {
+							"r": 0.0,
+							"g": 1.0,
+							"b": 0.0,
+							"a": 0.328000009059906
+						}
+					}
+				}, {
+					"Point": {
+						"longitude": 12.400462975320514,
+						"latitude": 55.73045416315703,
+						"altitude": 0.009999999776482582
+					},
+					"ThresholdZone": {
+						"ThresholdZoneType": 3,
+						"Threshold": 3.853577136993408,
+						"ZoneColor": {
+							"r": 0.0,
+							"g": 0.0,
+							"b": 1.0,
+							"a": 0.328000009059906
+						}
+					}
+				}, {
+					"Point": {
+						"longitude": 12.400388820171786,
+						"latitude": 55.730407335097648,
+						"altitude": 0.009999999776482582
+					},
+					"ThresholdZone": {
+						"ThresholdZoneType": 1,
+						"Threshold": 0.5,
+						"ZoneColor": {
+							"r": 1.0,
+							"g": 1.0,
+							"b": 0.0,
+							"a": 0.328000009059906
+						}
+					}
+				}, {
+					"Point": {
+						"longitude": 12.400308962189106,
+						"latitude": 55.73038533847799,
+						"altitude": 0.009999999776482582
+					},
+					"ThresholdZone": {
+						"ThresholdZoneType": 3,
+						"Threshold": 0.23640084266662599,
+						"ZoneColor": {
+							"r": 0.0,
+							"g": 0.0,
+							"b": 1.0,
+							"a": 0.328000009059906
+						}
+					}
+				}
+			]
+		}
+	]
+}

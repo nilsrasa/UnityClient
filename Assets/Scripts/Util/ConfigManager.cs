@@ -39,7 +39,7 @@ public class ConfigManager
         if (def.FloorLineWidth != userConfigFile.FloorLineWidth) ConfigFile.FloorLineWidth = userConfigFile.FloorLineWidth;
         if (def.UtmZone != userConfigFile.UtmZone) ConfigFile.UtmZone = userConfigFile.UtmZone;
         if (def.IsUtmNorth != userConfigFile.IsUtmNorth) ConfigFile.IsUtmNorth = userConfigFile.IsUtmNorth;
-        if (def.ZeroFiducial != userConfigFile.ZeroFiducial) ConfigFile.ZeroFiducial = userConfigFile.ZeroFiducial;
+        if (def.ZeroFiducials != userConfigFile.ZeroFiducials) ConfigFile.ZeroFiducials = userConfigFile.ZeroFiducials;
         if (def.Routes != userConfigFile.Routes) ConfigFile.Routes = userConfigFile.Routes;
     }
 

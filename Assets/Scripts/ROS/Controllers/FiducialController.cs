@@ -5,10 +5,14 @@ using System.IO;
 using System.Linq;
 using ROSBridgeLib;
 using ROSBridgeLib.fiducial_msgs;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 public class FiducialController : MonoBehaviour
 {
+    [HideInInspector] public FiducialData ZeroFiducial;
     public static FiducialController Instance { get; private set; }
 
     private const string FIDUCIAL_RESOURCE_NAME = "FiducialMarker";
@@ -20,7 +24,6 @@ public class FiducialController : MonoBehaviour
     private Dictionary<int, FiducialObject> _fiducialObjects = new Dictionary<int, FiducialObject>();
     private Dictionary<int, Fiducial> _fiducials = new Dictionary<int, Fiducial>();
     private string _fiducialSavePath;
-    private FiducialData _zeroLocation;
     private FiducialCollectionFile _fiducialCollectionFile;
 
     private int _tempFiducialId;
@@ -37,7 +40,6 @@ public class FiducialController : MonoBehaviour
 
     void Start()
     {
-        _zeroLocation = ConfigManager.ConfigFile.ZeroFiducial;
         MazeMapController.Instance.OnFinishedGeneratingCampus += LoadFiducials;
     }
 
@@ -45,17 +47,38 @@ public class FiducialController : MonoBehaviour
     {
         _fiducials = new Dictionary<int, Fiducial>();
         _fiducialObjects = new Dictionary<int, FiducialObject>();
-        Fiducial newFiducial = (Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _zeroLocation.Position.ToUTM().ToUnity(),
-            Quaternion.Euler(_zeroLocation.Rotation)) as GameObject).GetComponent<Fiducial>();
-
-        newFiducial.gameObject.name = _zeroLocation.FiducialId.ToString();
-
-        newFiducial.FiducialId = _zeroLocation.FiducialId;
-        _fiducials.Add(_zeroLocation.FiducialId, newFiducial);
-
-        _fiducialObjects.Add(_zeroLocation.FiducialId, new FiducialObject
+        bool hasFiducial = false;
+        foreach (ConfigFile.ZeroFiducial fid in ConfigManager.ConfigFile.ZeroFiducials)
         {
-            Id = _zeroLocation.FiducialId,
+            if (fid.CampusId == MazeMapController.Instance.CampusId)
+            {
+                ZeroFiducial = fid.FiducialData;
+                hasFiducial = true;
+                break;
+            }
+        }
+
+        if (!hasFiducial)
+        {
+            Debug.LogError("Zerofiducial not found in UserConfig - Exiting");
+#if UNITY_EDITOR
+            EditorApplication.isPlaying = false;
+#endif
+            Application.Quit();
+            return;
+        }
+
+        Fiducial newFiducial = (Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), ZeroFiducial.Position.ToUTM().ToUnity(),
+            Quaternion.Euler(ZeroFiducial.Rotation)) as GameObject).GetComponent<Fiducial>();
+
+        newFiducial.gameObject.name = ZeroFiducial.FiducialId.ToString();
+
+        newFiducial.FiducialId = ZeroFiducial.FiducialId;
+        _fiducials.Add(ZeroFiducial.FiducialId, newFiducial);
+
+        _fiducialObjects.Add(ZeroFiducial.FiducialId, new FiducialObject
+        {
+            Id = ZeroFiducial.FiducialId,
             Position = newFiducial.transform.position.ToUTM().ToWGS84(),
             Rotation = newFiducial.transform.eulerAngles.ToGeoRotation()
         });
@@ -65,7 +88,7 @@ public class FiducialController : MonoBehaviour
 
     private Fiducial InstantiateFiducial(FiducialObject fiducial)
     {
-        Fiducial newFiducial = (Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _fiducials[_zeroLocation.FiducialId].transform) as GameObject).GetComponent<Fiducial>();
+        Fiducial newFiducial = (Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _fiducials[ZeroFiducial.FiducialId].transform) as GameObject).GetComponent<Fiducial>();
         newFiducial.transform.position = fiducial.Position.ToUTM().ToUnity();
         newFiducial.transform.eulerAngles = fiducial.Rotation.ToUnity();
         newFiducial.name = fiducial.Id.ToString();
@@ -80,7 +103,7 @@ public class FiducialController : MonoBehaviour
     private void UpdateFiducial(FiducialMapEntryMsg entry)
     {
         Vector3 localpos = new Vector3((float) entry._x, (float) entry._z, (float) entry._y);
-        _fiducials[entry._fiducial_id].transform.localPosition = _fiducials[_zeroLocation.FiducialId].transform.rotation * localpos;
+        _fiducials[entry._fiducial_id].transform.localPosition = _fiducials[ZeroFiducial.FiducialId].transform.rotation * localpos;
         _fiducials[entry._fiducial_id].transform.localEulerAngles = new Vector3((float) entry._rx * Mathf.Rad2Deg, (float) entry._rz * Mathf.Rad2Deg, (float) entry._ry * Mathf.Rad2Deg);
     }
 
@@ -135,7 +158,7 @@ public class FiducialController : MonoBehaviour
                 {
                     foreach (FiducialObject fiducialObject in collection.SavedFiducials)
                     {
-                        if (fiducialObject.Id == _zeroLocation.FiducialId) continue;
+                        if (fiducialObject.Id == ZeroFiducial.FiducialId) continue;
 
                         InstantiateFiducial(fiducialObject);
                         _fiducialObjects.Add(fiducialObject.Id, fiducialObject);
@@ -177,7 +200,7 @@ public class FiducialController : MonoBehaviour
 
         if (_tempFiducial == null)
         {
-            _tempFiducial = (Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _fiducials[_zeroLocation.FiducialId].transform) as GameObject).GetComponent<Fiducial>();
+            _tempFiducial = (Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), _fiducials[ZeroFiducial.FiducialId].transform) as GameObject).GetComponent<Fiducial>();
             _tempFiducial.transform.SetPositionAndRotation(position, Quaternion.Euler(rotation));
         }
         else

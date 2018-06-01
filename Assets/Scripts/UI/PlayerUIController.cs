@@ -969,7 +969,7 @@ public class PlayerUIController : MonoBehaviour
 
     private void OnAddFiducialMouseClick(Vector3 clickPos)
     {
-        clickPos = new Vector3(clickPos.x, ConfigManager.ConfigFile.ZeroFiducial.Position.ToUTM().ToUnity().y, clickPos.z);
+        clickPos = new Vector3(clickPos.x, FiducialController.Instance.ZeroFiducial.Position.ToUTM().ToUnity().y, clickPos.z);
         _addFidPosX.text = clickPos.x.ToString(CultureInfo.InvariantCulture);
         _addFidPosY.text = clickPos.y.ToString(CultureInfo.InvariantCulture);
         _addFidPosZ.text = clickPos.z.ToString(CultureInfo.InvariantCulture);

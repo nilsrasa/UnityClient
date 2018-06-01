@@ -26,8 +26,10 @@ public class MazeMapController : MonoBehaviour
     public Dictionary<int, Building> Buildings;
 
     public delegate void WasFinishedGeneratingCampus(int campusId);
-
     public event WasFinishedGeneratingCampus OnFinishedGeneratingCampus;
+
+    public delegate void StartedGeneratingCampus();
+    public event StartedGeneratingCampus OnStartedGeneratingCampus;
 
     private const string REST_BUILDING_SEARCH = "https://api.mazemap.com/api/buildings/?campusid={0}&srid=4326";
     private const string REST_FLOOROUTLINES = "https://api.mazemap.com/api/flooroutlines/?campusid={0}&srid=4326";
@@ -656,6 +658,8 @@ public class MazeMapController : MonoBehaviour
 
     public void GenerateCampus(int id)
     {
+        if (OnStartedGeneratingCampus != null)
+            OnStartedGeneratingCampus();
         CampusId = id;
         StartCoroutine(GetWWW(string.Format(REST_BUILDING_SEARCH, id), GetBuildings));
     }
