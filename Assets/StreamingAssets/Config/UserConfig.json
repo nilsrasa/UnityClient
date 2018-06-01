@@ -6,7 +6,7 @@
 	"IsUtmNorth": true,
 	"ZeroFiducials": [{
 			"CampusId": 89,
-			"ZeroFiducial": {
+			"FiducialData": {
 				"FiducialId": 100,
 				"Position": {
 					"longitude": 12.514173060177,
@@ -16,6 +16,21 @@
 				"Rotation": {
 					"x": 0,
 					"y": -83.5,
+					"z": 180
+				}
+			}
+		}, {
+			"CampusId": 88,
+			"FiducialData": {
+				"FiducialId": 100,
+				"Position": {
+					"longitude": 12.397192432484928,
+					"latitude": 55.731300480571804,
+					"altitude": 10.253
+				},
+				"Rotation": {
+					"x": 0,
+					"y": 0,
 					"z": 180
 				}
 			}
