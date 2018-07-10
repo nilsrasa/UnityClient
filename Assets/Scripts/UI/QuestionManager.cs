@@ -5,71 +5,43 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
+using System.Linq;
+using ProBuilder2.Common;
+using UnityEngine.Serialization;
 
 public class QuestionManager : MonoBehaviour {
 
+
+    
+    [System.Serializable]
+    public class ListWrapper
+    {
+        public KeyCode Hotkey;
+        public bool ActiveForTest;
+        public List<string> QueryList;
+    }
+
+
     //struct to save the pair of response times for each query
+    [Serializable]
     public class ResponseTimes
     {
-        // Response time for the popup
         public float PRS;
-        // Response time for the query
         public float QRS;
-
+       // public float[] RS;
         //constructor for fast init
         public ResponseTimes()
         {
-            PRS = 0.0f;
-            QRS = 0.0f;
+            PRS = QRS = 0;
         }
 
     }
 
-    //struct to assist with saving date time in json format
-    struct JsonDateTime
+    [Serializable]
+    public struct JsonRS
     {
-        public long value;
-        public static implicit operator DateTime(JsonDateTime jdt)
-        {
-            Debug.Log("Converted to time");
-            return DateTime.FromFileTimeUtc(jdt.value);
-        }
-        public static implicit operator JsonDateTime(DateTime dt)
-        {
-            Debug.Log("Converted to JDT");
-            JsonDateTime jdt = new JsonDateTime();
-            jdt.value = dt.ToFileTimeUtc();
-            return jdt;
-        }
-    }
-
-    public static class JsonHelper
-    {
-        public static T[] FromJson<T>(string json)
-        {
-            Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(json);
-            return wrapper.Items;
-        }
-
-        public static string ToJson<T>(T[] array)
-        {
-            Wrapper<T> wrapper = new Wrapper<T>();
-            wrapper.Items = array;
-            return JsonUtility.ToJson(wrapper);
-        }
-
-        public static string ToJson<T>(T[] array, bool prettyPrint)
-        {
-            Wrapper<T> wrapper = new Wrapper<T>();
-            wrapper.Items = array;
-            return JsonUtility.ToJson(wrapper, prettyPrint);
-        }
-
-        [Serializable]
-        private class Wrapper<T>
-        {
-            public T[] Items;
-        }
+        public string QuestionType;
+        public ResponseTimes[] RSS;
     }
 
 
@@ -79,21 +51,23 @@ public class QuestionManager : MonoBehaviour {
         public string Date;
         public int UserID;
         public int Maze;
-        public float[] PRS;
-        public float[] QRS;
+        public JsonRS[] Responses;
+       
     }
 
 
-    //Inspector vars
+    //Inspector variables
     public float PresetDelayTime;
     public int TestSubjectID;
     public int MazeID;
     public bool FormatJsonFile = false;
     public bool ClearJsonFile = false;
     public bool IsActive;
-    public List<string> QueriesList;
-    
-
+    public bool ResetTest;
+    public KeyCode CloseMessageHotkey;
+    public KeyCode FinalQuestionHotkey;//This key must correspond to one of the questions hotkeys
+    public List<ListWrapper> QueriesList;
+   
     //Private reference vars
     private GameObject PopUpMessagePanel;
     private GameObject QueryPanel;
@@ -101,8 +75,22 @@ public class QuestionManager : MonoBehaviour {
     private AudioSource source;
 
     //private vars
-    private int QueryCounter;
-    private List<ResponseTimes> RSList;
+    private List<List<ResponseTimes>> RSList;
+    private int[] QueryListCounters; //keeps track of the current query in each of the lists
+    private DateTime ExperimentDate;
+    private string DataLogFilePath;
+    private Dictionary<KeyCode, int> KeysToIndexMap;
+    private Dictionary<KeyCode, int> CurrentActiveKeys;
+    private Dictionary<KeyCode, int> InitActiveKeys;// this is pretty ugly, try to manage this in a better way
+
+    //per algorithm loop variables
+    // private int QueryCounter;
+    private string CurrentQueryText;
+    private int cqIndex;
+    private int CurrentQListIndex;
+    private KeyCode pressedKey;
+    private int TypesToWrite;
+
     private bool DisplayingPopUp;
     private bool DisplayingQuery;
     private bool DelayingQuery;
@@ -110,148 +98,163 @@ public class QuestionManager : MonoBehaviour {
     private float QueryTimer;
     private float DelayTimer;
     private float QueryDelay;
-    private DateTime ExperimentDate;
-    private string DataLogFilePath ;
-
+    
 
     // Use this for initialization
-    void Start ()
-	{
+    void Start()
+    {
         //Save the gameobjects  for fast reference in the loop
-	    PopUpMessagePanel = transform.GetChild(0).gameObject;
-	    QueryPanel = transform.GetChild(1).gameObject;
-	    source = gameObject.GetComponent<AudioSource>();
+        PopUpMessagePanel = transform.GetChild(0).gameObject;
+        QueryPanel = transform.GetChild(1).gameObject;
+        source = gameObject.GetComponent<AudioSource>();
 
         //If children were retrieved succesfully 
-	    if (PopUpMessagePanel && QueryPanel)
-	    {
+        if (PopUpMessagePanel && QueryPanel)
+        {
             //retrieve the question text and initialise the text with the first question
-	        QueryText = QueryPanel.transform.GetChild(3).gameObject.GetComponent<Text>();
-	        QueryText.text = QueriesList[0];
+            QueryText = QueryPanel.transform.GetChild(3).gameObject.GetComponent<Text>();
+           
             //Deactivate the panels
             PopUpMessagePanel.SetActive(false);
-	        QueryPanel.SetActive(false);
+            QueryPanel.SetActive(false);
         }
-	    else
-	    {
-	        Debug.Log("QueryManager could not locate predefined panels");
-	    }
+        else
+        {
+            Debug.Log("QueryManager could not locate predefined panels");
+        }
 
-	    QueryCounter = 0;
-	    QueryDelay = 0;
-	    DisplayingPopUp = DisplayingQuery = DelayingQuery = false;
-        ResetTimers();
-        //Initialize the list of response times
-        RSList = new List<ResponseTimes>();
-	    foreach (var query in QueriesList)
-	    {
-            RSList.Add(new ResponseTimes());
-	    }
+       
+       ResetManager();
 
-        ExperimentDate = DateTime.Now;
-        Debug.Log(ExperimentDate);
-	    DataLogFilePath = Application.streamingAssetsPath + "/TestLogData/UserTestData.json";
+        //Filepath
+        DataLogFilePath = Application.streamingAssetsPath + "/TestLogData/UserTestData.json";
 
-	}
-	// Update is called once per frame
-	void Update ()
-	{
-        //maybe use a hotkey for this or simply do it manually
-	    if (FormatJsonFile)
-	    {
-           
-	        DeleteJsonEndings();
-	        FormatJsonFile = false;
-	    }
+    }
+    // Update is called once per frame
+    void Update()
+    {
+        //Maybe use a hotkey for this or simply do it manually
+        if (FormatJsonFile)
+        {
 
-	    if (ClearJsonFile)
-	    {
-           ResetJSONFile();
-	        ClearJsonFile = false;
-	    }
+            DeleteJsonEndings();
+            FormatJsonFile = false;
+        }
+
+        if (ClearJsonFile)
+        {
+            ResetJSONFile();
+            ClearJsonFile = false;
+        }
+
+        if (ResetTest)
+        {
+            ResetManager();
+            ResetTest = false;
+        }
 
 
-	    //If the question manager is not active then do not check for keyboard input.
+        //If the question manager is not active then do not check for keyboard input.
         //This ensures that keys will not call the QuestionManager's functionality while typing in other situations e.g during chat message
-	    if (!IsActive)
+        if (!IsActive)
             return;
-        
+
         //Nothing displayed to the user
-	    if (!DisplayingPopUp && !DisplayingQuery)
-	    {
-            Debug.Log("Displays are closed");
-            //Tester Input
-	        if (Input.GetKeyDown(KeyCode.M))
-	        {
-	            Debug.Log("Pressed M");
-                //  Debug.Log("Pressed M when nothing displayed");
-                ShowPopUp();
-	            DisplayingPopUp = true;
-	        }
+        if (!DisplayingPopUp && !DisplayingQuery)
+        {
+            
+
+            //Tester Input is one of many possible KeyCodes
+            foreach (KeyCode key in CurrentActiveKeys.Keys)
+            {
+                if (Input.GetKeyDown(key))
+                {
+                    Debug.Log("Pressed " + key);
+
+                    //Load appropriate question for the text and save 
+                    pressedKey = key; 
+                    CurrentQListIndex = KeysToIndexMap[key]; Debug.Log("Questiontype  "+CurrentQListIndex);//which set of questions  
+                    cqIndex = QueryListCounters[CurrentQListIndex]; Debug.Log("Question index  " + cqIndex);// which question index of that previous set
+                    CurrentQueryText = QueriesList[CurrentQListIndex].QueryList[cqIndex]; Debug.Log("Question : " + CurrentQueryText); // the actual text of the question
+
+                    ShowPopUp();
+                    DisplayingPopUp = true;
+                }
+            }
+
+            
+
+            //if (Input.GetKeyDown(KeyCode.M))
+            //{
+            //    Debug.Log("Pressed M");
+            //    //  Debug.Log("Pressed M when nothing displayed");
+            //    ShowPopUp();
+            //    DisplayingPopUp = true;
+            //}
         }
         //PopUp is displaying
         else if (DisplayingPopUp)
-	    {
+        {
             //while the popup is displayed, increment timer
-	        if (!DelayingQuery)
-	        {
-	            PopUpTimer += Time.deltaTime;
-	            if ((Input.GetKeyDown(KeyCode.Y) || Input.GetKeyDown(KeyCode.N)) )
-	            {
-	                ClosePopUp();
-	                
-	                //Tester presses response key according to user's verbal answer
-	                // Y -> Yes
-	                // N -> No
-                    if (Input.GetKeyDown(KeyCode.Y))
-	                {
-	                 //   Debug.Log("Pressed Yes in PopUp");
-                        //Save timer
-                        RSList[QueryCounter].PRS = PopUpTimer;
-                        //Essentially instant query show
-	                    QueryDelay = 0.1f;
-	                }
-	                else if (Input.GetKeyDown(KeyCode.N))
-	                {
-	                  //  Debug.Log("Pressed No in PopUp");
-                        RSList[QueryCounter].PRS = PresetDelayTime;
-                        //Delay showing query by full preset time
-	                    QueryDelay = PresetDelayTime;
-	                }
+            if (!DelayingQuery)
+            {
+                PopUpTimer += Time.deltaTime;
+                if ((Input.GetKeyDown(KeyCode.Y) || Input.GetKeyDown(KeyCode.N)))
+                {
+                    ClosePopUp();
 
-	                DelayingQuery = true;
-	            //    Debug.Log("Delaying started");
+                    //Tester presses response key according to user's verbal answer
+                    // Y -> Yes
+                    // N -> No
+                   
+                    if (Input.GetKeyDown(KeyCode.Y))
+                    {
+                       
+                        //Save PRS timer
+                        RSList[CurrentQListIndex][cqIndex].PRS = PopUpTimer;
+                        //Essentially instant query show
+                        QueryDelay = 0.1f;
+                    }
+                    else if (Input.GetKeyDown(KeyCode.N))
+                    {
+                        //Save PRS timer as preset
+                        RSList[CurrentQListIndex][cqIndex].PRS = PresetDelayTime;
+                        //Delay showing query by full preset time
+                        QueryDelay = PresetDelayTime;
+                    }
+
+                    DelayingQuery = true;
+                   
                 }
             }
-	        else
-	        {
-	            DelayTimer += Time.deltaTime;
-	            if (DelayTimer >= QueryDelay)
-	            {
-	           //     Debug.Log("Delaying ended");
+            else
+            {
+                DelayTimer += Time.deltaTime;
+                if (DelayTimer >= QueryDelay)
+                {
+                    //     Debug.Log("Delaying ended");
 
                     ShowQuery();
-	                DelayingQuery = false;
-	                DisplayingQuery = true;
-	                DisplayingPopUp = false;
+                    DelayingQuery = false;
+                    DisplayingQuery = true;
+                    DisplayingPopUp = false;
                 }
             }
         }
         //Query is displaying
         else if (DisplayingQuery)
-	    {
-	        QueryTimer += Time.deltaTime;
+        {
+            QueryTimer += Time.deltaTime;
 
-	        if (Input.GetKeyDown(KeyCode.K))
-	        {
-	         
+            if (Input.GetKeyDown(CloseMessageHotkey))
+            {
                 //Save QRS
-                RSList[QueryCounter].QRS = QueryTimer;
+                RSList[CurrentQListIndex][cqIndex].QRS = QueryTimer;
                 CloseQuery();
-	            DisplayingQuery = false;
+                DisplayingQuery = false;
                 ResetTimers();
-	            
-	        }
+
+            }
         }
 
     }
@@ -273,27 +276,40 @@ public class QuestionManager : MonoBehaviour {
 
     private void ShowQuery()
     {
+        QueryText.text = CurrentQueryText;
         //For now no animations or anything else
         QueryPanel.SetActive(true);
-     
+
     }
 
     private void CloseQuery()
     {
+
         //If there are still questions in the list, then prepare the next question's text
-        if (QueryCounter < QueriesList.Count-1)
+        if (QueryListCounters[CurrentQListIndex] < RSList[CurrentQListIndex].Count-1)
         {
-            QueryText.text = QueriesList[++QueryCounter];
-          
+            QueryListCounters[CurrentQListIndex]++;
+
         }
-        //If all questions were answered, then save the data on a json and make the QueryManager inactive
+        //If all questions from this set are answered then disable that hotkey for now.
         else
         {
-            WriteDataToFile();
-            IsActive = false;
-            ResetManager();
+            CurrentActiveKeys.Remove(pressedKey);
+
+            //If we answered all the final questions then write to file and exit
+            //This key must correspond to one of the questions hotkeys
+            if (pressedKey == FinalQuestionHotkey)
+            {
+                WriteDataToFile();
+               // ResetManager();
+            }
         }
 
+
+       
+        
+       
+       
         //For now no animations or anything else
         QueryPanel.SetActive(false);
        
@@ -311,16 +327,36 @@ public class QuestionManager : MonoBehaviour {
         data.Date = ExperimentDate.ToString(); //Date and time as string
         data.Maze = MazeID;
 
+        //this many different types of questions
+        Debug.Log(InitActiveKeys.Keys.Count);
+        data.Responses = new JsonRS[InitActiveKeys.Keys.Count];
 
-        data.PRS = new float[RSList.Count];
-        data.QRS = new float[RSList.Count];
-
-        for (int i = 0; i < RSList.Count ; i++)
+        foreach (var key in InitActiveKeys)
         {
-            data.PRS[i] = RSList[i].PRS;
-            data.QRS[i] = RSList[i].QRS;
-            //Debug.Log("PRS : " + rs.PRS + "     QRS : " + rs.QRS);
+            Debug.Log(key);
         }
+
+        int counter = 0;
+        foreach (var key in InitActiveKeys.Keys)
+        {
+            JsonRS temp = new JsonRS();
+            temp.QuestionType = key.ToString();
+            int index = InitActiveKeys[key];
+          //  Debug.Log("Index = "+ index);
+          //  Debug.Log("No of Rss  = " + RSList[index].Count);
+            temp.RSS = new ResponseTimes[RSList[index].Count];
+            for (int j = 0; j < RSList[index].Count; j++)
+            {
+                temp.RSS[j] = new ResponseTimes();
+                temp.RSS[j].PRS= RSList[index][j].PRS;
+                temp.RSS[j].QRS = RSList[index][j].QRS;
+
+            }
+            data.Responses[counter]= temp;
+            counter++;
+        }
+
+       
         string json = JsonUtility.ToJson(data,true);
 
       
@@ -346,8 +382,54 @@ public class QuestionManager : MonoBehaviour {
 
     private void ResetManager()
     {
-        QueryCounter = 0;
+       
+        QueryDelay = 0;
+        cqIndex = 0;
+        CurrentQListIndex = 0;
+        DisplayingPopUp = DisplayingQuery = DelayingQuery = false;
+        ResetTimers();
 
+        //Initialize data structures from scratch
+        KeysToIndexMap = new Dictionary<KeyCode, int>();
+        CurrentActiveKeys = new Dictionary<KeyCode, int>();
+        InitActiveKeys= new Dictionary<KeyCode, int>();
+        QueryListCounters = new int[QueriesList.Count];
+        RSList = new List<List<ResponseTimes>>();
+        for (int i = 0; i < QueriesList.Count; i++)
+        {
+            List<ResponseTimes> tempList = new List<ResponseTimes>();
+            for (int j = 0; j < QueriesList[i].QueryList.Count; j++)
+            {
+                tempList.Add(new ResponseTimes());
+            }
+            RSList.Add(tempList);
+
+            QueryListCounters[i] = 0;
+            KeysToIndexMap.Add(QueriesList[i].Hotkey, i);
+
+            //if the question type is active then enable the hotkey for the test
+            if (QueriesList[i].ActiveForTest)
+            {
+                CurrentActiveKeys.Add(QueriesList[i].Hotkey, i);
+                InitActiveKeys.Add(QueriesList[i].Hotkey, i);
+            }
+        }
+
+        //this is the number of question types we will write to the json file 
+        
+        
+
+        foreach (var key in InitActiveKeys)
+        {
+            Debug.Log(key);
+        }
+        //New Date
+        ExperimentDate = DateTime.Now;
+
+
+        Debug.Log("Query Manager Reset");
+        //Debug log more stuff here maybe
+        Debug.Log(ExperimentDate);
     }
 
     private void DeleteJsonEndings()
