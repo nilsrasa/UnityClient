@@ -77,6 +77,22 @@ public class StreamController : MonoBehaviour
         Viewport.Instance.SetFollowTarget(VRController.Instance.Head);
     }
 
+
+    public void Update()
+    {
+        //manual connect to robot and ascend chair instead of gaze track the button
+        if (!_isConnected)
+        {
+            if (Input.GetKeyDown(KeyCode.A)){
+
+                ConnectToRobot();
+            }
+        }
+
+        
+       
+    }
+
     /// <summary>
     /// Starts animation of ascending the chair into the cockpit to start.
     /// Loops the chair so that the tube feels endless until a connection has been established.

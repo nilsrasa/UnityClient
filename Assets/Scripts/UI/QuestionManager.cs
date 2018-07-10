@@ -76,8 +76,9 @@ public class QuestionManager : MonoBehaviour {
     [Serializable]
     public class JsonData
     {
-        public long Date;
+        public string Date;
         public int UserID;
+        public int Maze;
         public float[] PRS;
         public float[] QRS;
     }
@@ -86,6 +87,9 @@ public class QuestionManager : MonoBehaviour {
     //Inspector vars
     public float PresetDelayTime;
     public int TestSubjectID;
+    public int MazeID;
+    public bool FormatJsonFile = false;
+    public bool ClearJsonFile = false;
     public bool IsActive;
     public List<string> QueriesList;
     
@@ -149,24 +153,38 @@ public class QuestionManager : MonoBehaviour {
 	    DataLogFilePath = Application.streamingAssetsPath + "/TestLogData/UserTestData.json";
 
 	}
-	
 	// Update is called once per frame
 	void Update ()
 	{
-        //If the question manager is not active then do not check for keyboard input.
+        //maybe use a hotkey for this or simply do it manually
+	    if (FormatJsonFile)
+	    {
+           
+	        DeleteJsonEndings();
+	        FormatJsonFile = false;
+	    }
+
+	    if (ClearJsonFile)
+	    {
+           ResetJSONFile();
+	        ClearJsonFile = false;
+	    }
+
+
+	    //If the question manager is not active then do not check for keyboard input.
         //This ensures that keys will not call the QuestionManager's functionality while typing in other situations e.g during chat message
 	    if (!IsActive)
             return;
-
-
         
         //Nothing displayed to the user
 	    if (!DisplayingPopUp && !DisplayingQuery)
 	    {
+            Debug.Log("Displays are closed");
             //Tester Input
 	        if (Input.GetKeyDown(KeyCode.M))
 	        {
-	          //  Debug.Log("Pressed M when nothing displayed");
+	            Debug.Log("Pressed M");
+                //  Debug.Log("Pressed M when nothing displayed");
                 ShowPopUp();
 	            DisplayingPopUp = true;
 	        }
@@ -226,9 +244,8 @@ public class QuestionManager : MonoBehaviour {
 
 	        if (Input.GetKeyDown(KeyCode.K))
 	        {
-	          //  Debug.Log("Pressed K while display query");
+	         
                 //Save QRS
-	           // Debug.Log(QueryCounter);
                 RSList[QueryCounter].QRS = QueryTimer;
                 CloseQuery();
 	            DisplayingQuery = false;
@@ -244,43 +261,43 @@ public class QuestionManager : MonoBehaviour {
         //For now no animations or anything else
         PopUpMessagePanel.SetActive(true);
         source.Play();
-       // Debug.Log("PopUp Active");
+      
     }
 
     private void ClosePopUp()
     {
         //For now no animations or anything else
         PopUpMessagePanel.SetActive(false);
-       // Debug.Log("PopUp Inactive");
+      ;
     }
 
     private void ShowQuery()
     {
         //For now no animations or anything else
         QueryPanel.SetActive(true);
-       // Debug.Log("Query Active");
+     
     }
+
     private void CloseQuery()
     {
         //If there are still questions in the list, then prepare the next question's text
         if (QueryCounter < QueriesList.Count-1)
         {
             QueryText.text = QueriesList[++QueryCounter];
-          //  Debug.Log("Incrementing question counter" + QueryCounter);
+          
         }
         //If all questions were answered, then save the data on a json and make the QueryManager inactive
         else
         {
             WriteDataToFile();
             IsActive = false;
+            ResetManager();
         }
 
         //For now no animations or anything else
         QueryPanel.SetActive(false);
-       // Debug.Log("Query inactive");
+       
     }
-
-  
 
     private void WriteDataToFile()
     {
@@ -288,9 +305,12 @@ public class QuestionManager : MonoBehaviour {
        
         Debug.Log("Writing to file");
 
+        //JSON object creation
         JsonData data = new JsonData();
         data.UserID = TestSubjectID;
-        data.Date = ExperimentDate.ToFileTimeUtc();
+        data.Date = ExperimentDate.ToString(); //Date and time as string
+        data.Maze = MazeID;
+
 
         data.PRS = new float[RSList.Count];
         data.QRS = new float[RSList.Count];
@@ -303,12 +323,54 @@ public class QuestionManager : MonoBehaviour {
         }
         string json = JsonUtility.ToJson(data,true);
 
-        //TODO fix format of json
-        File.AppendAllText(DataLogFilePath,json);
+      
+        //Appending in the write position in the file
+  
+        //read the existing contents of the file
+        string ExistingFile = File.ReadAllText(DataLogFilePath);
+
+        //find the position of the $ which shows the position where we will append the new object
+        int AppendPosition = ExistingFile.IndexOf("$");
+        ExistingFile = ExistingFile.Insert(AppendPosition, json + ", \r\n");
+       
+       //write the new string in the file
+        File.WriteAllText(DataLogFilePath,ExistingFile);
+
+   
     }
 
     private void ResetTimers()
     {
         PopUpTimer = QueryTimer = DelayTimer =  0.0f;
+    }
+
+    private void ResetManager()
+    {
+        QueryCounter = 0;
+
+    }
+
+    private void DeleteJsonEndings()
+    {
+        Debug.Log("Finalising JSON format - Deleting special characters");
+        //read the existing contents of the file
+        string text = File.ReadAllText(DataLogFilePath);
+
+        int dollarIndex = text.IndexOf("$");
+        int lastCommaIndex = text.LastIndexOf(",");
+        
+        text = text.Remove(dollarIndex, 1);
+        text = text.Remove(lastCommaIndex, 1);
+
+        File.WriteAllText(DataLogFilePath, text);
+    }
+
+    private void ResetJSONFile()
+    {
+
+        Debug.Log("JSON file has been reset");
+        string InitText = "{ \r\n \"TestData\":[  \r\n $ \r\n ] \r\n }";
+
+        File.WriteAllText(DataLogFilePath, InitText);
     }
 }
