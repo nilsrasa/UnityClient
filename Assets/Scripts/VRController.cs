@@ -47,7 +47,9 @@ public class VRController : MonoBehaviour
             case StreamController.ControlType.Head:
                 ray = new Ray(Head.position, Head.forward * 1000);
                 break;
+
             case StreamController.ControlType.Eyes_Mouse:
+
             case StreamController.ControlType.Mouse:
                 if (Input.GetMouseButtonDown(1))
                 {
@@ -69,6 +71,7 @@ public class VRController : MonoBehaviour
                     return;
                 }
                 break;
+
             case StreamController.ControlType.Eyes:
                 List<Vector3> eyeDirections = new List<Vector3>();
                 FoveInterfaceBase.EyeRays rays = _foveInterface.GetGazeRays();
@@ -105,9 +108,14 @@ public class VRController : MonoBehaviour
             RobotControlTrackPad robotControl = gazeObject.GetComponent<RobotControlTrackPad>();
             if (robotControl != null)
             {
+                //Debug.Log("Robot control not null");
                 Vector2 controlResult = robotControl.GetControlResult(hit.point);
                 if (robotControl.IsActivated)
+                {
+                  //  Debug.Log("Robotcontrol not activated");
                     RobotInterface.Instance.SendCommand(controlResult);
+                }
+                   
             }
             else
             {

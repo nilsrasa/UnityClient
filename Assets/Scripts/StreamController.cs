@@ -75,7 +75,7 @@ public class StreamController : MonoBehaviour
 
     void Start()
     {
-        Viewport.Instance.SetFollowTarget(VRController.Instance.Head);
+        //Viewport.Instance.SetFollowTarget(VRController.Instance.Head);
     }
 
 

@@ -177,7 +177,7 @@ public class QuestionManager : MonoBehaviour {
         if (!DisplayingPopUp && !DisplayingQuery)
         {
             
-            //Tester Input is one of many possible KeyCodes
+            //Tester pushes one of the hotkeys that will activate
             foreach (KeyCode key in CurrentActiveKeys.Keys)
             {
                 if (Input.GetKeyDown(key))

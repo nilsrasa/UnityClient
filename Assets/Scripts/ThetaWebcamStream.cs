@@ -47,8 +47,8 @@ public class ThetaWebcamStream : MonoBehaviour
 
             //Create soundclip from microphone, by making a small recording of  1 second duration.
             //Name for the microphone is either manually the one below or : Microphone.Devices[0] . However this seems a safer choice in the case that there is another microphone source in that slot.
-           // AudioClip micClip = Microphone.Start("Microphone (RICOH THETA S)", true, 1, 44100);
-            audiosource.clip =  defaUltTestClip;//micClip ? micClip :
+            AudioClip micClip = Microphone.Start("Microphone (RICOH THETA S)", true, 1, 44100);
+            audiosource.clip = micClip ;
             audiosource.loop = true;
             audiosource.Play();
             microphoneEnabled = true;
@@ -67,10 +67,10 @@ public class ThetaWebcamStream : MonoBehaviour
 
         //Debug show the devices to ensure that theta camera is connected
         //
-        //foreach (var variable in WebCamTexture.devices)
-        //{
-        //    Debug.Log(variable.name);
-        //}
+        foreach (var variable in WebCamTexture.devices)
+        {
+            Debug.Log(variable.name);
+        }
     }
 
     public void Update()
