@@ -37,7 +37,7 @@ public class VRController : MonoBehaviour
     void Update()
     {
         if (!_initialized) return;
-        if (Input.GetKeyDown(KeyCode.C))
+        if (Input.GetKeyDown(KeyCode.H))
             CenterHead();
         if (Input.GetKeyDown(KeyCode.Escape))
             Application.Quit();

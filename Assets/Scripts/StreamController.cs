@@ -19,6 +19,7 @@ public class StreamController : MonoBehaviour
     [SerializeField] private ControlType _selectedControlType = ControlType.Head;
 
     [Header("Cameras and Projection")] [SerializeField] private ThetaWebcamStream _cameraStreamUSB;
+    [SerializeField] private QuestionManager _queryManager ;
     [SerializeField] private MeshRenderer _icosphere;
     [SerializeField] private MeshRenderer _icosphereDissolve;
     [SerializeField] private MeshRenderer _projectionSphere;
@@ -249,6 +250,8 @@ public class StreamController : MonoBehaviour
         _currentChairState = ChairState.Accelerating;
         StartCoroutine(AscendChair());
         RobotInterface.Instance.Connect();
+        _queryManager.EnableManager();
+     
         //TODO: When online connection is put in, uncomment this
         //_isLooping = true;
         _isConnected = true;

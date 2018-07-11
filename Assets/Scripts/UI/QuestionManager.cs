@@ -9,10 +9,18 @@ using System.Linq;
 using ProBuilder2.Common;
 using UnityEngine.Serialization;
 
+
+/* Author : Antonios Nestoridis (nestoridis.antonai@gmail.com)
+ * 
+ * QueryManager description:
+ * 
+ * 
+ */
+
+
 public class QuestionManager : MonoBehaviour {
 
-
-    
+    //Wrapper class for the queries provided by the conductor of the test
     [System.Serializable]
     public class ListWrapper
     {
@@ -21,15 +29,12 @@ public class QuestionManager : MonoBehaviour {
         public List<string> QueryList;
     }
 
-
-    //struct to save the pair of response times for each query
+    //Struct to save the pair of response times for each query
     [Serializable]
     public class ResponseTimes
     {
         public float PRS;
         public float QRS;
-       // public float[] RS;
-        //constructor for fast init
         public ResponseTimes()
         {
             PRS = QRS = 0;
@@ -37,6 +42,7 @@ public class QuestionManager : MonoBehaviour {
 
     }
 
+    //Helper class for JSON formating
     [Serializable]
     public struct JsonRS
     {
@@ -44,7 +50,7 @@ public class QuestionManager : MonoBehaviour {
         public ResponseTimes[] RSS;
     }
 
-
+    //Helper class for the data of the JSON file
     [Serializable]
     public class JsonData
     {
@@ -57,24 +63,34 @@ public class QuestionManager : MonoBehaviour {
 
 
     //Inspector variables
-    public float PresetDelayTime;
-    public int TestSubjectID;
-    public int MazeID;
-    public bool FormatJsonFile = false;
-    public bool ClearJsonFile = false;
-    public bool IsActive;
-    public bool ResetTest;
-    public KeyCode CloseMessageHotkey;
-    public KeyCode FinalQuestionHotkey;//This key must correspond to one of the questions hotkeys
-    public List<ListWrapper> QueriesList;
+    [Header("Experiment Parameters")]
+    [SerializeField] private float PresetDelayTime;
+    [SerializeField] private int TestSubjectID;
+    [SerializeField] private int MazeID;
+    [SerializeField] private KeyCode CloseMessageHotkey;
+    [Tooltip("This key must correspond to one of the questions' hotkeys.")] 
+    [SerializeField] private KeyCode FinalQuestionHotkey;
+    [SerializeField] private List<ListWrapper> QueriesList;
+
+    [Header("JSON formatting ")]
+    [Tooltip("Makes the JSON file valid by removing special characters used for appending information.")]
+    [SerializeField] private bool FinalizeJsonFile = false;
+    [Tooltip("Resets the JSON file to an initial preset format.")]
+    [SerializeField] private bool ClearJsonFile = false;
+
+    [Header("Query Manager options ")]
+    [SerializeField] private bool IsActive;
+    [Tooltip("Resets the QueryManager. Changes to active questions are taken into consideration.")]
+    [SerializeField] private bool ResetTest;
+  
    
-    //Private reference vars
+    //Reference variables
     private GameObject PopUpMessagePanel;
     private GameObject QueryPanel;
     private Text QueryText;
     private AudioSource source;
 
-    //private vars
+    //Private data variables
     private List<List<ResponseTimes>> RSList;
     private int[] QueryListCounters; //keeps track of the current query in each of the lists
     private DateTime ExperimentDate;
@@ -83,8 +99,7 @@ public class QuestionManager : MonoBehaviour {
     private Dictionary<KeyCode, int> CurrentActiveKeys;
     private Dictionary<KeyCode, int> InitActiveKeys;// this is pretty ugly, try to manage this in a better way
 
-    //per algorithm loop variables
-    // private int QueryCounter;
+    //Temporary variables for every loop iteration
     private string CurrentQueryText;
     private int cqIndex;
     private int CurrentQListIndex;
@@ -100,7 +115,7 @@ public class QuestionManager : MonoBehaviour {
     private float QueryDelay;
     
 
-    // Use this for initialization
+    // Init
     void Start()
     {
         //Save the gameobjects  for fast reference in the loop
@@ -108,10 +123,10 @@ public class QuestionManager : MonoBehaviour {
         QueryPanel = transform.GetChild(1).gameObject;
         source = gameObject.GetComponent<AudioSource>();
 
-        //If children were retrieved succesfully 
+        //If children gos were retrieved succesfully 
         if (PopUpMessagePanel && QueryPanel)
         {
-            //retrieve the question text and initialise the text with the first question
+            //Retrieve the question text and initialise the text with the first question
             QueryText = QueryPanel.transform.GetChild(3).gameObject.GetComponent<Text>();
            
             //Deactivate the panels
@@ -126,19 +141,18 @@ public class QuestionManager : MonoBehaviour {
        
        ResetManager();
 
-        //Filepath
-        DataLogFilePath = Application.streamingAssetsPath + "/TestLogData/UserTestData.json";
+       //Filepath
+       DataLogFilePath = Application.streamingAssetsPath + "/TestLogData/UserTestData.json";
 
     }
-    // Update is called once per frame
+    // Algorithm logic located here
     void Update()
     {
-        //Maybe use a hotkey for this or simply do it manually
-        if (FormatJsonFile)
+        //General options 
+        if (FinalizeJsonFile)
         {
-
             DeleteJsonEndings();
-            FormatJsonFile = false;
+            FinalizeJsonFile = false;
         }
 
         if (ClearJsonFile)
@@ -159,17 +173,16 @@ public class QuestionManager : MonoBehaviour {
         if (!IsActive)
             return;
 
-        //Nothing displayed to the user
+        //All panels deactivated
         if (!DisplayingPopUp && !DisplayingQuery)
         {
             
-
             //Tester Input is one of many possible KeyCodes
             foreach (KeyCode key in CurrentActiveKeys.Keys)
             {
                 if (Input.GetKeyDown(key))
                 {
-                    Debug.Log("Pressed " + key);
+                  //  Debug.Log("Pressed " + key);
 
                     //Load appropriate question for the text and save 
                     pressedKey = key; 
@@ -182,15 +195,6 @@ public class QuestionManager : MonoBehaviour {
                 }
             }
 
-            
-
-            //if (Input.GetKeyDown(KeyCode.M))
-            //{
-            //    Debug.Log("Pressed M");
-            //    //  Debug.Log("Pressed M when nothing displayed");
-            //    ShowPopUp();
-            //    DisplayingPopUp = true;
-            //}
         }
         //PopUp is displaying
         else if (DisplayingPopUp)
@@ -232,8 +236,6 @@ public class QuestionManager : MonoBehaviour {
                 DelayTimer += Time.deltaTime;
                 if (DelayTimer >= QueryDelay)
                 {
-                    //     Debug.Log("Delaying ended");
-
                     ShowQuery();
                     DelayingQuery = false;
                     DisplayingQuery = true;
@@ -257,6 +259,12 @@ public class QuestionManager : MonoBehaviour {
             }
         }
 
+    }
+
+    public void EnableManager()
+    {
+        Debug.Log("QueryManager enabled");
+        IsActive = true;
     }
 
     private void ShowPopUp()
@@ -327,14 +335,8 @@ public class QuestionManager : MonoBehaviour {
         data.Date = ExperimentDate.ToString(); //Date and time as string
         data.Maze = MazeID;
 
-        //this many different types of questions
-        Debug.Log(InitActiveKeys.Keys.Count);
+        //this is the number of question types we will write to the json file 
         data.Responses = new JsonRS[InitActiveKeys.Keys.Count];
-
-        foreach (var key in InitActiveKeys)
-        {
-            Debug.Log(key);
-        }
 
         int counter = 0;
         foreach (var key in InitActiveKeys.Keys)
@@ -342,8 +344,6 @@ public class QuestionManager : MonoBehaviour {
             JsonRS temp = new JsonRS();
             temp.QuestionType = key.ToString();
             int index = InitActiveKeys[key];
-          //  Debug.Log("Index = "+ index);
-          //  Debug.Log("No of Rss  = " + RSList[index].Count);
             temp.RSS = new ResponseTimes[RSList[index].Count];
             for (int j = 0; j < RSList[index].Count; j++)
             {
@@ -362,14 +362,14 @@ public class QuestionManager : MonoBehaviour {
       
         //Appending in the write position in the file
   
-        //read the existing contents of the file
+        //Read the existing contents of the file
         string ExistingFile = File.ReadAllText(DataLogFilePath);
 
-        //find the position of the $ which shows the position where we will append the new object
+        //Find the position of the $ which shows the position where we will append the new object
         int AppendPosition = ExistingFile.IndexOf("$");
         ExistingFile = ExistingFile.Insert(AppendPosition, json + ", \r\n");
        
-       //write the new string in the file
+        //Write the new string in the file
         File.WriteAllText(DataLogFilePath,ExistingFile);
 
    
@@ -414,15 +414,7 @@ public class QuestionManager : MonoBehaviour {
                 InitActiveKeys.Add(QueriesList[i].Hotkey, i);
             }
         }
-
-        //this is the number of question types we will write to the json file 
-        
-        
-
-        foreach (var key in InitActiveKeys)
-        {
-            Debug.Log(key);
-        }
+      
         //New Date
         ExperimentDate = DateTime.Now;
 
@@ -455,4 +447,6 @@ public class QuestionManager : MonoBehaviour {
 
         File.WriteAllText(DataLogFilePath, InitText);
     }
+
+    
 }
