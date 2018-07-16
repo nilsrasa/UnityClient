@@ -25,6 +25,8 @@ public class RobotInterface : MonoBehaviour
     public static RobotInterface Instance { get; private set; }
     public bool Parked { get; private set; }
 
+    //not quite nice, I have broken the enables/disables in multiple scripts 
+    public bool AllowRobotCommands = true;
     public bool IsConnected { get; private set; }
     public AnimationCurve SpeedCurve;
 
@@ -87,16 +89,17 @@ public class RobotInterface : MonoBehaviour
             return intIntensity.ToString("000");
     }
 
+    //Commands with eye tracking
     private void SendCommandToRobot(Vector2 controlOutput)
     {
-        Debug.Log("Sending command to robot");
+       // Debug.Log("Sending command to robot");
        // Debug.Log("ControlOutput is :" + controlOutput.x +"  " +  controlOutput.y);
 
        // Debug.Log("Sending command to robot");
         Vector2 movement = new Vector2(controlOutput.y, -controlOutput.x);
 
        
-         Debug.Log("Intial Linear speed was :" + movement.x + "Initial Angular speed was : " + movement.y);
+       //  Debug.Log("Intial Linear speed was :" + movement.x + "Initial Angular speed was : " + movement.y);
         //if you are not at the dead zone 
         if (!InsideDeadZone(movement.x, movement.y))
         {
@@ -115,6 +118,33 @@ public class RobotInterface : MonoBehaviour
         }
 
     }
+
+    //Commands with joystick
+    public void DirectCommandRobot(Vector2 JoystickInput)
+    {
+        //Horizontal = rotation = y , Vertical = LinearMove = x
+        Vector2 movement = new Vector2(JoystickInput.y, -JoystickInput.x);
+
+        
+        if (movement.x > MaximumLinearVelocity) movement.x = MaximumLinearVelocity;
+        else if (movement.x < 0) movement.x = -BackwardsVelocity;
+
+
+        if (Mathf.Abs(movement.y) > MaximumAngularVelocity)
+        {
+            if (movement.y < 0) movement.y = -MaximumAngularVelocity;
+            else movement.y = MaximumAngularVelocity;
+
+        }
+     
+       // Debug.Log("Command move:" + movement);
+
+        if (AllowRobotCommands) { 
+            _rosLocomotionDirect.PublishData(movement.x, movement.y);
+            _isStopped = false;
+        }
+    }
+
 
     public void StopRobot()
     {
@@ -139,7 +169,7 @@ public class RobotInterface : MonoBehaviour
         //}
         _timer = 0;
 
-        SendCommandToRobot(controlOutput);
+         if (AllowRobotCommands) SendCommandToRobot(controlOutput);
     }
 
     public void SetParkingBrake(bool isOn)

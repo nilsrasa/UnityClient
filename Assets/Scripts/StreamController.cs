@@ -11,7 +11,8 @@ public class StreamController : MonoBehaviour
         Head,
         Mouse,
         Eyes,
-        Eyes_Mouse
+        Eyes_Mouse,
+        Joystick
     }
 
     public static StreamController Instance { get; private set; }
@@ -64,7 +65,8 @@ public class StreamController : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        if (_selectedControlType == ControlType.Eyes || _selectedControlType == ControlType.Head) _useFOVE = true;
+        //still use the FOVE even with joystick
+        if (_selectedControlType == ControlType.Eyes || _selectedControlType == ControlType.Head || _selectedControlType==ControlType.Joystick) _useFOVE = true;
         ActiveChair = (_useFOVE) ? _chairFOVE : _chair;
         _chair.gameObject.SetActive(!_useFOVE);
         _chairFOVE.gameObject.SetActive(_useFOVE);

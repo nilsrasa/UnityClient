@@ -41,6 +41,8 @@ public class VRController : MonoBehaviour
             CenterHead();
         if (Input.GetKeyDown(KeyCode.Escape))
             Application.Quit();
+
+
         Ray ray = new Ray();
         switch (_selectedControlType)
         {
@@ -90,6 +92,24 @@ public class VRController : MonoBehaviour
 
                 ray = new Ray(Head.transform.position, direction * 1000);
                 break;
+            case StreamController.ControlType.Joystick:
+            {
+                    // Not optimized this should be done once  
+
+                     
+                if (RobotInterface.Instance.IsConnected)
+                {
+                    Vector2 JoyInput = new Vector2(Input.GetAxis("Horizontal"),Input.GetAxis("Vertical"));
+                    // Debug.Log(JoyInput);
+                   
+                    RobotInterface.Instance.DirectCommandRobot(JoyInput);
+                }
+               
+                    //after we send command we want to return
+                return;
+               break;
+            }
+           
         }
 
         //Positioning of the cursor
@@ -122,6 +142,7 @@ public class VRController : MonoBehaviour
                 if (robotControl.IsActivated & !robotControl.IsExternallyDisabled())
                 {
                   //  Debug.Log("Command sent");
+                  
                     RobotInterface.Instance.SendCommand(controlResult);
                 }
                 

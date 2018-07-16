@@ -27429,6 +27429,26 @@ Prefab:
       propertyPath: EyeControlPanel
       value: 
       objectReference: {fileID: 1940821322}
+    - target: {fileID: 114424092080043980, guid: 3924d28bc7586c34d86d41140fe04472,
+        type: 2}
+      propertyPath: QueriesList.Array.data[0].ActiveForTest
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114424092080043980, guid: 3924d28bc7586c34d86d41140fe04472,
+        type: 2}
+      propertyPath: QueriesList.Array.data[1].ActiveForTest
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114424092080043980, guid: 3924d28bc7586c34d86d41140fe04472,
+        type: 2}
+      propertyPath: TestSubjectID
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114424092080043980, guid: 3924d28bc7586c34d86d41140fe04472,
+        type: 2}
+      propertyPath: MazeID
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3924d28bc7586c34d86d41140fe04472, type: 2}
   m_IsPrefabParent: 0
@@ -65447,6 +65467,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fbb35185fe87e54c871cf4a1b49adc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AllowRobotCommands: 1
   SpeedCurve:
     serializedVersion: 2
     m_Curve:
@@ -65488,7 +65509,7 @@ MonoBehaviour:
   MaximumAngularVelocity: 0.8
   BackwardsVelocity: 0.1
   MaxVelocityHorizon: 0.4
-  UpperDeadZoneLimit: -0.7
+  UpperDeadZoneLimit: -0.8
   LowerDeadZoneLimit: -1
   RightDeadZoneLimit: 0.5
   LeftDeadZoneLimit: -0.5
