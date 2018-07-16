@@ -89,6 +89,8 @@ public class QuestionManager : MonoBehaviour {
     private GameObject QueryPanel;
     private Text QueryText;
     private AudioSource source;
+    //not sure here why it cannot be made into a public var
+    [SerializeField] private RobotControlTrackPad EyeControlPanel;
 
     //Private data variables
     private List<List<ResponseTimes>> RSList;
@@ -189,7 +191,7 @@ public class QuestionManager : MonoBehaviour {
                     CurrentQListIndex = KeysToIndexMap[key]; Debug.Log("Questiontype  "+CurrentQListIndex);//which set of questions  
                     cqIndex = QueryListCounters[CurrentQListIndex]; Debug.Log("Question index  " + cqIndex);// which question index of that previous set
                     CurrentQueryText = QueriesList[CurrentQListIndex].QueryList[cqIndex]; Debug.Log("Question : " + CurrentQueryText); // the actual text of the question
-
+                    EyeControlPanel.SetExternallyDisabled(true);
                     ShowPopUp();
                     DisplayingPopUp = true;
                 }
@@ -255,7 +257,7 @@ public class QuestionManager : MonoBehaviour {
                 CloseQuery();
                 DisplayingQuery = false;
                 ResetTimers();
-
+                EyeControlPanel.SetExternallyDisabled(false);
             }
         }
 

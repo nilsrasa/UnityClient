@@ -18,6 +18,8 @@ public class GazeObject : MonoBehaviour
     protected BoxCollider _collider;
     protected RectTransform _rect;
     protected bool _isEnabled = true;
+    //Blocks the mechanics of the gazeobject 
+    protected bool ExternallyDisabled = false;
 
     public delegate void OnActivated(GazeObject button);
 
@@ -32,6 +34,9 @@ public class GazeObject : MonoBehaviour
     public event OnUnhovered Unhovered;
     public bool Gazed { get; protected set; }
     public bool IsActivated { get; protected set; }
+
+
+
 
     protected virtual void Awake()
     {
@@ -49,13 +54,15 @@ public class GazeObject : MonoBehaviour
     {
         if (!Gazed || _locked || IsActivated && !_useToggle) return;
 
-        if (_dwellTimer < _dwellTime)
-        {
-            _dwellTimer += Time.deltaTime;
-        }
-        else if (_dwellTimer >= _dwellTime)
-        {
-            Activate();
+        if (!ExternallyDisabled) { 
+            if (_dwellTimer < _dwellTime)
+            {
+                _dwellTimer += Time.deltaTime;
+            }
+            else if (_dwellTimer >= _dwellTime)
+            {
+                Activate();
+            }
         }
     }
 
@@ -110,5 +117,20 @@ public class GazeObject : MonoBehaviour
     public virtual void SetState(bool isOn)
     {
         IsActivated = isOn;
+    }
+
+    public virtual void SetExternallyDisabled(bool isExtDisabled)
+    {
+        ExternallyDisabled = isExtDisabled;
+        //if the gazeobject was just externally disabled call unhover
+        if (ExternallyDisabled == true)
+        {
+            OnUnhover();
+        }
+    }
+
+    public bool IsExternallyDisabled()
+    {
+        return ExternallyDisabled;
     }
 }

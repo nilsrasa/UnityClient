@@ -26,6 +26,7 @@ class RobotControlTrackPad : GazeObject
     [SerializeField] private float _grazePeriodTimer = 0;
     [SerializeField] private float _lowTimerPeriodTimer = 1.5f;
 
+    
     private string _orgText;
     private float _orgDwellTime;
     private float _grazeTimer = 10;
@@ -42,38 +43,40 @@ class RobotControlTrackPad : GazeObject
     protected override void Update()
     {
         base.Update();
-
-        if (!IsActivated && Gazed)
-        {
-            _text.text = (_dwellTime - _dwellTimer).ToString("0.0");
-        }
-        else if (!Gazed)
-        {
-            _text.text = _orgText;
-            _grazeTimer += Time.deltaTime;
-            if (_grazeTimer < _grazePeriod)
+        if (!ExternallyDisabled)
+        { 
+            if (!IsActivated && Gazed)
             {
-                _dwellTime = _grazePeriodTimer;
-                _border.color = _borderGrazePeriodColor;
+                _text.text = (_dwellTime - _dwellTimer).ToString("0.0");
             }
-            else if (_grazeTimer < _lowTimerPeriod)
+            else if (!Gazed)
             {
-                _dwellTime = _lowTimerPeriodTimer;
-                _border.color = _borderLowPeriodColor;
+                _text.text = _orgText;
+                _grazeTimer += Time.deltaTime;
+                if (_grazeTimer < _grazePeriod)
+                {
+                    _dwellTime = _grazePeriodTimer;
+                    _border.color = _borderGrazePeriodColor;
+                }
+                else if (_grazeTimer < _lowTimerPeriod)
+                {
+                    _dwellTime = _lowTimerPeriodTimer;
+                    _border.color = _borderLowPeriodColor;
+                }
+                else
+                {
+                    _dwellTime = _orgDwellTime;
+                    _border.color = _borderColor;
+                }
             }
-            else
+            else if (IsActivated)
             {
-                _dwellTime = _orgDwellTime;
-                _border.color = _borderColor;
+                _text.text = "";
+                _border.color = _borderActiveColor;
             }
+            if (!_isEnabled)
+                _text.text = "";
         }
-        else if (IsActivated)
-        {
-            _text.text = "";
-            _border.color = _borderActiveColor;
-        }
-        if (!_isEnabled)
-            _text.text = "";
     }
 
     protected override void Activate()
@@ -93,6 +96,7 @@ class RobotControlTrackPad : GazeObject
             _grazeTimer = 0;
         base.OnUnhover();
         _border.color = _borderColor;
+        RobotInterface.Instance.StopRobot();
     }
 
     /// <summary>
@@ -120,5 +124,14 @@ class RobotControlTrackPad : GazeObject
     public void SetOverlayVisibility(bool isVisible)
     {
         _overlayContainer.gameObject.SetActive(isVisible);
+    }
+
+    public override void SetExternallyDisabled(bool isExtDisabled)
+    {
+        //call base unhover + the extra functionality for this unhover if you disable
+        base.SetExternallyDisabled(isExtDisabled);
+
+        if (isExtDisabled == true)
+            this.OnUnhover();
     }
 }

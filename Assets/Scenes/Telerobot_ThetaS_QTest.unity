@@ -7476,7 +7476,7 @@ MeshRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 0
-  m_SelectedEditorRenderState: 0
+  m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -27424,6 +27424,11 @@ Prefab:
       propertyPath: m_Volume
       value: 0.3
       objectReference: {fileID: 0}
+    - target: {fileID: 114424092080043980, guid: 3924d28bc7586c34d86d41140fe04472,
+        type: 2}
+      propertyPath: EyeControlPanel
+      value: 
+      objectReference: {fileID: 1940821322}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3924d28bc7586c34d86d41140fe04472, type: 2}
   m_IsPrefabParent: 0
@@ -65477,14 +65482,16 @@ MonoBehaviour:
     m_RotationOrder: 0
   _motorMaxSpeed: 255
   _motorMinSpeed: 60
-  _commandTimer: 20
-  MaximumVelocity: 0.2
+  _commandTimer: 2
+  MaximumLinearVelocity: 0.4
+  MinimumLinearVelocity: 0.05
+  MaximumAngularVelocity: 0.8
   BackwardsVelocity: 0.1
-  MaxVelocityHorizon: 0.1
-  UpperDeadZoneLimit: -0.6
-  LowerDeadZoneLimit: -0.8
-  RightDeadZoneLimit: 1
-  LeftDeadZoneLimit: -1
+  MaxVelocityHorizon: 0.4
+  UpperDeadZoneLimit: -0.7
+  LowerDeadZoneLimit: -1
+  RightDeadZoneLimit: 0.5
+  LeftDeadZoneLimit: -0.5
   LeftBackZoneLimit: -1
   UpperBackZoneLimit: -0.8
 --- !u!114 &1426035242
@@ -99480,7 +99487,7 @@ GameObject:
   - component: {fileID: 1940821321}
   m_Layer: 0
   m_Name: RobotControlTrackPad
-  m_TagString: Untagged
+  m_TagString: EyeControlPanel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -121306,7 +121313,7 @@ MonoBehaviour:
   _position: 0
   _isLocalPosition: 0
   _positionalOffset: {x: 0, y: 0, z: 0}
-  _rotation: 1
+  _rotation: 0
   _isLocalRotation: 0
   _rotationalOffset: {x: 0, y: 0, z: 0}
 --- !u!92 &2111245064
@@ -121341,7 +121348,7 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 1000
-  field of view: 60
+  field of view: 80
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -121365,7 +121372,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2111245062}
-  m_LocalRotation: {x: 0.17364816, y: 0, z: 0, w: 0.9848078}
+  m_LocalRotation: {x: 0.2588191, y: 0, z: 0, w: 0.9659258}
   m_LocalPosition: {x: -10, y: 0, z: 30}
   m_LocalScale: {x: 3.5, y: 3.5, z: 3.5}
   m_Children:
@@ -121373,7 +121380,7 @@ Transform:
   - {fileID: 126657692}
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 20, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 30, y: 0, z: 0}
 --- !u!1 &2111936875
 GameObject:
   m_ObjectHideFlags: 0

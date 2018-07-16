@@ -89,27 +89,26 @@ public class RobotInterface : MonoBehaviour
 
     private void SendCommandToRobot(Vector2 controlOutput)
     {
-        //Debug.Log("Sending command to robot");
+        Debug.Log("Sending command to robot");
        // Debug.Log("ControlOutput is :" + controlOutput.x +"  " +  controlOutput.y);
 
        // Debug.Log("Sending command to robot");
         Vector2 movement = new Vector2(controlOutput.y, -controlOutput.x);
 
        
-         //Debug.Log("Intial Linear speed was :" + movement.x + "Initial Angular speed was : " + movement.y);
+         Debug.Log("Intial Linear speed was :" + movement.x + "Initial Angular speed was : " + movement.y);
         //if you are not at the dead zone 
         if (!InsideDeadZone(movement.x, movement.y))
         {
             //normalize speed and send data
             movement = new Vector2(FilterLinearVelocity(movement.x), FilterAngularVelocity(movement.y));
-            Debug.Log("Normalized Linear speed was :" + movement.x + "Normalized Initial Angular speed was : " +
-             movement.y);
+           // Debug.Log("Normalized Linear speed was :" + movement.x + "Normalized Initial Angular speed was : " +  movement.y);
             _rosLocomotionDirect.PublishData(movement.x, movement.y);
             _isStopped = false;
         }
         else
         {
-            Debug.Log("Inside Dead Zone");
+          //  Debug.Log("Inside Dead Zone");
            // Debug.Log("Linear speed was :" + 0 + "Angular speed was : " + 0);
             _rosLocomotionDirect.PublishData(0, 0);
             _isStopped = false;

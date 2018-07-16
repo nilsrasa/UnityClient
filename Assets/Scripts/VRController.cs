@@ -105,21 +105,32 @@ public class VRController : MonoBehaviour
                 ResetHoveredObject();
                 return;
             }
+            //else
+            //{
+            //    Debug.Log(gazeObject.tag);
+
+            //}
+          
+            //Not sure why this is not null when you gaze at gameobjects which do not have the robotControltrackpad on them but apparently, every gazeobject sends commands\
+
+            // For this reason we also check if the tag of the gazeobject is the correct one 
             RobotControlTrackPad robotControl = gazeObject.GetComponent<RobotControlTrackPad>();
-            if (robotControl != null)
+            if (robotControl != null && gazeObject.CompareTag("EyeControlPanel"))
             {
                 //Debug.Log("Robot control not null");
                 Vector2 controlResult = robotControl.GetControlResult(hit.point);
-                if (robotControl.IsActivated)
+                if (robotControl.IsActivated & !robotControl.IsExternallyDisabled())
                 {
-                  //  Debug.Log("Robotcontrol not activated");
+                  //  Debug.Log("Command sent");
                     RobotInterface.Instance.SendCommand(controlResult);
                 }
-                   
+                
+
             }
             else
             {
-                RobotInterface.Instance.SendCommand(Vector2.zero);
+                //TODO : SendStopCommandToRobot instead of a zero vector. The zero vector is filtered and still adds movemenet to the robot
+               // RobotInterface.Instance.SendCommand(Vector2.zero);
             }
             if (gazeObject == _hoveredGazeObject) return;
             if (_hoveredGazeObject != null) _hoveredGazeObject.OnUnhover();
