@@ -32,7 +32,9 @@ public class RobotInterface : MonoBehaviour
     [SerializeField] private int _motorMinSpeed = 60;
     [SerializeField] private float _commandTimer = 50;
 
-    [SerializeField] private float MaximumVelocity = 0.4f;
+    [SerializeField] private float MaximumLinearVelocity = 0.4f;
+    [SerializeField] private float MinimumLinearVelocity = 0.05f;
+    [SerializeField] private float MaximumAngularVelocity= 0.8f;
     [SerializeField] private float BackwardsVelocity = 0.1f;
 
     [SerializeField] private float MaxVelocityHorizon = 0;
@@ -66,7 +68,7 @@ public class RobotInterface : MonoBehaviour
         _telerobotConfigFile = JsonUtility.FromJson<Telerobot_ThetaFile>(robotFileJson);
 
         InitRange = new Vector2(UpperDeadZoneLimit , MaxVelocityHorizon);
-        NewRange = new Vector2(0,MaximumVelocity);
+        NewRange = new Vector2(0,MaximumLinearVelocity);
        // Debug.log(_telerobotConfigFile);
     }
 
@@ -94,21 +96,21 @@ public class RobotInterface : MonoBehaviour
         Vector2 movement = new Vector2(controlOutput.y, -controlOutput.x);
 
        
-         Debug.Log("Intial Linear speed was :" + movement.x + "Initial Angular speed was : " + movement.y);
+         //Debug.Log("Intial Linear speed was :" + movement.x + "Initial Angular speed was : " + movement.y);
         //if you are not at the dead zone 
         if (!InsideDeadZone(movement.x, movement.y))
         {
             //normalize speed and send data
-            movement = new Vector2(FilterLinearVelocity(movement.x), movement.y);
-            //Debug.Log("Normalized Linear speed was :" + movement.x + "Normalized Initial Angular speed was : " +
-            // movement.y);
+            movement = new Vector2(FilterLinearVelocity(movement.x), FilterAngularVelocity(movement.y));
+            Debug.Log("Normalized Linear speed was :" + movement.x + "Normalized Initial Angular speed was : " +
+             movement.y);
             _rosLocomotionDirect.PublishData(movement.x, movement.y);
             _isStopped = false;
         }
         else
         {
             Debug.Log("Inside Dead Zone");
-            Debug.Log("Linear speed was :" + 0 + "Angular speed was : " + 0);
+           // Debug.Log("Linear speed was :" + 0 + "Angular speed was : " + 0);
             _rosLocomotionDirect.PublishData(0, 0);
             _isStopped = false;
         }
@@ -131,11 +133,11 @@ public class RobotInterface : MonoBehaviour
             return;
         }
        
-        if (_timer < _commandTimer / 1000f)
-        {
-            _timer += Time.deltaTime;
-            return;
-        }
+        //if (_timer < _commandTimer / 1000f)
+        //{
+        //    _timer += Time.deltaTime;
+        //    return;
+        //}
         _timer = 0;
 
         SendCommandToRobot(controlOutput);
@@ -192,31 +194,54 @@ public class RobotInterface : MonoBehaviour
         //From this point and upwards, you move with maximum velocity
         if (InitValue >= MaxVelocityHorizon)
         {
-            Debug.Log("Maximum Velocity");
-            return MaximumVelocity;
+           // Debug.Log("Maximum Velocity");
+            return MaximumLinearVelocity;
         }
         //between that point and until the dead zone move with adjusted speed
         else if (InitValue < MaxVelocityHorizon && InitValue > UpperDeadZoneLimit)
         {
             float vel = NormalizeValues(InitValue);
-            Debug.Log("Normalized Velocity : " + vel );
+            //Debug.Log("Normalized Velocity )");
+
+            //Return minimum velocity instead of something too close to 0
+            if (vel < MinimumLinearVelocity)
+            {
+                return MinimumLinearVelocity;
+            }
+
             return vel;
         }
-        else if (InitValue < UpperBackZoneLimit && InitValue > -1)
+        else if (InitValue < LowerDeadZoneLimit)
         {
-            Debug.Log("Normalized Velocity : " );
-            return BackwardsVelocity;
+            return 0;
         }
+        //else if (InitValue < UpperBackZoneLimit && InitValue > -1)
+        //{
+        //    Debug.Log("BackwardsZone  " );
+        //    return -BackwardsVelocity;
+        //}
 
 
         return 0;
     }
 
+    public float FilterAngularVelocity(float InitValue)
+    {
+        if (Mathf.Abs(InitValue) > MaximumAngularVelocity)
+        {
+            return InitValue > 0 ? MaximumAngularVelocity : -MaximumAngularVelocity; 
+           
+        }
+
+        //TODO normalize here a bit more?
+        return InitValue;
+    }
+
     //returns true if we are in the bounding box of the dead zone
     private bool InsideDeadZone(float x, float y)
     {
-        if (x > LeftDeadZoneLimit && x <= RightDeadZoneLimit
-            && y > LowerDeadZoneLimit && y < UpperDeadZoneLimit)
+        if (y > LeftDeadZoneLimit && y <= RightDeadZoneLimit
+            && x > LowerDeadZoneLimit && x < UpperDeadZoneLimit)
         {
             return true;
         }
