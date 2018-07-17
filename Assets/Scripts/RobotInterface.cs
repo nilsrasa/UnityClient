@@ -40,10 +40,10 @@ public class RobotInterface : MonoBehaviour
     [SerializeField] private float BackwardsVelocity = 0.1f;
 
     [SerializeField] private float MaxVelocityHorizon = 0;
-    [SerializeField] private float UpperDeadZoneLimit = -0.5f;
-    [SerializeField] private float LowerDeadZoneLimit = -0.7f;
-    [SerializeField] private float RightDeadZoneLimit = 0.2f;
-    [SerializeField] private float LeftDeadZoneLimit = -0.2f;
+    [SerializeField] public float UpperDeadZoneLimit = -0.5f;
+    [SerializeField] public float LowerDeadZoneLimit = -0.7f;
+    [SerializeField] public float RightDeadZoneLimit = 0.2f;
+    [SerializeField] public float LeftDeadZoneLimit = -0.2f;
 
     [SerializeField] private float LeftBackZoneLimit = -0.2f;
     [SerializeField] private float UpperBackZoneLimit = -0.8f;
@@ -57,6 +57,8 @@ public class RobotInterface : MonoBehaviour
     private ROSLocomotionDirect _rosLocomotionDirect;
     private ROSBridgeWebSocketConnection _rosBridge;
     private Telerobot_ThetaFile _telerobotConfigFile;
+
+   
 
     void Awake()
     {
@@ -74,7 +76,8 @@ public class RobotInterface : MonoBehaviour
        // Debug.log(_telerobotConfigFile);
     }
 
-    void OnApplicationQuit()
+    //changed this from OnApplicationQuit
+    public void Quit()
     {
         if (_rosBridge != null)
             _rosBridge.Disconnect();
@@ -98,16 +101,21 @@ public class RobotInterface : MonoBehaviour
        // Debug.Log("Sending command to robot");
         Vector2 movement = new Vector2(controlOutput.y, -controlOutput.x);
 
-       
-       //  Debug.Log("Intial Linear speed was :" + movement.x + "Initial Angular speed was : " + movement.y);
+
+
+      //  Debug.Log("Intial Linear speed was :" + movement.x + "Initial Angular speed was : " + movement.y);
         //if you are not at the dead zone 
         if (!InsideDeadZone(movement.x, movement.y))
         {
             //normalize speed and send data
             movement = new Vector2(FilterLinearVelocity(movement.x), FilterAngularVelocity(movement.y));
            // Debug.Log("Normalized Linear speed was :" + movement.x + "Normalized Initial Angular speed was : " +  movement.y);
+
+
+           
             _rosLocomotionDirect.PublishData(movement.x, movement.y);
             _isStopped = false;
+            
         }
         else
         {

@@ -41,7 +41,7 @@ public class VRController : MonoBehaviour
             CenterHead();
         if (Input.GetKeyDown(KeyCode.Escape))
             Application.Quit();
-
+        
 
         Ray ray = new Ray();
         switch (_selectedControlType)

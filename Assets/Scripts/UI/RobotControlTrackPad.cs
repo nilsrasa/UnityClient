@@ -25,11 +25,19 @@ class RobotControlTrackPad : GazeObject
     [SerializeField] private float _lowTimerPeriod = 5f;
     [SerializeField] private float _grazePeriodTimer = 0;
     [SerializeField] private float _lowTimerPeriodTimer = 1.5f;
+    [SerializeField] private float MaxUnhoverTimer = 1.0f;
+
+    public bool DisconnectFromRobot = false;
 
     
     private string _orgText;
     private float _orgDwellTime;
     private float _grazeTimer = 10;
+
+    //change names for these
+    private float unhoveredTimer = 0;
+    private bool ExitingDriveMode = false;
+
 
     protected override void Awake()
     {
@@ -42,6 +50,25 @@ class RobotControlTrackPad : GazeObject
 
     protected override void Update()
     {
+
+        if (DisconnectFromRobot) {  RobotInterface.Instance.Quit();
+            DisconnectFromRobot = false;
+        }
+
+        //if the user quickly unhovered start 
+        if (ExitingDriveMode)
+        {
+            unhoveredTimer += Time.deltaTime;
+        }
+        //call functionality of unhover if the user stared out of the panel for longer than max unhover time
+        if (unhoveredTimer > MaxUnhoverTimer)
+        {
+            base.OnUnhover();
+            _border.color = _borderColor;
+            RobotInterface.Instance.StopRobot();
+        }
+
+
         base.Update();
         if (!ExternallyDisabled)
         { 
@@ -88,15 +115,21 @@ class RobotControlTrackPad : GazeObject
     public override void OnHover()
     {
         base.OnHover();
+
+        //reset the exiting drive mode period
+        ExitingDriveMode = false;
+        unhoveredTimer = 0.0f;
     }
 
     public override void OnUnhover()
     {
         if (IsActivated)
             _grazeTimer = 0;
-        base.OnUnhover();
-        _border.color = _borderColor;
-        RobotInterface.Instance.StopRobot();
+
+        //instead of instantly calling unhover, start a timer
+        ExitingDriveMode = true;
+        
+        
     }
 
     /// <summary>
