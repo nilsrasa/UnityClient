@@ -17,7 +17,7 @@ public class StreamController : MonoBehaviour
 
     public static StreamController Instance { get; private set; }
 
-    [SerializeField] private ControlType _selectedControlType = ControlType.Head;
+    [SerializeField] public ControlType _selectedControlType = ControlType.Head;
 
     [Header("Cameras and Projection")] [SerializeField] private ThetaWebcamStream _cameraStreamUSB;
     [SerializeField] private QuestionManager _queryManager ;

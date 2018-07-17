@@ -41,7 +41,7 @@ public class ROSLocomotionDirect : ROSAgent
     public void PublishData(float linear, float angular)
     {
         if (_publisher == null) return;
-        Debug.Log("Sent message");
+        
         TwistMsg twist = new TwistMsg(new Vector3Msg(linear, 0, 0),
             new Vector3Msg(0, 0, angular));
         _publisher.PublishData(twist);

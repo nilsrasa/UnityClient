@@ -188,15 +188,21 @@ public class QuestionManager : MonoBehaviour {
 
                     //Load appropriate question for the text and save 
                     pressedKey = key; 
-                    CurrentQListIndex = KeysToIndexMap[key]; Debug.Log("Questiontype  "+CurrentQListIndex);//which set of questions  
+                   CurrentQListIndex = KeysToIndexMap[key]; Debug.Log("Questiontype  "+CurrentQListIndex);//which set of questions  
                     cqIndex = QueryListCounters[CurrentQListIndex]; Debug.Log("Question index  " + cqIndex);// which question index of that previous set
                     CurrentQueryText = QueriesList[CurrentQListIndex].QueryList[cqIndex]; Debug.Log("Question : " + CurrentQueryText); // the actual text of the question
 
                     //Instead of checking which type of locomotion is on  just disable both for now
 
-                    EyeControlPanel.SetExternallyDisabled(true);
-                    RobotInterface.Instance.AllowRobotCommands = false;
-
+                    if (StreamController.Instance._selectedControlType == StreamController.ControlType.Eyes)
+                    {
+                        EyeControlPanel.SetExternallyDisabled(true);
+                    }
+                    else if (StreamController.Instance._selectedControlType == StreamController.ControlType.Joystick)
+                    {
+                        RobotInterface.Instance.EnableRobotCommands(false);
+                    }
+                    
                     ShowPopUp();
                     DisplayingPopUp = true;
                 }
@@ -263,8 +269,14 @@ public class QuestionManager : MonoBehaviour {
                 DisplayingQuery = false;
                 ResetTimers();
 
-                EyeControlPanel.SetExternallyDisabled(false);
-                RobotInterface.Instance.AllowRobotCommands = true;
+                if (StreamController.Instance._selectedControlType == StreamController.ControlType.Eyes)
+                {
+                    EyeControlPanel.SetExternallyDisabled(false);
+                }
+                else if (StreamController.Instance._selectedControlType == StreamController.ControlType.Joystick)
+                {
+                    RobotInterface.Instance.EnableRobotCommands(true) ;
+                }
             }
         }
 

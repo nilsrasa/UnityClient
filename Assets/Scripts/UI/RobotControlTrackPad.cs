@@ -74,6 +74,7 @@ class RobotControlTrackPad : GazeObject
         { 
             if (!IsActivated && Gazed)
             {
+                
                 _text.text = (_dwellTime - _dwellTimer).ToString("0.0");
             }
             else if (!Gazed)
@@ -125,7 +126,8 @@ class RobotControlTrackPad : GazeObject
     {
         if (IsActivated)
             _grazeTimer = 0;
-
+        Gazed = false;
+        _dwellTimer = 0;
         //instead of instantly calling unhover, start a timer
         ExitingDriveMode = true;
         

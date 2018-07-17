@@ -26,7 +26,7 @@ public class RobotInterface : MonoBehaviour
     public bool Parked { get; private set; }
 
     //not quite nice, I have broken the enables/disables in multiple scripts 
-    public bool AllowRobotCommands = true;
+    private bool AllowRobotCommands = true;
     public bool IsConnected { get; private set; }
     public AnimationCurve SpeedCurve;
 
@@ -145,7 +145,7 @@ public class RobotInterface : MonoBehaviour
 
         }
      
-       // Debug.Log("Command move:" + movement);
+        //Debug.Log("Command move:" + movement);
 
         if (AllowRobotCommands) { 
             _rosLocomotionDirect.PublishData(movement.x, movement.y);
@@ -296,5 +296,11 @@ public class RobotInterface : MonoBehaviour
             return true;
 
         return false;
+    }
+
+    public void EnableRobotCommands(bool enable)
+    {
+        AllowRobotCommands = enable;
+        StopRobot();
     }
 }
