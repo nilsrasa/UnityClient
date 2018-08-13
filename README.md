@@ -20,6 +20,22 @@ Unity is scene based, which means each project is placed in a separate scene.
 * **Telerobot_ThetaS_Normal:** Direct control of robot through VR interface using Theta S 360 camera for navigation. (Requires camera)
 * **Telerobot_ThetaS_Limited:** Same as above but with a limited interface for use with only eyes. (Either on a screen or with a VR HMD)
 
+### Guang Tao experiments July 2018
+
+The goal was to test the differences between two different input methods by the user, direct gazecontrol and joystick.
+For both types the user was connected to the Virtual environment through the FOVE  headset and was asked to drive a physical robot through different sets of mazes in the physical world,
+answering pop up questions in the process. The environment could be perceived through direct feedback (image and sound) from the Ricoh Theta 360 camera attached to the robot. 
+
+In Unity, the scene that contains this specific simulation is the "Telerobot_ThetaS_QTest" located in the scenes folder of the project directory. 
+
+The simulation assumes that setup for to the physical robot and the 360 camera has been established beforehand, to enable the Unity interface to connect to both and receive/send information correctly.
+
+The test conductor may change the input method for the test through a drop down menu, located in the CockpitStructure gameobject and on the Stream Controller script component attached to it.
+The name of the menu in the inspector is  called "selected control type".
+
+The QueryManager gameobject (and script) contains all the settings for the pop up question interface , which the test conductor may change according to their needs.
+It also contains settings for parameterising the user trial (Test user ID , maze ID etc) which will be serialised to a JSON file once the experiment is done.
+
 ## Builds
 A list of available builds can be found [here](https://drive.google.com/drive/folders/1ta0PJkqub2rFYe6Vo0hOmulnSYLumLxf?usp=sharing).
 This google drive folder contains the following builds:

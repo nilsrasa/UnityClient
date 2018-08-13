@@ -1,4 +1,4 @@
 {
-	"RosBridgeUri": "raspi-ros00",
+	"RosBridgeUri": "pi-desktop",
 	"RosBridgePort": 9090
 }

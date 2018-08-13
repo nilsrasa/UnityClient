@@ -25,10 +25,19 @@ class RobotControlTrackPad : GazeObject
     [SerializeField] private float _lowTimerPeriod = 5f;
     [SerializeField] private float _grazePeriodTimer = 0;
     [SerializeField] private float _lowTimerPeriodTimer = 1.5f;
+    [SerializeField] private float MaxUnhoverTimer = 1.0f;
 
+    public bool DisconnectFromRobot = false;
+
+    
     private string _orgText;
     private float _orgDwellTime;
     private float _grazeTimer = 10;
+
+    //change names for these
+    private float unhoveredTimer = 0;
+    private bool ExitingDriveMode = false;
+
 
     protected override void Awake()
     {
@@ -41,39 +50,61 @@ class RobotControlTrackPad : GazeObject
 
     protected override void Update()
     {
-        base.Update();
 
-        if (!IsActivated && Gazed)
-        {
-            _text.text = (_dwellTime - _dwellTimer).ToString("0.0");
+        if (DisconnectFromRobot) {  RobotInterface.Instance.Quit();
+            DisconnectFromRobot = false;
         }
-        else if (!Gazed)
+
+        //if the user quickly unhovered start 
+        if (ExitingDriveMode)
         {
-            _text.text = _orgText;
-            _grazeTimer += Time.deltaTime;
-            if (_grazeTimer < _grazePeriod)
-            {
-                _dwellTime = _grazePeriodTimer;
-                _border.color = _borderGrazePeriodColor;
-            }
-            else if (_grazeTimer < _lowTimerPeriod)
-            {
-                _dwellTime = _lowTimerPeriodTimer;
-                _border.color = _borderLowPeriodColor;
-            }
-            else
-            {
-                _dwellTime = _orgDwellTime;
-                _border.color = _borderColor;
-            }
+            unhoveredTimer += Time.deltaTime;
         }
-        else if (IsActivated)
+        //call functionality of unhover if the user stared out of the panel for longer than max unhover time
+        if (unhoveredTimer > MaxUnhoverTimer)
         {
-            _text.text = "";
-            _border.color = _borderActiveColor;
+            base.OnUnhover();
+            _border.color = _borderColor;
+            RobotInterface.Instance.StopRobot();
         }
-        if (!_isEnabled)
-            _text.text = "";
+
+
+        base.Update();
+        if (!ExternallyDisabled)
+        { 
+            if (!IsActivated && Gazed)
+            {
+                
+                _text.text = (_dwellTime - _dwellTimer).ToString("0.0");
+            }
+            else if (!Gazed)
+            {
+                _text.text = _orgText;
+                _grazeTimer += Time.deltaTime;
+                if (_grazeTimer < _grazePeriod)
+                {
+                    _dwellTime = _grazePeriodTimer;
+                    _border.color = _borderGrazePeriodColor;
+                }
+                else if (_grazeTimer < _lowTimerPeriod)
+                {
+                    _dwellTime = _lowTimerPeriodTimer;
+                    _border.color = _borderLowPeriodColor;
+                }
+                else
+                {
+                    _dwellTime = _orgDwellTime;
+                    _border.color = _borderColor;
+                }
+            }
+            else if (IsActivated)
+            {
+                _text.text = "";
+                _border.color = _borderActiveColor;
+            }
+            if (!_isEnabled)
+                _text.text = "";
+        }
     }
 
     protected override void Activate()
@@ -85,14 +116,22 @@ class RobotControlTrackPad : GazeObject
     public override void OnHover()
     {
         base.OnHover();
+
+        //reset the exiting drive mode period
+        ExitingDriveMode = false;
+        unhoveredTimer = 0.0f;
     }
 
     public override void OnUnhover()
     {
         if (IsActivated)
             _grazeTimer = 0;
-        base.OnUnhover();
-        _border.color = _borderColor;
+        Gazed = false;
+        _dwellTimer = 0;
+        //instead of instantly calling unhover, start a timer
+        ExitingDriveMode = true;
+        
+        
     }
 
     /// <summary>
@@ -120,5 +159,14 @@ class RobotControlTrackPad : GazeObject
     public void SetOverlayVisibility(bool isVisible)
     {
         _overlayContainer.gameObject.SetActive(isVisible);
+    }
+
+    public override void SetExternallyDisabled(bool isExtDisabled)
+    {
+        //call base unhover + the extra functionality for this unhover if you disable
+        base.SetExternallyDisabled(isExtDisabled);
+
+        if (isExtDisabled == true)
+            this.OnUnhover();
     }
 }

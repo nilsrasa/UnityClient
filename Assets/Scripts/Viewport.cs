@@ -12,13 +12,13 @@ public class Viewport : MonoBehaviour
     [SerializeField] private float _animationSpeed = 2;
     [SerializeField] private Texture _viewportDrivingMask;
     [SerializeField] private Texture _viewportDefaultMask;
-
+    [SerializeField] private bool _isLocked;
     public bool SlerpRotation;
     public Canvas ViewportCanvas;
 
     private RectTransform _canvasRectTransform;
     private RawImage _viewportImage;
-    private bool _isLocked;
+   
 
     void Awake()
     {
@@ -85,6 +85,7 @@ public class Viewport : MonoBehaviour
 
     public void LockScreenToCenter()
     {
+        Debug.Log("Locking to center");
         _isLocked = true;
         iTween.RotateTo(gameObject, new Hashtable {{"rotation", Vector3.zero}, {"easetype", iTween.EaseType.easeInOutCirc}, {"time", 0f}});
         _viewportImage.material.SetTexture("_Stencil", _viewportDrivingMask);
@@ -93,7 +94,9 @@ public class Viewport : MonoBehaviour
     public void UnlockScreen()
     {
         _isLocked = false;
-        _viewportImage.material.SetTexture("_Stencil", _viewportDefaultMask);
+        //the locked and unlocked material is the same
+        _viewportImage.material.SetTexture("_Stencil", _viewportDrivingMask);
+        //_viewportImage.material.SetTexture("_Stencil", _viewportDefaultMask);
     }
 
     public void SetFollowTarget(Transform target)
