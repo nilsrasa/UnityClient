@@ -54,7 +54,8 @@ public class QuestionManager : MonoBehaviour {
     [Serializable]
     public class JsonData
     {
-        public string Date;
+        public string StartDate;
+        public string EndDate;
         public int UserID;
         public int Maze;
         public JsonRS[] Responses;
@@ -96,6 +97,7 @@ public class QuestionManager : MonoBehaviour {
     private List<List<ResponseTimes>> RSList;
     private int[] QueryListCounters; //keeps track of the current query in each of the lists
     private DateTime ExperimentDate;
+    private DateTime ExperimentEndDate;
     private string DataLogFilePath;
     private Dictionary<KeyCode, int> KeysToIndexMap;
     private Dictionary<KeyCode, int> CurrentActiveKeys;
@@ -266,6 +268,7 @@ public class QuestionManager : MonoBehaviour {
                 //Save QRS
                 RSList[CurrentQListIndex][cqIndex].QRS = QueryTimer;
                 CloseQuery();
+                ExperimentEndDate = DateTime.Now;
                 DisplayingQuery = false;
                 ResetTimers();
 
@@ -353,7 +356,8 @@ public class QuestionManager : MonoBehaviour {
         //JSON object creation
         JsonData data = new JsonData();
         data.UserID = TestSubjectID;
-        data.Date = ExperimentDate.ToString(); //Date and time as string
+        data.StartDate = ExperimentDate.ToString(); //StartDate and time as string
+        data.EndDate = ExperimentEndDate.ToString(); //End time of the trial 
         data.Maze = MazeID;
 
         //this is the number of question types we will write to the json file 
@@ -436,7 +440,7 @@ public class QuestionManager : MonoBehaviour {
             }
         }
       
-        //New Date
+        //New StartDate
         ExperimentDate = DateTime.Now;
 
 
