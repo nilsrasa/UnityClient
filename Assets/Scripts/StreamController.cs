@@ -11,14 +11,16 @@ public class StreamController : MonoBehaviour
         Head,
         Mouse,
         Eyes,
-        Eyes_Mouse
+        Eyes_Mouse,
+        Joystick
     }
 
     public static StreamController Instance { get; private set; }
 
-    [SerializeField] private ControlType _selectedControlType = ControlType.Head;
+    [SerializeField] public ControlType _selectedControlType = ControlType.Head;
 
     [Header("Cameras and Projection")] [SerializeField] private ThetaWebcamStream _cameraStreamUSB;
+    [SerializeField] private QuestionManager _queryManager ;
     [SerializeField] private MeshRenderer _icosphere;
     [SerializeField] private MeshRenderer _icosphereDissolve;
     [SerializeField] private MeshRenderer _projectionSphere;
@@ -63,7 +65,8 @@ public class StreamController : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        if (_selectedControlType == ControlType.Eyes || _selectedControlType == ControlType.Head) _useFOVE = true;
+        //still use the FOVE even with joystick
+        if (_selectedControlType == ControlType.Eyes || _selectedControlType == ControlType.Head || _selectedControlType==ControlType.Joystick) _useFOVE = true;
         ActiveChair = (_useFOVE) ? _chairFOVE : _chair;
         _chair.gameObject.SetActive(!_useFOVE);
         _chairFOVE.gameObject.SetActive(_useFOVE);
@@ -74,7 +77,23 @@ public class StreamController : MonoBehaviour
 
     void Start()
     {
-        Viewport.Instance.SetFollowTarget(VRController.Instance.Head);
+        //Viewport.Instance.SetFollowTarget(VRController.Instance.Head);
+    }
+
+
+    public void Update()
+    {
+        //manual connect to robot and ascend chair instead of gaze track the button
+        if (!_isConnected)
+        {
+            if (Input.GetKeyDown(KeyCode.A)){
+
+                ConnectToRobot();
+            }
+        }
+
+        
+       
     }
 
     /// <summary>
@@ -233,6 +252,8 @@ public class StreamController : MonoBehaviour
         _currentChairState = ChairState.Accelerating;
         StartCoroutine(AscendChair());
         RobotInterface.Instance.Connect();
+        _queryManager.EnableManager();
+     
         //TODO: When online connection is put in, uncomment this
         //_isLooping = true;
         _isConnected = true;

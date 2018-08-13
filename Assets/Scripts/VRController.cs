@@ -37,17 +37,21 @@ public class VRController : MonoBehaviour
     void Update()
     {
         if (!_initialized) return;
-        if (Input.GetKeyDown(KeyCode.C))
+        if (Input.GetKeyDown(KeyCode.H))
             CenterHead();
         if (Input.GetKeyDown(KeyCode.Escape))
             Application.Quit();
+        
+
         Ray ray = new Ray();
         switch (_selectedControlType)
         {
             case StreamController.ControlType.Head:
                 ray = new Ray(Head.position, Head.forward * 1000);
                 break;
+
             case StreamController.ControlType.Eyes_Mouse:
+
             case StreamController.ControlType.Mouse:
                 if (Input.GetMouseButtonDown(1))
                 {
@@ -69,6 +73,7 @@ public class VRController : MonoBehaviour
                     return;
                 }
                 break;
+
             case StreamController.ControlType.Eyes:
                 List<Vector3> eyeDirections = new List<Vector3>();
                 FoveInterfaceBase.EyeRays rays = _foveInterface.GetGazeRays();
@@ -87,6 +92,24 @@ public class VRController : MonoBehaviour
 
                 ray = new Ray(Head.transform.position, direction * 1000);
                 break;
+            case StreamController.ControlType.Joystick:
+            {
+                    // Not optimized this should be done once  
+
+                     
+                if (RobotInterface.Instance.IsConnected)
+                {
+                    Vector2 JoyInput = new Vector2(Input.GetAxis("Horizontal"),Input.GetAxis("Vertical"));
+                    // Debug.Log(JoyInput);
+                   
+                    RobotInterface.Instance.DirectCommandRobot(JoyInput);
+                }
+               
+                    //after we send command we want to return
+                return;
+               break;
+            }
+           
         }
 
         //Positioning of the cursor
@@ -102,16 +125,33 @@ public class VRController : MonoBehaviour
                 ResetHoveredObject();
                 return;
             }
+            //else
+            //{
+            //    Debug.Log(gazeObject.tag);
+
+            //}
+          
+            //Not sure why this is not null when you gaze at gameobjects which do not have the robotControltrackpad on them but apparently, every gazeobject sends commands\
+
+            // For this reason we also check if the tag of the gazeobject is the correct one 
             RobotControlTrackPad robotControl = gazeObject.GetComponent<RobotControlTrackPad>();
-            if (robotControl != null)
+            if (robotControl != null && gazeObject.CompareTag("EyeControlPanel"))
             {
+                //Debug.Log("Robot control not null");
                 Vector2 controlResult = robotControl.GetControlResult(hit.point);
-                if (robotControl.IsActivated)
+                if (robotControl.IsActivated & !robotControl.IsExternallyDisabled())
+                {
+                  //  Debug.Log("Command sent");
+                  
                     RobotInterface.Instance.SendCommand(controlResult);
+                }
+                
+
             }
             else
             {
-                RobotInterface.Instance.SendCommand(Vector2.zero);
+                //TODO : SendStopCommandToRobot instead of a zero vector. The zero vector is filtered and still adds movemenet to the robot
+               // RobotInterface.Instance.SendCommand(Vector2.zero);
             }
             if (gazeObject == _hoveredGazeObject) return;
             if (_hoveredGazeObject != null) _hoveredGazeObject.OnUnhover();

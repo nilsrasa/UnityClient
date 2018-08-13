@@ -65,6 +65,7 @@ namespace ROSBridgeLib
 
         public WebSocket WebSocket { get; private set; }
         public bool IsConnected { get; private set; }
+        public bool IsDisconnecting { get; private set; }
 
         private string _host;
         private int _port;
@@ -91,20 +92,21 @@ namespace ROSBridgeLib
             _subscribers = new List<ROSBridgeSubscriber>();
             _publishers = new List<ROSBridgePublisher>();
             _robotName = robotName;
+            IsDisconnecting = true;
         }
 
 
         public void AddSubscriber(ROSBridgeSubscriber subscriber)
         {
             _subscribers.Add(subscriber);
-            if (IsConnected)
+            if (IsConnected && !IsDisconnecting)
                 WebSocket.Send(ROSBridgeMsg.Subscribe(subscriber.GetMessageTopic(), subscriber.GetMessageType()));
         }
 
         public void AddPublisher(ROSBridgePublisher publisher)
         {
             _publishers.Add(publisher);
-            if (IsConnected)
+            if (IsConnected && !IsDisconnecting)
                 WebSocket.Send(ROSBridgeMsg.Advertise(publisher.GetMessageTopic(), publisher.GetMessageType()));
         }
 
@@ -132,6 +134,7 @@ namespace ROSBridgeLib
             Debug.Log("Connecting to " + _host);
             _myThread = new Thread(() => Run(callback));
             _myThread.Start();
+            IsDisconnecting = false;
         }
 
         /// <summary>
@@ -139,6 +142,7 @@ namespace ROSBridgeLib
         /// </summary>
         public void Disconnect()
         {
+            IsDisconnecting = true;
             Debug.Log("Disconnecting from " + _host);
             _myThread.Abort();
             if (WebSocket == null) return;
@@ -150,12 +154,22 @@ namespace ROSBridgeLib
             foreach (ROSBridgePublisher publisher in _publishers)
             {
                 WebSocket.Send(ROSBridgeMsg.UnAdvertise(publisher.GetMessageTopic()));
+
                 Debug.Log("Sending " + ROSBridgeMsg.UnAdvertise(publisher.GetMessageTopic()));
             }
-            _subscribers = new List<ROSBridgeSubscriber>();
-            _publishers = new List<ROSBridgePublisher>();
+            _subscribers.Clear();
+            _publishers.Clear();
+            //fix this in a better way
+            RobotInterface.Instance.StartCoroutine(Example());
             WebSocket.Close();
             IsConnected = false;
+        }
+
+        IEnumerator Example()
+        {
+            Debug.Log(Time.time);
+            yield return new WaitForSeconds(5);
+            Debug.Log(Time.time);
         }
 
         private void Run(Action<string, bool> callback)
@@ -270,17 +284,17 @@ namespace ROSBridgeLib
 
         public void Publish(String topic, ROSBridgeMsg msg)
         {
-            if (WebSocket != null)
+            if (WebSocket != null && !IsDisconnecting)
             {
                 string s = ROSBridgeMsg.Publish(topic, msg.ToYAMLString());
-                //Debug.Log ("Sending " + s);
+               // Debug.Log("Sending " + s);
                 WebSocket.Send(s);
             }
         }
 
         public void CallService(string service, string args)
         {
-            if (WebSocket != null)
+            if (WebSocket != null && !IsDisconnecting)
             {
                 string s = ROSBridgeMsg.CallService(service, args);
                 //Debug.Log("Sending " + s);
