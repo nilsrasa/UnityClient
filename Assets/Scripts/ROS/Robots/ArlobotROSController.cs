@@ -63,6 +63,9 @@ public class ArlobotROSController : ROSController
 
         if (_hasOdometryDataToConsume)
         {
+            //I believe this is what I need to have for the Virtual robot as well
+            // The commands being received by the virtual robot and changing it in space
+            //Probably requires and inverse filter here?
             transform.rotation = _odometryDataToConsume.Orientation;
             transform.position = _odometryDataToConsume.Position.ToUTM().ToUnity();
             _hasOdometryDataToConsume = false;
@@ -195,6 +198,7 @@ public class ArlobotROSController : ROSController
 
     public void ReceivedOdometryUpdate(ROSBridgeMsg data)
     {
+        
         //In WGS84
         OdometryMsg nav = (OdometryMsg) data;
 

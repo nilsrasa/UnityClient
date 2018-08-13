@@ -6,8 +6,17 @@ using ROSBridgeLib.nav_msgs;
 using ROSBridgeLib.std_msgs;
 using UnityEngine;
 
+
+
+
 public class VirtualRobot : ROSController
 {
+    private struct OdometryData
+    {
+        public GeoPointWGS84 Position;
+        public Quaternion Orientation;
+    }
+
     [SerializeField] private float _publishInterval = 0.05f;
 
     private Rigidbody _rigidbody;
@@ -18,6 +27,14 @@ public class VirtualRobot : ROSController
     private bool _hasLocomotionDirectDataToConsume;
     private TwistMsg _locomotionDirectDataToConsume;
     private ROSGenericSubscriber<TwistMsg> _rosJoystick;
+
+    //VIRTUAL ROBOT IS MISSING ODOMETRY subscriber : check ArlobotROSController 
+    //By having a subscriber I want to receive and update my odometry based on what changed from the robot
+    private ROSGenericSubscriber<OdometryMsg> _rosOdometrySubscriber;
+    private bool _hasOdometryDataToConsume;
+
+    private OdometryData _odometryDataToConsume;
+
     private bool _hasJoystickDataToConsume;
     private TwistMsg _joystickDataToConsume;
 
@@ -89,9 +106,21 @@ public class VirtualRobot : ROSController
         }
         if (_hasLocomotionDirectDataToConsume)
         {
+            Debug.Log("Received velocity data");
             _rigidbody.velocity = transform.forward * (float) _locomotionDirectDataToConsume._linear._x;
             _rigidbody.angularVelocity = new Vector3(0, (float) -_locomotionDirectDataToConsume._angular._z, 0);
             _hasLocomotionDirectDataToConsume = false;
+        }
+
+        if (_hasOdometryDataToConsume)
+        {
+            Debug.Log("Received odometry data");
+            //I believe this is what I need to have for the Virtual robot as well
+            // The commands being received by the virtual robot and changing it in space
+            //Probably requires and inverse filter here?
+            transform.rotation = _odometryDataToConsume.Orientation;
+            transform.position = _odometryDataToConsume.Position.ToUTM().ToUnity();
+            _hasOdometryDataToConsume = false;
         }
     }
 
@@ -113,6 +142,7 @@ public class VirtualRobot : ROSController
         {
             GeoPointWGS84 wgs = transform.position.ToUTM().ToWGS84();
             Quaternion rot = transform.rotation;
+            //Filter here for the message?
             PoseMsg pose = new PoseMsg(new PointMsg(wgs.longitude, wgs.latitude, wgs.altitude),
                 new QuaternionMsg(rot.x, rot.y, rot.z, rot.w));
             PoseWithCovarianceMsg poseWithCovariance = new PoseWithCovarianceMsg(pose, new double[36]);
@@ -140,6 +170,10 @@ public class VirtualRobot : ROSController
         _rosJoystick.OnDataReceived += ReceivedJoystickUpdate;
 
         _rosOdometry = new ROSGenericPublisher(_rosBridge, "/robot_gps_pose", OdometryMsg.GetMessageType());
+
+        _rosOdometrySubscriber = new ROSGenericSubscriber<OdometryMsg>(_rosBridge, "/odom", OdometryMsg.GetMessageType(), (msg) => new OdometryMsg(msg));
+        _rosOdometrySubscriber.OnDataReceived += ReceivedOdometryUpdate;
+
         _transformUpdateCoroutine = StartCoroutine(SendTransformUpdate(_publishInterval));
 
         _rosLocomotionWaypointState = new ROSLocomotionWaypointState(ROSAgent.AgentJob.Publisher, _rosBridge, "/waypoint/state");
@@ -152,6 +186,32 @@ public class VirtualRobot : ROSController
         _rosLocomotionLinear.PublishData(new Float32Msg(RobotConfig.MaxLinearSpeed));
         _rosLocomotionAngular.PublishData(new Float32Msg(RobotConfig.MaxAngularSpeed));
         _rosLocomotionControlParams.PublishData(RobotConfig.LinearSpeedParameter, RobotConfig.RollSpeedParameter, RobotConfig.PitchSpeedParameter, RobotConfig.AngularSpeedParameter);
+    }
+
+    public void ReceivedOdometryUpdate(ROSBridgeMsg data)
+    {
+        Debug.Log("Received odometry data");
+        //In WGS84
+        OdometryMsg nav = (OdometryMsg)data;
+
+        GeoPointWGS84 geoPoint = new GeoPointWGS84
+        {
+            latitude = nav._pose._pose._position.GetY(),
+            longitude = nav._pose._pose._position.GetX(),
+            altitude = nav._pose._pose._position.GetZ(),
+        };
+        Quaternion orientation = new Quaternion(
+            x: nav._pose._pose._orientation.GetX(),
+            z: nav._pose._pose._orientation.GetY(),
+            y: nav._pose._pose._orientation.GetZ(),
+            w: nav._pose._pose._orientation.GetW()
+        );
+        _odometryDataToConsume = new OdometryData
+        {
+            Position = geoPoint,
+            Orientation = orientation
+        };
+        _hasOdometryDataToConsume = true;
     }
 
     public override void MoveDirect(Vector2 command)
