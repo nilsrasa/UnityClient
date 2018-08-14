@@ -20,7 +20,8 @@ public class VRController : MonoBehaviour
     private GazeObject _hoveredGazeObject;
     private StreamController.ControlType _selectedControlType;
     private bool _initialized;
-
+    private Vector2 controlResult;
+    
     void Awake()
     {
         Instance = this;
@@ -31,6 +32,7 @@ public class VRController : MonoBehaviour
     {
         //CenterHead();
         _cursorCanvas.position = Head.position + transform.forward * _cursorDistance;
+        controlResult = new Vector2(-2,-2);
     }
 
     //Gets point where user is looking every frame and interacts with any intersecting gazeobjects if possible
@@ -137,8 +139,11 @@ public class VRController : MonoBehaviour
             RobotControlTrackPad robotControl = gazeObject.GetComponent<RobotControlTrackPad>();
             if (robotControl != null && gazeObject.CompareTag("EyeControlPanel"))
             {
-                //Debug.Log("Robot control not null");
-                Vector2 controlResult = robotControl.GetControlResult(hit.point);
+                
+                controlResult = robotControl.GetControlResult(hit.point);
+                Debug.Log(controlResult);
+                //Control vector sends the vector2 information on hit. I should retrieve it from here
+                // regardless if the robotControlPad is activated or not.
                 if (robotControl.IsActivated & !robotControl.IsExternallyDisabled())
                 {
                   //  Debug.Log("Command sent");
@@ -150,8 +155,10 @@ public class VRController : MonoBehaviour
             }
             else
             {
+                //this result means not staring at panel.
+                controlResult = new Vector2(-2,-2);
                 //TODO : SendStopCommandToRobot instead of a zero vector. The zero vector is filtered and still adds movemenet to the robot
-               // RobotInterface.Instance.SendCommand(Vector2.zero);
+                // RobotInterface.Instance.SendCommand(Vector2.zero);
             }
             if (gazeObject == _hoveredGazeObject) return;
             if (_hoveredGazeObject != null) _hoveredGazeObject.OnUnhover();
@@ -196,5 +203,11 @@ public class VRController : MonoBehaviour
     public void CenterSeat()
     {
         transform.localEulerAngles = Vector3.zero;
+    }
+
+    public Vector2 GetPanelGazeCoordinates()
+    {
+
+        return controlResult;
     }
 }

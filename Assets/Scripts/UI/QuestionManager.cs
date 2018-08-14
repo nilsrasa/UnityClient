@@ -20,6 +20,8 @@ using UnityEngine.Serialization;
 
 public class QuestionManager : MonoBehaviour {
 
+   
+
     //Wrapper class for the queries provided by the conductor of the test
     [System.Serializable]
     public class ListWrapper
@@ -328,6 +330,13 @@ public class QuestionManager : MonoBehaviour {
 
     }
 
+
+
+    public bool IsActivated()
+    {
+        return IsActive;
+    }
+
     private void PostAnswerLogic(bool lastQuestion)
     {
         if (lastQuestion)
@@ -422,6 +431,8 @@ public class QuestionManager : MonoBehaviour {
         {
 
             ExperimentEndDate = DateTime.Now;
+            IsActive = false;
+            Debug.Log("QueryManager Deactivated");
             WriteDataToFile();
 
         }
@@ -499,7 +510,7 @@ public class QuestionManager : MonoBehaviour {
         CurrentQListIndex = 0;
         DisplayingPopUp = DisplayingQuery = DelayingQuery = PostAnswerMode = false;
         ResetTimers();
-
+        IsActive = true;
         //Initialize data structures from scratch
         KeysToIndexMap = new Dictionary<KeyCode, int>();
         CurrentActiveKeys = new Dictionary<KeyCode, int>();
