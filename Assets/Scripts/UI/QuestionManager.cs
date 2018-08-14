@@ -33,11 +33,16 @@ public class QuestionManager : MonoBehaviour {
     [Serializable]
     public class ResponseTimes
     {
+        public string PopUpStartTime;
+        public string QuestionStartTime;
+        public string QuestionEndTime;
+        public string StartDrivingTime;
         public float PRS;
         public float QRS;
+        public float DRS;
         public ResponseTimes()
         {
-            PRS = QRS = 0;
+            PRS = QRS = DRS = 0;
         }
 
     }
@@ -113,8 +118,10 @@ public class QuestionManager : MonoBehaviour {
     private bool DisplayingPopUp;
     private bool DisplayingQuery;
     private bool DelayingQuery;
+    private bool PostAnswerMode;
     private float PopUpTimer;
     private float QueryTimer;
+    private float DriveTimer; //Timer to measure how long it took for the user to provide input for driving after a question has been answered
     private float DelayTimer;
     private float QueryDelay;
     
@@ -127,6 +134,7 @@ public class QuestionManager : MonoBehaviour {
         QueryPanel = transform.GetChild(1).gameObject;
         source = gameObject.GetComponent<AudioSource>();
 
+    
         //If children gos were retrieved succesfully 
         if (PopUpMessagePanel && QueryPanel)
         {
@@ -186,13 +194,21 @@ public class QuestionManager : MonoBehaviour {
             {
                 if (Input.GetKeyDown(key))
                 {
-                  //  Debug.Log("Pressed " + key);
-
+                    //if the post answer mode from the previous question was not finished 
+                    // Meaning that we invoked a question before the user started driving after answering a question
+                    //this will increment the counters and reset everything back to normal
+                    if (PostAnswerMode)
+                    {
+                        ResetTimers();
+                        PostAnswerLogic(false);
+                    }
                     //Load appropriate question for the text and save 
                     pressedKey = key; 
                    CurrentQListIndex = KeysToIndexMap[key]; Debug.Log("Questiontype  "+CurrentQListIndex);//which set of questions  
                     cqIndex = QueryListCounters[CurrentQListIndex]; Debug.Log("Question index  " + cqIndex);// which question index of that previous set
                     CurrentQueryText = QueriesList[CurrentQListIndex].QueryList[cqIndex]; Debug.Log("Question : " + CurrentQueryText); // the actual text of the question
+
+                    RSList[CurrentQListIndex][cqIndex].PopUpStartTime = CurrentTimeString(); 
 
                     //Instead of checking which type of locomotion is on  just disable both for now
 
@@ -252,6 +268,7 @@ public class QuestionManager : MonoBehaviour {
                 if (DelayTimer >= QueryDelay)
                 {
                     ShowQuery();
+                    RSList[CurrentQListIndex][cqIndex].QuestionStartTime = CurrentTimeString();
                     DelayingQuery = false;
                     DisplayingQuery = true;
                     DisplayingPopUp = false;
@@ -267,11 +284,13 @@ public class QuestionManager : MonoBehaviour {
             {
                 //Save QRS
                 RSList[CurrentQListIndex][cqIndex].QRS = QueryTimer;
-                CloseQuery();
-                ExperimentEndDate = DateTime.Now;
+               
+                RSList[CurrentQListIndex][cqIndex].QuestionEndTime = CurrentTimeString();
+                
                 DisplayingQuery = false;
-                ResetTimers();
-
+                CloseQuery();
+                IncrementQuestion();
+                //reset the user's control 
                 if (StreamController.Instance._selectedControlType == StreamController.ControlType.Eyes)
                 {
                     EyeControlPanel.SetExternallyDisabled(false);
@@ -280,9 +299,63 @@ public class QuestionManager : MonoBehaviour {
                 {
                     RobotInterface.Instance.EnableRobotCommands(true) ;
                 }
+
+                PostAnswerMode = true;
             }
         }
+        // Post query calculations -- Mode stops once user starts driving again
+        if (PostAnswerMode)
+        {
+            //if the pressed key was not the final questions
+            if (pressedKey != FinalQuestionHotkey)
+            {
+                DriveTimer += Time.deltaTime;
+                
+                //query the interface that controls the robot about user input, to determine when the robot started moving again
+                if (RobotInterface.Instance.IsRobotDriving())
+                {
+                   
+                    PostAnswerLogic(false);
+                }
+            }
+            //if this was the last question there will be no post question driving mode
+            else
+            {
+                PostAnswerLogic(true);
+            }
 
+        }
+
+    }
+
+    private void PostAnswerLogic(bool lastQuestion)
+    {
+        if (lastQuestion)
+        {
+            //double check if this works ok
+            RSList[CurrentQListIndex][cqIndex].DRS = 0;
+            RSList[CurrentQListIndex][cqIndex].StartDrivingTime = CurrentTimeString();
+            FinalQuestionOperations();
+           
+        }
+        else
+        {
+            //When we write the driving times the question index has been incremented
+            RSList[CurrentQListIndex][cqIndex].DRS = DriveTimer;
+            RSList[CurrentQListIndex][cqIndex].StartDrivingTime = CurrentTimeString();
+           
+        }
+        PostAnswerMode = false;
+        ResetTimers();
+    }
+
+    //Returns a string with the current time in the format hh:mm:ss
+    public string CurrentTimeString()
+    {
+        
+        string CurrentTime = DateTime.Now.Hour.ToString()+ ":" + DateTime.Now.Minute.ToString()+":" + DateTime.Now.Second.ToString(); 
+
+        return CurrentTime;
     }
 
     public void EnableManager()
@@ -317,9 +390,19 @@ public class QuestionManager : MonoBehaviour {
     private void CloseQuery()
     {
 
+
+        //For now no animations or anything else
+        QueryPanel.SetActive(false);
+       
+    }
+
+    private void IncrementQuestion()
+    {
+
         //If there are still questions in the list, then prepare the next question's text
-        if (QueryListCounters[CurrentQListIndex] < RSList[CurrentQListIndex].Count-1)
+        if (QueryListCounters[CurrentQListIndex] < RSList[CurrentQListIndex].Count - 1)
         {
+
             QueryListCounters[CurrentQListIndex]++;
 
         }
@@ -327,24 +410,21 @@ public class QuestionManager : MonoBehaviour {
         else
         {
             CurrentActiveKeys.Remove(pressedKey);
-
-            //If we answered all the final questions then write to file and exit
-            //This key must correspond to one of the questions hotkeys
-            if (pressedKey == FinalQuestionHotkey)
-            {
-                WriteDataToFile();
-               // ResetManager();
-            }
         }
 
+    }
 
-       
-        
-       
-       
-        //For now no animations or anything else
-        QueryPanel.SetActive(false);
-       
+    private void FinalQuestionOperations()
+    {
+        //If we answered all the final questions then write to file and exit
+        //This key must correspond to one of the questions hotkeys
+        if (pressedKey == FinalQuestionHotkey)
+        {
+
+            ExperimentEndDate = DateTime.Now;
+            WriteDataToFile();
+
+        }
     }
 
     private void WriteDataToFile()
@@ -375,6 +455,12 @@ public class QuestionManager : MonoBehaviour {
                 temp.RSS[j] = new ResponseTimes();
                 temp.RSS[j].PRS= RSList[index][j].PRS;
                 temp.RSS[j].QRS = RSList[index][j].QRS;
+                temp.RSS[j].DRS = RSList[index][j].DRS;
+             
+                temp.RSS[j].PopUpStartTime = RSList[index][j].PopUpStartTime;
+                temp.RSS[j].QuestionStartTime = RSList[index][j].QuestionStartTime;
+                temp.RSS[j].QuestionEndTime = RSList[index][j].QuestionEndTime;
+                temp.RSS[j].StartDrivingTime = RSList[index][j].StartDrivingTime;
 
             }
             data.Responses[counter]= temp;
@@ -402,7 +488,7 @@ public class QuestionManager : MonoBehaviour {
 
     private void ResetTimers()
     {
-        PopUpTimer = QueryTimer = DelayTimer =  0.0f;
+        PopUpTimer = QueryTimer = DelayTimer = DriveTimer =  0.0f;
     }
 
     private void ResetManager()
@@ -411,7 +497,7 @@ public class QuestionManager : MonoBehaviour {
         QueryDelay = 0;
         cqIndex = 0;
         CurrentQListIndex = 0;
-        DisplayingPopUp = DisplayingQuery = DelayingQuery = false;
+        DisplayingPopUp = DisplayingQuery = DelayingQuery = PostAnswerMode = false;
         ResetTimers();
 
         //Initialize data structures from scratch

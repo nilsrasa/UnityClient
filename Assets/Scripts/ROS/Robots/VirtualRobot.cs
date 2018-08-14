@@ -126,6 +126,8 @@ public class VirtualRobot : ROSController
             }
         }
 
+       
+
         if (_hasJoystickDataToConsume)
         {
             _rigidbody.velocity = transform.forward * (float) _joystickDataToConsume._linear._x;

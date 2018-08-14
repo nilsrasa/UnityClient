@@ -28,6 +28,7 @@ public class RobotInterface : MonoBehaviour
     //not quite nice, I have broken the enables/disables in multiple scripts 
     private bool AllowRobotCommands = true;
     public bool IsConnected { get; private set; }
+    private bool IsDriving;
     public AnimationCurve SpeedCurve;
 
     [SerializeField] private int _motorMaxSpeed = 255;
@@ -70,7 +71,7 @@ public class RobotInterface : MonoBehaviour
     {
         string robotFileJson = File.ReadAllText(_telerobotConfigPath);
         _telerobotConfigFile = JsonUtility.FromJson<Telerobot_ThetaFile>(robotFileJson);
-
+        IsDriving = false;
         InitRange = new Vector2(UpperDeadZoneLimit , MaxVelocityHorizon);
         NewRange = new Vector2(0,MaximumLinearVelocity);
        // Debug.log(_telerobotConfigFile);
@@ -98,10 +99,8 @@ public class RobotInterface : MonoBehaviour
        // Debug.Log("Sending command to robot");
        // Debug.Log("ControlOutput is :" + controlOutput.x +"  " +  controlOutput.y);
 
-       // Debug.Log("Sending command to robot");
+        IsDriving = true;
         Vector2 movement = new Vector2(controlOutput.y, -controlOutput.x);
-
-
 
       //  Debug.Log("Intial Linear speed was :" + movement.x + "Initial Angular speed was : " + movement.y);
         //if you are not at the dead zone 
@@ -111,8 +110,6 @@ public class RobotInterface : MonoBehaviour
             movement = new Vector2(FilterLinearVelocity(movement.x), FilterAngularVelocity(movement.y));
            // Debug.Log("Normalized Linear speed was :" + movement.x + "Normalized Initial Angular speed was : " +  movement.y);
 
-
-           
             _rosLocomotionDirect.PublishData(movement.x, movement.y);
             _isStopped = false;
             
@@ -127,13 +124,14 @@ public class RobotInterface : MonoBehaviour
 
     }
 
-    //Commands with joystick
+    //Commands with joystick -- This should not be called every frame for 0 input maybe
     public void DirectCommandRobot(Vector2 JoystickInput)
     {
         //Horizontal = rotation = y , Vertical = LinearMove = x
         Vector2 movement = new Vector2(JoystickInput.y, -JoystickInput.x);
 
-        
+        IsDriving = movement != Vector2.zero;
+     
         if (movement.x > MaximumLinearVelocity) movement.x = MaximumLinearVelocity;
         else if (movement.x < 0) movement.x = -BackwardsVelocity;
 
@@ -156,11 +154,17 @@ public class RobotInterface : MonoBehaviour
 
     public void StopRobot()
     {
+        
+        IsDriving = false;
         if (!IsConnected || _isStopped) return;
         _rosLocomotionDirect.PublishData(0, 0);
         _isStopped = true;
     }
 
+    public bool IsRobotDriving()
+    {
+        return IsDriving;
+    }
     public void SendCommand(Vector2 controlOutput)
     {
         

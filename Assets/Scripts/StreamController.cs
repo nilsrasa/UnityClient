@@ -57,6 +57,7 @@ public class StreamController : MonoBehaviour
 
     private bool _isLooping;
     private bool _isConnected;
+    private bool _isDriving;
     private bool _useFOVE;
     private float _currentChairSpeed;
     private float _accelTimer;

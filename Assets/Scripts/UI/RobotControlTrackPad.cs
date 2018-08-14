@@ -33,7 +33,7 @@ class RobotControlTrackPad : GazeObject
     private string _orgText;
     private float _orgDwellTime;
     private float _grazeTimer = 10;
-
+    
     //change names for these
     private float unhoveredTimer = 0;
     private bool ExitingDriveMode = false;
@@ -46,6 +46,7 @@ class RobotControlTrackPad : GazeObject
         _border.color = _borderColor;
         _orgText = _text.text;
         _orgDwellTime = _dwellTime;
+        
     }
 
     protected override void Update()
@@ -65,6 +66,7 @@ class RobotControlTrackPad : GazeObject
         {
             base.OnUnhover();
             _border.color = _borderColor;
+           
             RobotInterface.Instance.StopRobot();
         }
 
