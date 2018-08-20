@@ -29,6 +29,7 @@ public class GazeTrackingDataManager : MonoBehaviour
         public List<GazeVisitInformation> SegmentVisits;
         public int TotalNumberOfVisits;
         public float AvgVisitDuration;
+        public float VisitPercentage;
 
         public GazeSegment()
         {
@@ -41,20 +42,23 @@ public class GazeTrackingDataManager : MonoBehaviour
     public GazeSegment[,] PanelSegments;
     public int NoPanelGazeSegments;
     public float RecordDataTimeInterval;
+    public float GazeTimeThreshold;
     public bool RecordingData;
     public bool EndRecording;
+
 
     private QuestionManager QueryManager;
     private long TotalGazeIterations;
     private float Timer;
     private float SegmentGazeDurationTimer;
-
+    private string DataLogFilePath;
     private Vector2 NewGazeSegment;
     private Vector2 PreviousGazeSegment;
 
     // Use this for initialization
     void Start ()
     {
+        DataLogFilePath = Application.streamingAssetsPath + "/TestLogData/GazeData.json";
         EndRecording = false;
 	    TotalGazeIterations = 0;
 	    QueryManager = gameObject.GetComponent<QuestionManager>();
@@ -80,6 +84,7 @@ public class GazeTrackingDataManager : MonoBehaviour
 	    if (EndRecording)
 	    {
 	        FinalizeStats();
+	        EndRecording = false;
 	    }
 
 	    if (QueryManager.IsActivated() && RecordingData)
@@ -89,30 +94,34 @@ public class GazeTrackingDataManager : MonoBehaviour
 	        if (Timer > RecordDataTimeInterval)
 	        {
 	            Vector2 GazeCoords = VRController.Instance.GetPanelGazeCoordinates();
-
+	         
                 //If the user is staring somewhere at the panel
-	            if (GazeCoords != new Vector2(-2, -2))
+                if (GazeCoords != new Vector2(-2, -2))
 	            {
                     //get gaze segment according to coordinates
 	                NewGazeSegment = GetGazeSegmentID(GazeCoords);
-
+                    //  Debug.Log("GazeCoords : " + GazeCoords + " ->" +"Segments " +NewGazeSegment);
                     //If the new Gazesegment is different than the previous one
-	                if (NewGazeSegment != PreviousGazeSegment)
-	                {
-	                    //Record stare duration data for the previous segment and reset the timer
-	                    RecordData(PreviousGazeSegment, SegmentGazeDurationTimer);
-
-	                    SegmentGazeDurationTimer = 0.0f;
-	                    PreviousGazeSegment = NewGazeSegment;
-	                }
-	                else
-	                {
+                    if (NewGazeSegment != PreviousGazeSegment)
+                    {
+                        //Record stare duration data for the previous segment and reset the timer
+                        //Recording will only happen if the tester has stared at a section for more than 
+                        // the threshold of 1 second
+                        if (SegmentGazeDurationTimer > GazeTimeThreshold) { 
+                            
+                            RecordData(PreviousGazeSegment, SegmentGazeDurationTimer);
+                            TotalGazeIterations++;
+                        }
+                        SegmentGazeDurationTimer = 0.0f;
+                        PreviousGazeSegment = NewGazeSegment;
+                    }
+                    else
+                    {
                         //for now simply add the interval to the timer
-	                    SegmentGazeDurationTimer += RecordDataTimeInterval;
-	                }
+                        SegmentGazeDurationTimer += RecordDataTimeInterval;
+                    }
 
-	            }
-
+                }
 
 	            //reset timer
 	            Timer = 0.0f;
@@ -136,16 +145,52 @@ public class GazeTrackingDataManager : MonoBehaviour
 
     private void FinalizeStats()
     {
+
         //Loop through all segments and just divide the duration with the total visits. Also calculate percentages after adding
         //total number of visits
+        for (int i = 0; i < NoPanelGazeSegments; i++)
+        {
+            for (int j = 0; j < NoPanelGazeSegments; j++)
+            {
+                PanelSegments[i, j].AvgVisitDuration = PanelSegments[i, j].AvgVisitDuration / PanelSegments[i, j].TotalNumberOfVisits;
+                PanelSegments[i, j].VisitPercentage = (float) PanelSegments[i, j].TotalNumberOfVisits / TotalGazeIterations;
+            }
+        }
+       
     }
 
     private Vector2 GetGazeSegmentID(Vector2 GazeCoords)
     {
+        float x = GazeCoords.x;
+        float y = GazeCoords.y;
+      
+        float cellDim = 2.0f / NoPanelGazeSegments;
+        
+        int row = -1;
+        int column = -1;
         //Naive double loop per segment or binary search. Depends on number of segments
+        for (int i = 0; i < NoPanelGazeSegments; i++)
+        {
+            if (-1 + i * cellDim <= x && x < -1 + (i + 1) * cellDim)
+            {
+                column = i;
+            }
+        }
 
+        for (int j = 0; j < NoPanelGazeSegments; j++)
+        {
+            if (-1 + j * cellDim <= y && y < -1 + (j + 1) * cellDim)
+            {
+                row = NoPanelGazeSegments -1 -j;
+            }
+        }
 
-        return Vector2.zero;
+        return new Vector2(row,column);
     }
 
+
+    private void WriteDataToFile()
+    {
+
+    }
 }

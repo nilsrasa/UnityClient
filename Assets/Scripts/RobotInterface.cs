@@ -48,7 +48,9 @@ public class RobotInterface : MonoBehaviour
 
     [SerializeField] private float LeftBackZoneLimit = -0.2f;
     [SerializeField] private float UpperBackZoneLimit = -0.8f;
+    [SerializeField] private string RobotConfigurationFile = "Telerobot_ThetaS.json";
 
+    private string RobotName;
     private float _timer = 0;
     private Vector2 InitRange;
     private Vector2 NewRange;
@@ -56,7 +58,8 @@ public class RobotInterface : MonoBehaviour
     private bool _left, _right, _forward, _reverse;
     private bool _isStopped;
     private ROSLocomotionDirect _rosLocomotionDirect;
-    private ROSBridgeWebSocketConnection _rosBridge;
+    [HideInInspector]
+    public ROSBridgeWebSocketConnection _rosBridge;
     private Telerobot_ThetaFile _telerobotConfigFile;
 
    
@@ -64,7 +67,8 @@ public class RobotInterface : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        _telerobotConfigPath = Application.streamingAssetsPath + "/Config/Telerobot_ThetaS.json";
+        //The connection details of the robot to drive, retrieved from a json file in the config path.
+        _telerobotConfigPath = Application.streamingAssetsPath + "/Config/" + RobotConfigurationFile;
     }
 
     void Start()
@@ -74,6 +78,7 @@ public class RobotInterface : MonoBehaviour
         IsDriving = false;
         InitRange = new Vector2(UpperDeadZoneLimit , MaxVelocityHorizon);
         NewRange = new Vector2(0,MaximumLinearVelocity);
+       // RobotName = RobotConfigurationFile.re
        // Debug.log(_telerobotConfigFile);
     }
 
@@ -217,8 +222,10 @@ public class RobotInterface : MonoBehaviour
         if (!_telerobotConfigFile.RosBridgeUri.StartsWith("ws://"))
             _telerobotConfigFile.RosBridgeUri = "ws://" + _telerobotConfigFile.RosBridgeUri;
 
-        _rosBridge = new ROSBridgeWebSocketConnection(_telerobotConfigFile.RosBridgeUri, _telerobotConfigFile.RosBridgePort, "Telerobot_ThetaS");
+        //"Telerobot_ThetaS"
+        _rosBridge = new ROSBridgeWebSocketConnection(_telerobotConfigFile.RosBridgeUri, _telerobotConfigFile.RosBridgePort, "VirtualRobot_Arlobot");
         _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Publisher, _rosBridge, "/cmd_vel");
+        
         _rosBridge.Connect(((s, b) => { Debug.Log(s + " - " + b); }));
         IsConnected = true;
     }

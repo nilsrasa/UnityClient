@@ -93,6 +93,7 @@ public class QuestionManager : MonoBehaviour {
   
    
     //Reference variables
+    private GazeTrackingDataManager GazeDataManager;
     private GameObject PopUpMessagePanel;
     private GameObject QueryPanel;
     private Text QueryText;
@@ -135,8 +136,8 @@ public class QuestionManager : MonoBehaviour {
         PopUpMessagePanel = transform.GetChild(0).gameObject;
         QueryPanel = transform.GetChild(1).gameObject;
         source = gameObject.GetComponent<AudioSource>();
+        GazeDataManager = gameObject.GetComponent<GazeTrackingDataManager>();
 
-    
         //If children gos were retrieved succesfully 
         if (PopUpMessagePanel && QueryPanel)
         {
@@ -431,6 +432,7 @@ public class QuestionManager : MonoBehaviour {
         {
 
             ExperimentEndDate = DateTime.Now;
+            GazeDataManager.EndRecording = true;
             IsActive = false;
             Debug.Log("QueryManager Deactivated");
             WriteDataToFile();

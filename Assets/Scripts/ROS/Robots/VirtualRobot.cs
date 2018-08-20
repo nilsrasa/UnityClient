@@ -36,21 +36,16 @@ public class VirtualRobot : ROSController
     private ROSGenericSubscriber<OdometryMsg> _rosOdometrySubscriber;
 
    
-
     // Are these needed ?  The virtual robot does not have odometry data to consume since it is the one doing
     // the calculations. 
     private OdometryData _odometryDataToConsume;
     private bool _hasOdometryDataToConsume;
-
-
-
 
     private bool _hasJoystickDataToConsume;
     private TwistMsg _joystickDataToConsume;
 
     //Publishers
     private Coroutine _transformUpdateCoroutine;
-
     private ROSLocomotionWaypointState _rosLocomotionWaypointState;
     private ROSLocomotionWaypoint _rosLocomotionWaypoint;
     private ROSGenericPublisher _rosLocomotionLinear;
@@ -102,13 +97,14 @@ public class VirtualRobot : ROSController
         PublishOdometryData(InitialPosition, InitialRotation);
         _PublishOdomTimer = 0.0f;
 
-        //initialise calib_pose 
+       
     }
 
     protected override void Update()
     {
         base.Update();
 
+        Debug.Log("UPDATE VIRTUAL ROBOT");
         //Navigation to waypoint
         if (CurrenLocomotionType != RobotLocomotionType.DIRECT &&
             CurrentRobotLocomotionState != RobotLocomotionState.STOPPED)
@@ -127,7 +123,6 @@ public class VirtualRobot : ROSController
         }
 
        
-
         if (_hasJoystickDataToConsume)
         {
             _rigidbody.velocity = transform.forward * (float) _joystickDataToConsume._linear._x;
@@ -148,7 +143,7 @@ public class VirtualRobot : ROSController
         _PublishOdomTimer += Time.deltaTime;
         if (_PublishOdomTimer > _publishInterval)
         {
-            Debug.Log("Publishing odometry data");
+            //Debug.Log("Publishing odometry data");
             //calculate the difference between the current position and the initial position
             PublishOdometryData(gameObject.transform.position - InitialPosition , gameObject.transform.rotation);
             _PublishOdomTimer = 0.0f;
@@ -196,8 +191,16 @@ public class VirtualRobot : ROSController
         StopCoroutine(_transformUpdateCoroutine);
     }
 
+    public void ManualStartRos()
+    {
+        StartROS();
+    }
+
     protected override void StartROS()
     {
+
+        Debug.Log("Started ROS");
+        Debug.Log(_rosBridge);
         _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Subscriber, _rosBridge, "/cmd_vel");
         _rosLocomotionDirect.OnDataReceived += ReceivedLocomotionDirectUpdate;
         _rosJoystick = new ROSGenericSubscriber<TwistMsg>(_rosBridge, "/teleop_velocity_smoother/raw_cmd_vel",
@@ -244,13 +247,14 @@ public class VirtualRobot : ROSController
             ));
 
         OdometryMsg odometryUpdate= new OdometryMsg(pose);
-        _rosOdometry.PublishData(odometryUpdate);
+       // _rosOdometry.PublishData(odometryUpdate);
     }
 
    
 
     public override void MoveDirect(Vector2 command)
     {
+       
         if (CurrenLocomotionType != RobotLocomotionType.DIRECT)
             _rosLocomotionWaypointState.PublishData(ROSLocomotionWaypointState.RobotWaypointState.STOP);
         _rosLocomotionDirect.PublishData(command.y, command.x);

@@ -28,6 +28,7 @@ namespace ROSBridgeLib
 
         protected sealed override void StartAgent(ROSBridgeWebSocketConnection rosConnection, string topicName, string messageType)
         {
+            
             TopicName = topicName;
             MessageType = messageType;
             ROSConnection = rosConnection;

@@ -1,6 +1,6 @@
 {
 	"Campuses": [ 89, 88 ],
-	"RosBridgeUri": "192.168.255.40",
+	"RosBridgeUri": "gazeit-VirtualBox",
 	"RosBridgePort": 9090,
 	"MaxLinearSpeed": 1.0,
 	"MaxAngularSpeed": 1.0,

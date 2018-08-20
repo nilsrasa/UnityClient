@@ -141,7 +141,7 @@ public class VRController : MonoBehaviour
             {
                 
                 controlResult = robotControl.GetControlResult(hit.point);
-                Debug.Log(controlResult);
+               // Debug.Log(controlResult);
                 //Control vector sends the vector2 information on hit. I should retrieve it from here
                 // regardless if the robotControlPad is activated or not.
                 if (robotControl.IsActivated & !robotControl.IsExternallyDisabled())
@@ -149,6 +149,8 @@ public class VRController : MonoBehaviour
                   //  Debug.Log("Command sent");
                   
                     RobotInterface.Instance.SendCommand(controlResult);
+
+                    //Instead of robotinterface here
                 }
                 
 

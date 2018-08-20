@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -7019,17 +7019,17 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 11.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -7.9599996
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_SizeDelta.x
-      value: 23
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -7044,7 +7044,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -7054,7 +7054,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -29173,17 +29173,17 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 11.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -5.97
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_SizeDelta.x
-      value: 23
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -29198,7 +29198,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -29208,7 +29208,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -49911,7 +49911,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh7532
+  m_Name: pb_Mesh21958
   serializedVersion: 8
   m_SubMeshes:
   - serializedVersion: 2
@@ -50673,7 +50673,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh6968
+  m_Name: pb_Mesh21390
   serializedVersion: 8
   m_SubMeshes:
   - serializedVersion: 2
@@ -57763,7 +57763,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 11.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -57773,7 +57773,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_SizeDelta.x
-      value: 23
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -57788,7 +57788,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -57798,7 +57798,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -62673,7 +62673,7 @@ MeshRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 0
-  m_SelectedEditorRenderState: 0
+  m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -65061,6 +65061,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _selectedControlType: 2
+  VirtualRobotController: {fileID: 0}
+  FeedbackFromCamera: 1
   _cameraStreamUSB: {fileID: 850222836}
   _queryManager: {fileID: 475049853}
   _icosphere: {fileID: 590692520}
@@ -65155,6 +65157,7 @@ MonoBehaviour:
   LeftDeadZoneLimit: -0.5
   LeftBackZoneLimit: -1
   UpperBackZoneLimit: -0.8
+  RobotConfigurationFile: Telerobot_ThetaS.json
 --- !u!114 &1426035242
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -78922,17 +78925,17 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 11.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -1.99
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_SizeDelta.x
-      value: 23
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -78947,7 +78950,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -78957,7 +78960,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -100213,7 +100216,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh7174
+  m_Name: pb_Mesh21594
   serializedVersion: 8
   m_SubMeshes:
   - serializedVersion: 2
@@ -116346,17 +116349,17 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 11.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -3.98
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_SizeDelta.x
-      value: 23
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -116371,7 +116374,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
@@ -116381,7 +116384,7 @@ Prefab:
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224508636170169104, guid: 5fcb346c16930a5488b4cecd77f18640,
         type: 2}
