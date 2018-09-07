@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,11 +16,13 @@ public class GazeTrackingDataManager : MonoBehaviour
     public struct GazeVisitInformation
     {
         public int VisitID;
+        public string VisitTimeStamp;
         public float VisitDuration;
 
-        public GazeVisitInformation(int ID, float duration)
+        public GazeVisitInformation(int ID,string Timestamp , float duration)
         {
             VisitID = ID;
+            VisitTimeStamp = Timestamp;
             VisitDuration = duration;
         }
     }
@@ -37,6 +40,25 @@ public class GazeTrackingDataManager : MonoBehaviour
             TotalNumberOfVisits = 0;
             AvgVisitDuration = 0;
         }
+    }
+
+
+    [Serializable]
+    public struct JsonGazeSegment
+    {
+        public int x;
+        public int y;
+    }
+    [Serializable]
+    public class JsonGazeData
+    {
+        public JsonGazeSegment SegmentID;
+        public string StartDate;
+        public string EndDate;
+        public int UserID;
+        public int Maze;
+        public QuestionManager.JsonRS[] Responses;
+
     }
 
     public GazeSegment[,] PanelSegments;
@@ -137,8 +159,8 @@ public class GazeTrackingDataManager : MonoBehaviour
     //Adds new entry of format : VisitID -> VisitDuration to the list of the segment
     private void RecordData(Vector2 segment,float duration)
     {
-        PanelSegments[(int)segment.x, (int)segment.y].SegmentVisits.Add(
-            new GazeVisitInformation(++PanelSegments[(int)segment.x, (int)segment.y].TotalNumberOfVisits,duration));
+       // PanelSegments[(int)segment.x, (int)segment.y].SegmentVisits.Add(
+        //    new GazeVisitInformation(++PanelSegments[(int)segment.x, (int)segment.y].TotalNumberOfVisits,duration));
 
         PanelSegments[(int) segment.x, (int) segment.y].AvgVisitDuration += duration;
     }
