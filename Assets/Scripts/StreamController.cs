@@ -21,6 +21,8 @@ public class StreamController : MonoBehaviour
     public static StreamController Instance { get; private set; }
 
     [SerializeField] public ControlType _selectedControlType = ControlType.Head;
+    [SerializeField] public bool VirtualEnvironment = false;
+
     public VirtualRobot VirtualRobotController;
 
     [Header("Cameras and Projection")]
@@ -121,7 +123,7 @@ public class StreamController : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.A)){
                
                 ConnectToRobot();
-                SetupVirtualRobot();
+                //SetupVirtualRobot();
 
             }
         }
@@ -289,9 +291,14 @@ public class StreamController : MonoBehaviour
         _currentChairState = ChairState.Accelerating;
         StartCoroutine(AscendChair());
 
-       
-            RobotInterface.Instance.Connect();
-       
+        //connect to the appropriate controller
+        if (VirtualEnvironment)
+        {
+            VirtualUnityController.Instance.Connect();
+        }
+        else { 
+             RobotInterface.Instance.Connect();
+        }
 
         _queryManager.EnableManager();
      

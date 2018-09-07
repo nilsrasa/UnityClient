@@ -40,6 +40,7 @@ public class RobotInterface : MonoBehaviour
     [SerializeField] private float MaximumAngularVelocity= 0.8f;
     [SerializeField] private float BackwardsVelocity = 0.1f;
 
+    //these should be in robotcontrolpad maybe , not here as filters. They are part of the UI.
     [SerializeField] private float MaxVelocityHorizon = 0;
     [SerializeField] public float UpperDeadZoneLimit = -0.5f;
     [SerializeField] public float LowerDeadZoneLimit = -0.7f;
@@ -78,8 +79,7 @@ public class RobotInterface : MonoBehaviour
         IsDriving = false;
         InitRange = new Vector2(UpperDeadZoneLimit , MaxVelocityHorizon);
         NewRange = new Vector2(0,MaximumLinearVelocity);
-       // RobotName = RobotConfigurationFile.re
-       // Debug.log(_telerobotConfigFile);
+      
     }
 
     //changed this from OnApplicationQuit
@@ -263,12 +263,6 @@ public class RobotInterface : MonoBehaviour
         {
             return 0;
         }
-        //else if (InitValue < UpperBackZoneLimit && InitValue > -1)
-        //{
-        //    Debug.Log("BackwardsZone  " );
-        //    return -BackwardsVelocity;
-        //}
-
 
         return 0;
     }

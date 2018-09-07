@@ -21,7 +21,7 @@ public class VRController : MonoBehaviour
     private StreamController.ControlType _selectedControlType;
     private bool _initialized;
     private Vector2 controlResult;
-    
+   
     void Awake()
     {
         Instance = this;
@@ -94,21 +94,33 @@ public class VRController : MonoBehaviour
 
                 ray = new Ray(Head.transform.position, direction * 1000);
                 break;
+
             case StreamController.ControlType.Joystick:
             {
-                    // Not optimized this should be done once  
 
-                     
-                if (RobotInterface.Instance.IsConnected)
+                 //   Joystick input
+                Vector2 JoyInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+
+                //if the virtual environment is on, send the command to the VirtualUnityController    
+                if (StreamController.Instance.VirtualEnvironment)
                 {
-                    Vector2 JoyInput = new Vector2(Input.GetAxis("Horizontal"),Input.GetAxis("Vertical"));
-                    // Debug.Log(JoyInput);
-                   
-                    RobotInterface.Instance.DirectCommandRobot(JoyInput);
+                    if (VirtualUnityController.Instance.IsConnected)
+                    {
+                        VirtualUnityController.Instance.JoystickCommand(JoyInput);
+                    }
                 }
-               
+                // Othewise send it to the robotinterface
+                else
+                {
+                    if (RobotInterface.Instance.IsConnected)
+                    {
+                        RobotInterface.Instance.DirectCommandRobot(JoyInput);
+                    }
                     //after we send command we want to return
-                return;
+                    return;
+                    }
+            
                break;
             }
            
@@ -139,21 +151,35 @@ public class VRController : MonoBehaviour
             RobotControlTrackPad robotControl = gazeObject.GetComponent<RobotControlTrackPad>();
             if (robotControl != null && gazeObject.CompareTag("EyeControlPanel"))
             {
-                
+                //Control result is provided on hit
                 controlResult = robotControl.GetControlResult(hit.point);
-               // Debug.Log(controlResult);
-                //Control vector sends the vector2 information on hit. I should retrieve it from here
-                // regardless if the robotControlPad is activated or not.
+                
+                //If the robotcontrols are activated
                 if (robotControl.IsActivated & !robotControl.IsExternallyDisabled())
                 {
-                  //  Debug.Log("Command sent");
-                  
-                    RobotInterface.Instance.SendCommand(controlResult);
+                    if (StreamController.Instance.VirtualEnvironment)
+                    {
+                        Debug.Log("Sending gaze command to robot");
+                        if (VirtualUnityController.Instance.IsConnected)
+                        {
+                            VirtualUnityController.Instance.GazeCommand(controlResult);
+                        }
+                        else{Debug.Log("VirtualUnityController is not connected"); }
 
-                    //Instead of robotinterface here
+                    }
+                    // Othewise send it to the robotinterface
+                    else
+                    {
+                        if (RobotInterface.Instance.IsConnected)
+                        {
+                            RobotInterface.Instance.SendCommand(controlResult);
+                        }
+                        else { Debug.Log("RobotInterface controller is not connected"); }
+
+                    }
+                    //Instead of robotinterface here 
                 }
                 
-
             }
             else
             {
@@ -177,6 +203,7 @@ public class VRController : MonoBehaviour
             _hoveredGazeObject.OnUnhover();
         _hoveredGazeObject = null;
         RobotInterface.Instance.StopRobot();
+        VirtualUnityController.Instance.StopRobot();
     }
 
     /// <summary>
