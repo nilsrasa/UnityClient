@@ -1,6 +1,6 @@
 {
 	"Campuses": [ 89, 88, 179 ],
-	"RosBridgeUri": "ROS-Jetson",
+	"RosBridgeUri": "raspi-ros01",
 	"RosBridgePort": 9090,
 	"MaxLinearSpeed": 1.0,
 	"MaxAngularSpeed": 1.0,
