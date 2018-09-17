@@ -57,17 +57,16 @@ public class FiducialController : MonoBehaviour
                 break;
             }
         }
-
+        /*
         if (!hasFiducial)
         {
-            Debug.LogError("Zerofiducial not found in UserConfig - Exiting");
+            Debug.LogError("Zerofiducial not found in UserConfig");
 #if UNITY_EDITOR
             EditorApplication.isPlaying = false;
 #endif
             Application.Quit();
-            return;
         }
-
+        */
         Fiducial newFiducial = (Instantiate(Resources.Load(FIDUCIAL_RESOURCE_NAME), ZeroFiducial.Position.ToUTM().ToUnity(),
             Quaternion.Euler(ZeroFiducial.Rotation)) as GameObject).GetComponent<Fiducial>();
 
