@@ -372,6 +372,12 @@ public class QuestionManager : MonoBehaviour {
     {
         Debug.Log("QueryManager enabled");
         IsActive = true;
+
+        if (GazeTrackingDataManager.Instance)
+        {
+            GazeTrackingDataManager.Instance.StartRecordingData();
+        }
+
     }
 
     private void ShowPopUp()
@@ -437,6 +443,12 @@ public class QuestionManager : MonoBehaviour {
             Debug.Log("QueryManager Deactivated");
             WriteDataToFile();
 
+            //DISABLE GAZE RECORDING
+            if (GazeTrackingDataManager.Instance)
+            {
+                GazeTrackingDataManager.Instance.EndRecording = true;
+            }
+
         }
     }
 
@@ -444,7 +456,7 @@ public class QuestionManager : MonoBehaviour {
     {
 
        
-        Debug.Log("Writing to file");
+        Debug.Log("Writing to data file");
 
         //JSON object creation
         JsonData data = new JsonData();
@@ -483,7 +495,6 @@ public class QuestionManager : MonoBehaviour {
        
         string json = JsonUtility.ToJson(data,true);
 
-      
         //Appending in the write position in the file
   
         //Read the existing contents of the file
@@ -570,6 +581,17 @@ public class QuestionManager : MonoBehaviour {
         string InitText = "{ \r\n \"TestData\":[  \r\n $ \r\n ] \r\n }";
 
         File.WriteAllText(DataLogFilePath, InitText);
+    }
+
+    
+    public int GetUserID()
+    {
+        return TestSubjectID;
+    }
+
+    public int GetMazeID()
+    {
+        return MazeID;
     }
 
     

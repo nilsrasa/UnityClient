@@ -1,0 +1,173 @@
+{ 
+ "GazeData":[ 
+ {
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "1/1/0001 12:00:00 AM",
+    "EndDate": "9/20/2018 4:30:24 PM",
+    "SegmentID": []
+}, 
+{
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "1/1/0001 12:00:00 AM",
+    "EndDate": "9/20/2018 4:41:51 PM",
+    "SegmentID": [
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        }
+    ]
+}, 
+{
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "1/1/0001 12:00:00 AM",
+    "EndDate": "9/20/2018 4:59:13 PM",
+    "SegmentID": [
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": NaN,
+            "GazeVisits": []
+        },
+        {
+            "x": 1,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": NaN,
+            "GazeVisits": []
+        },
+        {
+            "x": 2,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": NaN,
+            "GazeVisits": []
+        },
+        {
+            "x": 2,
+            "y": 1,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": NaN,
+            "GazeVisits": []
+        },
+        {
+            "x": 2,
+            "y": 2,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": NaN,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": 0.0,
+            "GazeVisits": []
+        }
+    ]
+}, 
+$
+
+ ]
+}

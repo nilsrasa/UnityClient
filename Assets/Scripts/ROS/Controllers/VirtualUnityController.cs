@@ -184,7 +184,7 @@ public class VirtualUnityController : MonoBehaviour {
         if (!InsideDeadZone(command.x, command.y))
         {
             //normalize speed and send data
-            Debug.Log(FilterLinearVelocity(command.x));
+           // Debug.Log(FilterLinearVelocity(command.x));
             VirtualBot.velocity = this.gameObject.transform.right * FilterLinearVelocity(command.x);
             //VirtualBot.angularVelocity = this.gameObject.transform.up; // * FilterAngularVelocity(command.y);
             this.gameObject.transform.Rotate(this.gameObject.transform.up, Mathf.Rad2Deg *Time.deltaTime*FilterAngularVelocity(command.y), Space.World);

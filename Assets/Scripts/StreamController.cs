@@ -300,7 +300,9 @@ public class StreamController : MonoBehaviour
              RobotInterface.Instance.Connect();
         }
 
+        //what about older projects?
         _queryManager.EnableManager();
+        
      
         //TODO: When online connection is put in, uncomment this
         //_isLooping = true;
