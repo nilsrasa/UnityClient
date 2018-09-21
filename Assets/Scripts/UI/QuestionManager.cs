@@ -375,6 +375,7 @@ public class QuestionManager : MonoBehaviour {
 
         if (GazeTrackingDataManager.Instance)
         {
+            
             GazeTrackingDataManager.Instance.StartRecordingData();
         }
 

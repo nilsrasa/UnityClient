@@ -61,7 +61,7 @@ public class GazeTrackingDataManager : MonoBehaviour
         public int y;
         public int TotalSegmentVisits;
         public float AverageVisitDuration;
-        public float TotalVisitPercentage;
+        public string TotalVisitPercentage;
         public JsonVisitData[] GazeVisits;
 
     }
@@ -103,28 +103,35 @@ public class GazeTrackingDataManager : MonoBehaviour
     private DateTime StartRecordingDate;
     private DateTime EndRecordingDate;
 
-    // Use this for initialization
-    void Start ()
+    void Awake()
     {
+        Instance = this;
+
         //make this path public maybe and add another file for the other  grid
         DataLogFilePath = Application.streamingAssetsPath + "/TestLogData/GazeData.json";
         EndRecording = false;
-	    TotalGazeIterations = 0;
-	    QueryManager = gameObject.GetComponent<QuestionManager>();
-	    Timer = 0;
-	    RecordingData = false;
-	    NewGazeSegment = PreviousGazeSegment =new Vector2(-1,-1);
+        TotalGazeIterations = 0;
+       
+        Timer = 0;
+        RecordingData = false;
+        NewGazeSegment = PreviousGazeSegment = new Vector2(-1, -1);
         //initialize gaze segments
-        PanelSegments = new GazeSegment[NoPanelGazeSegments,NoPanelGazeSegments];
+        PanelSegments = new GazeSegment[NoPanelGazeSegments, NoPanelGazeSegments];
 
-	    for (int i = 0; i < NoPanelGazeSegments; i++)
-	    {
-	        for (int j = 0; j < NoPanelGazeSegments; j++)
-	        {
-                PanelSegments [i,j] = new GazeSegment();
-	        }
+        for (int i = 0; i < NoPanelGazeSegments; i++)
+        {
+            for (int j = 0; j < NoPanelGazeSegments; j++)
+            {
+                PanelSegments[i, j] = new GazeSegment();
+            }
         }
-	}
+    }
+
+    // Use this for initialization
+    void Start ()
+    {
+        QueryManager = gameObject.GetComponent<QuestionManager>();
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -183,7 +190,7 @@ public class GazeTrackingDataManager : MonoBehaviour
                         SegmentGazeDurationTimer += RecordDataTimeInterval;
                     }
 
-                    Debug.Log(SegmentGazeDurationTimer);
+                    //Debug.Log(SegmentGazeDurationTimer);
 
                 }
 
@@ -200,6 +207,7 @@ public class GazeTrackingDataManager : MonoBehaviour
 
     public void StartRecordingData()
     {
+        Debug.Log("Gaze manager enabled ");
         RecordingData = true;
         StartRecordingDate = DateTime.Now;
     }
@@ -208,7 +216,7 @@ public class GazeTrackingDataManager : MonoBehaviour
     //Adds new entry of format : VisitID -> VisitDuration to the list of the segment
     private void RecordData(Vector2 segment,float duration)
     {
-
+        //Debug.Log("Data recorded: Segment [" + segment + " ] - Duration of stare :" + duration );
         //Add to the appropriate segment a new entry on the visit list, as well as increase the time spent on the segment.
         PanelSegments[(int)segment.x, (int)segment.y].SegmentVisits.Add(
             new GazeVisitInformation(++PanelSegments[(int)segment.x, (int)segment.y].TotalNumberOfVisits,CurrentTimeString(),duration)
@@ -236,11 +244,12 @@ public class GazeTrackingDataManager : MonoBehaviour
             for (int j = 0; j < NoPanelGazeSegments; j++)
             {
                 PanelSegments[i, j].AvgVisitDuration = PanelSegments[i, j].AvgVisitDuration / PanelSegments[i, j].TotalNumberOfVisits;
-                PanelSegments[i, j].VisitPercentage = (float) PanelSegments[i, j].TotalNumberOfVisits / TotalGazeIterations;
+                PanelSegments[i, j].VisitPercentage = ( (float) PanelSegments[i, j].TotalNumberOfVisits / TotalGazeIterations) * 100;
             }
         }
 
         //Stop recording data logic
+        Debug.Log("Gaze manager enabled ");
         RecordingData = false;
         EndRecordingDate = DateTime.Now;
         WriteDataToFile();
@@ -302,7 +311,7 @@ public class GazeTrackingDataManager : MonoBehaviour
                 SegmentInfo.y = j;
                 SegmentInfo.TotalSegmentVisits = PanelSegments[i, j].TotalNumberOfVisits;
                 SegmentInfo.AverageVisitDuration = PanelSegments[i, j].AvgVisitDuration;
-                SegmentInfo.TotalVisitPercentage = PanelSegments[i, j].VisitPercentage;
+                SegmentInfo.TotalVisitPercentage = (PanelSegments[i, j].VisitPercentage).ToString("#.00") + "%";
                 SegmentInfo.GazeVisits = new JsonVisitData[PanelSegments[i, j].SegmentVisits.Count];
 
                 //per segment visit info
@@ -311,10 +320,10 @@ public class GazeTrackingDataManager : MonoBehaviour
                     JsonVisitData visitdata = new JsonVisitData();
                     visitdata.Time = PanelSegments[i, j].SegmentVisits[k].VisitTimeStamp;
                     visitdata.VisitDuration = PanelSegments[i, j].SegmentVisits[k].VisitDuration;
-                    SegmentInfo.GazeVisits.Add(visitdata);
-
+                    SegmentInfo.GazeVisits[k]= visitdata;
+                    
                 }
-                trialData.SegmentID[i*(NoPanelGazeSegments-1)+ j] = SegmentInfo;
+                trialData.SegmentID[i*(NoPanelGazeSegments)+ j] = SegmentInfo;
             }
         }
 
