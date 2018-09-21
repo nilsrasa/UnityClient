@@ -1,0 +1,110 @@
+{ 
+ "CustomGridGazeData":[  
+ {
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "9/21/2018 5:04:46 PM",
+    "EndDate": "9/21/2018 5:05:40 PM",
+    "SegmentID": [],
+    "CustomSegmentID": [
+        {
+            "tag": "HighLeftRotHighVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 1.5,
+            "TotalVisitPercentage": "11.11%",
+            "GazeVisits": [
+                {
+                    "Time": "17:5:6",
+                    "VisitDuration": 1.5
+                }
+            ]
+        },
+        {
+            "tag": "HighLeftRotMidVel",
+            "TotalSegmentVisits": 2,
+            "AverageVisitDuration": 2.0,
+            "TotalVisitPercentage": "22.22%",
+            "GazeVisits": [
+                {
+                    "Time": "17:5:9",
+                    "VisitDuration": 2.5
+                },
+                {
+                    "Time": "17:5:19",
+                    "VisitDuration": 1.5
+                }
+            ]
+        },
+        {
+            "tag": "RotateLeftOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotHighVel",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotMidVel",
+            "TotalSegmentVisits": 2,
+            "AverageVisitDuration": 2.25,
+            "TotalVisitPercentage": "22.22%",
+            "GazeVisits": [
+                {
+                    "Time": "17:5:0",
+                    "VisitDuration": 2.0
+                },
+                {
+                    "Time": "17:5:28",
+                    "VisitDuration": 2.5
+                }
+            ]
+        },
+        {
+            "tag": "RotateRightOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "Forward",
+            "TotalSegmentVisits": 4,
+            "AverageVisitDuration": 4.5,
+            "TotalVisitPercentage": "44.44%",
+            "GazeVisits": [
+                {
+                    "Time": "17:4:57",
+                    "VisitDuration": 3.5
+                },
+                {
+                    "Time": "17:5:4",
+                    "VisitDuration": 2.5
+                },
+                {
+                    "Time": "17:5:16",
+                    "VisitDuration": 6.5
+                },
+                {
+                    "Time": "17:5:25",
+                    "VisitDuration": 5.5
+                }
+            ]
+        },
+        {
+            "tag": "DeadZone",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        }
+    ]
+}, 
+$ 
+ ] 
+ }
