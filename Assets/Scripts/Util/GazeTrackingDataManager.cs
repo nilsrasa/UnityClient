@@ -66,8 +66,8 @@ public class GazeTrackingDataManager : MonoBehaviour
         }
     }
 
-    //The following 3 structures are used to store for the JSON serialization. All are similar to the structures above which are 
-    //used internally by this manager. Is it possible to use them instantly instead of copying the datA?
+    //The following 4 structures are used to store information in the desirable format for the JSON serialization. All are similar to the structures above which are 
+    //used internally by this manager. They are kept separate in case we want to alter the way they are saved in the json file.
     [Serializable]
     public struct JsonVisitData
     {
@@ -87,7 +87,6 @@ public class GazeTrackingDataManager : MonoBehaviour
         public JsonVisitData[] GazeVisits;
 
     }
-
 
     [Serializable]
     public struct JsonCustomSegmentData
@@ -116,41 +115,63 @@ public class GazeTrackingDataManager : MonoBehaviour
     //singleton
     public static GazeTrackingDataManager Instance { get; private set; }
 
-    //Standard grid
-    public GazeSegment[,] PanelSegments;
-    public int NoPanelGazeSegments;
-    public float RecordDataTimeInterval;
-    public float GazeTimeThreshold;
-    public bool RecordingData;
+    //Overall manager options
+    [Tooltip("Enables/disables the manager and the recording of data")]
+    [SerializeField] public bool IsActive;
+    [Tooltip("If active, records data for the standard grid format")]
+    [SerializeField] private bool StandardGridActive;
+    [Tooltip("If active, records data for the custom grid format")]
+    [SerializeField] private bool CustomGridActive;
+    [Space(10)]
+    //Standard grid options
+    [Header("Standard M x M grid options")]
+    [Space(4)]
+    [Tooltip("Grid dimensions (width and height). This number generates a NumSegments X NumSegments grid")]
+    [SerializeField] private int NumSegments;
+    [Tooltip("Time threshold for recording a segment visit. If the user stares at a segment for less time, the data will be discarded")]
+    [SerializeField] private float StGazeTimeThreshold;
+    [Tooltip("Record time interval")]
+    [SerializeField] private float StRecordTimeInterval;
+    [Space(10)]
+    //Custom grid options
+    [Header("Custom grid options.")]
+    [Space(4)]
+    [Tooltip("Allows the creation of modular segments whose dimensions are defined explicitly by the user.")]
+    public CustomSegment[] CustomSegments;
+    [Tooltip("Time threshold for recording a segment visit. If the user stares at a segment for less time, the data will be discarded")]
+    [SerializeField] private float CustGazeTimeThreshold;
+    [Tooltip("Record time interval")]
+    [SerializeField] private float CustRecordTimeInterval;
+    [Space(10)]
+
+    //Recording options
+    //private bool StRecordingData;
     public bool EndRecording;
 
-
     //Save file paths
-    [Header("Save path files")]
-    [SerializeField] private string StandardGridDataFilepath;
-    [SerializeField] private string CustomGridDataFilepath;
-
-    //custom grid 
-    public CustomSegment[] CustomSegments;
-
-    [Header("JSON formatting ")]
-    [Tooltip("Makes the JSON file valid by removing special characters used for appending information.")]
-    [SerializeField] private bool FinalizeCustomSegFile = false;
-    [Tooltip("Resets the JSON file to an initial preset format.")]
-    [SerializeField] private bool ClearCustomSegFile = false;
+    //Standard grid
+    [Header("Json file options")]
+    [Space(4)]
+    [SerializeField] private string StandardDataFilepath;
     [Tooltip("Makes the JSON file valid by removing special characters used for appending information.")]
     [SerializeField] private bool FinalizeStandardSegFile = false;
     [Tooltip("Resets the JSON file to an initial preset format.")]
     [SerializeField] private bool ClearStandardSegFile = false;
-
-    private QuestionManager QueryManager;
+    [Space(5)]
+    //Custom grid
+    [SerializeField] private string CustomDataFilepath;
+    [Tooltip("Makes the JSON file valid by removing special characters used for appending information.")]
+    [SerializeField] private bool FinalizeCustomSegFile = false;
+    [Tooltip("Resets the JSON file to an initial preset format.")]
+    [SerializeField] private bool ClearCustomSegFile = false;
    
-    private float Timer;
-    
- 
-
+  
+    private QuestionManager QueryManager;
+    private float StTimer;
+    private float CustTimer;
 
     //Standard grid info
+    private GazeSegment[,] PanelSegments;
     private Vector2 NewGazeSegment;
     private Vector2 PreviousGazeSegment;
     private DateTime StartRecordingDate;
@@ -172,22 +193,22 @@ public class GazeTrackingDataManager : MonoBehaviour
         Instance = this;
 
         //make this path public maybe and add another file for the other  grid
-        StandardGridDataFilepath = Application.streamingAssetsPath + "/" + StandardGridDataFilepath;
-        CustomGridDataFilepath = Application.streamingAssetsPath + "/" + CustomGridDataFilepath;
+        StandardDataFilepath = Application.streamingAssetsPath + "/" + StandardDataFilepath;
+        CustomDataFilepath = Application.streamingAssetsPath + "/" + CustomDataFilepath;
         EndRecording = false;
+        IsActive = false;
         TotalGazeIterations = 0;
+        StTimer = CustTimer = 0;
        
-        Timer = 0;
-        RecordingData = false;
         NewGazeSegment = PreviousGazeSegment = new Vector2(-1, -1);
         CNewGazeSegment = CPreviousGazeSegment = -1;
 
-        //initialize gaze segments
-        PanelSegments = new GazeSegment[NoPanelGazeSegments, NoPanelGazeSegments];
+        //initialize segments
+        PanelSegments = new GazeSegment[NumSegments, NumSegments];
 
-        for (int i = 0; i < NoPanelGazeSegments; i++)
+        for (int i = 0; i < NumSegments; i++)
         {
-            for (int j = 0; j < NoPanelGazeSegments; j++)
+            for (int j = 0; j < NumSegments; j++)
             {
                 PanelSegments[i, j] = new GazeSegment();
             }
@@ -208,66 +229,67 @@ public class GazeTrackingDataManager : MonoBehaviour
 	// Update is called once per frame
 	void Update () {
 
-        //Pressing button to endrecording, do final calculations and write in json
+        //--------- The following act as buttons that will call a function when activated. This does not add unnecessary UI in our scene but keeps everything 
+        //in the inspector
+        
+        
 	    if (EndRecording)
 	    {
 	        FinalizeStats();
 	        EndRecording = false;
 	    }
 
-	    //General options 
+	    
 	    if (FinalizeStandardSegFile)
 	    {
-	        DeleteJsonEndings(StandardGridDataFilepath);
+	        DeleteJsonEndings(StandardDataFilepath);
 	        FinalizeStandardSegFile = false;
 	    }
 
 	    if (ClearStandardSegFile)
 	    {
-	        ResetJSONFile(StandardGridDataFilepath,"GazeData");
+	        ResetJSONFile(StandardDataFilepath,"GazeData");
 	        ClearStandardSegFile = false;
 	    }
 
 	    if (FinalizeCustomSegFile)
 	    {
-	        DeleteJsonEndings(CustomGridDataFilepath);
+	        DeleteJsonEndings(CustomDataFilepath);
 	        FinalizeCustomSegFile = false;
 	    }
 
 	    if (ClearCustomSegFile)
 	    {
-	        ResetJSONFile(CustomGridDataFilepath, "CustomGridGazeData");
+	        ResetJSONFile(CustomDataFilepath, "CustomGridGazeData");
 	        ClearCustomSegFile = false;
 	    }
 
-
-        if (QueryManager.IsActivated() && RecordingData)
+        //Main loop
+        //TODO REMOVE QUERYMANAGER DEPENDANCE HERE. Instead check if the panel is active?
+        if (QueryManager.IsActivated() && IsActive)
 	    {
-	        Timer += Time.deltaTime;
-            //this could run in a coroutine as well
-	        if (Timer > RecordDataTimeInterval)
+	       
+            //if this causes erros because it is sampled every frame instead of within the time interval put it back in each if statement
+	        Vector2 GazeCoords = VRController.Instance.GetPanelGazeCoordinates();
+
+            //Standard grid
+            if (StandardGridActive)
 	        {
-	            Vector2 GazeCoords = VRController.Instance.GetPanelGazeCoordinates();
-	         
+	            StTimer += Time.deltaTime;
 
-
-                //If the user is staring somewhere at the panel
-                if (GazeCoords != new Vector2(-2, -2))
+                //If the user is staring somewhere in the panel
+                if (StTimer > StRecordTimeInterval && GazeCoords != new Vector2(-2, -2))
 	            {
-
-
-                    //----------------StandardGrid -------------------------
                     //get gaze segment according to coordinates
 	                NewGazeSegment = GetGazeSegmentID(GazeCoords);
                     
-
-                    //If the new Gazesegment is different than the previous one
+                    //If the new Gazesegment has changed
                     if (NewGazeSegment != PreviousGazeSegment)
                     {
                         //Record stare duration data for the previous segment and reset the timer
                         //Recording will only happen if the tester has stared at a section for more than 
                         // the threshold of 1 second
-                        if (SegmentGazeDurationTimer > GazeTimeThreshold) { 
+                        if (SegmentGazeDurationTimer > StGazeTimeThreshold) { 
                             
                             RecordData(PreviousGazeSegment, SegmentGazeDurationTimer);
                             TotalGazeIterations++;
@@ -278,9 +300,21 @@ public class GazeTrackingDataManager : MonoBehaviour
                     else
                     {
                         //for now simply add the interval to the timer
-                        SegmentGazeDurationTimer += RecordDataTimeInterval;
+                        SegmentGazeDurationTimer += StRecordTimeInterval;
                     }
+                }
+                //reset timer
+                StTimer = 0.0f;
 
+	        }
+
+            //Customgrid
+	        if (CustomGridActive)
+	        {
+	            CustTimer += Time.deltaTime;
+                //If the user is staring somewhere in the panel
+                if (CustTimer > CustRecordTimeInterval && GazeCoords != new Vector2(-2, -2))
+	            {
 	                //----------------CustomGrid -------------------------
 	                CNewGazeSegment = GetCustomGazeSegmentID(GazeCoords);
 	                //If the new Gazesegment is different than the previous one
@@ -289,11 +323,10 @@ public class GazeTrackingDataManager : MonoBehaviour
 	                    //Record stare duration data for the previous segment and reset the timer
 	                    //Recording will only happen if the tester has stared at a section for more than 
 	                    // the threshold of 1 second
-	                    if (CSegmentGazeDurationTimer > GazeTimeThreshold)
+	                    if (CSegmentGazeDurationTimer > CustGazeTimeThreshold)
 	                    {
-
 	                        RecordCustomGazeData(CPreviousGazeSegment, CSegmentGazeDurationTimer);
-                            CTotalGazeIterations++;
+	                        CTotalGazeIterations++;
 	                    }
 	                    CSegmentGazeDurationTimer = 0.0f;
 	                    CPreviousGazeSegment = CNewGazeSegment;
@@ -301,29 +334,34 @@ public class GazeTrackingDataManager : MonoBehaviour
 	                else
 	                {
 	                    //for now simply add the interval to the timer
-	                    CSegmentGazeDurationTimer += RecordDataTimeInterval;
+	                    CSegmentGazeDurationTimer += CustRecordTimeInterval;
 	                }
-                    //Debug.Log(SegmentGazeDurationTimer);
-
                 }
 
-                //reset timer
-                Timer = 0.0f;
-
-	        }
+               
+            }
 
 	    }
 
 
 	}
 
-
-    public void StartRecordingData()
+    public void EnableManager()
     {
-        Debug.Log("Gaze manager enabled ");
-        RecordingData = true;
+        Debug.Log("Gaze manager enabled");
+        IsActive = true;
         StartRecordingDate = DateTime.Now;
     }
+
+    //enable = true -> resumes recording
+    //enable = false -> pauses recording
+    public void RecordingData(bool enable)
+    {
+        //this simply (un)pauses the manager. Does not finalize anything or reset anything
+        IsActive = enable;
+        Debug.Log(enable ? "Gaze manager unpaused " : "Gaze manager paused ");
+    }
+
 
     //Increases segment visit count
     //Adds new entry of format : VisitID -> VisitDuration to the list of the segment
@@ -357,32 +395,60 @@ public class GazeTrackingDataManager : MonoBehaviour
 
     private void FinalizeStats()
     {
-
-        //Loop through all segments and just divide the duration with the total visits. Also calculate percentages after adding
-        //total number of visits
-        for (int i = 0; i < NoPanelGazeSegments; i++)
-        {
-            for (int j = 0; j < NoPanelGazeSegments; j++)
+        EndRecordingDate = DateTime.Now;
+        if (StandardGridActive) { 
+         //Loop through all segments and just divide the duration with the total visits. Also calculate percentages after adding
+           //total number of visits
+            for (int i = 0; i < NumSegments; i++)
             {
-                PanelSegments[i, j].AvgVisitDuration = PanelSegments[i, j].AvgVisitDuration / PanelSegments[i, j].TotalNumberOfVisits;
-                PanelSegments[i, j].VisitPercentage = ( (float) PanelSegments[i, j].TotalNumberOfVisits / TotalGazeIterations) * 100;
+                for (int j = 0; j < NumSegments; j++)
+                {
+                    if (PanelSegments[i, j].TotalNumberOfVisits != 0)
+                    {
+                        PanelSegments[i, j].AvgVisitDuration =
+                            PanelSegments[i, j].AvgVisitDuration / PanelSegments[i, j].TotalNumberOfVisits;
+                        PanelSegments[i, j].VisitPercentage =
+                            ((float) PanelSegments[i, j].TotalNumberOfVisits / TotalGazeIterations) * 100;
+                    }
+                    else
+                    {
+                        PanelSegments[i, j].AvgVisitDuration = 0;
+
+                        PanelSegments[i, j].VisitPercentage = 0;
+                    }
+
+                }
             }
+            WriteDataToFile(StandardDataFilepath, 0);
+
         }
 
-        for (int i = 0; i < CustomSegments.Length; i++)
+        if (CustomGridActive)
         {
-            CustomSegments[i].SegmentInfo.AvgVisitDuration = CustomSegments[i].SegmentInfo.AvgVisitDuration / CustomSegments[i].SegmentInfo.TotalNumberOfVisits;
-            CustomSegments[i].SegmentInfo.VisitPercentage = ((float)CustomSegments[i].SegmentInfo.TotalNumberOfVisits / CTotalGazeIterations) *100;
+            for (int i = 0; i < CustomSegments.Length; i++)
+            {
+                if (CustomSegments[i].SegmentInfo.TotalNumberOfVisits != 0)
+                {
+                    CustomSegments[i].SegmentInfo.AvgVisitDuration =
+                        CustomSegments[i].SegmentInfo.AvgVisitDuration /
+                        CustomSegments[i].SegmentInfo.TotalNumberOfVisits;
+                    CustomSegments[i].SegmentInfo.VisitPercentage =
+                        ((float) CustomSegments[i].SegmentInfo.TotalNumberOfVisits / CTotalGazeIterations) * 100;
+                }
+                else
+                {
+                    CustomSegments[i].SegmentInfo.AvgVisitDuration = 0;
+                    CustomSegments[i].SegmentInfo.VisitPercentage = 0;
+                }
+              
+            }
+            WriteDataToFile(CustomDataFilepath, 1);
         }
+        
 
         //Stop recording data logic
         Debug.Log("Gaze manager disabled ");
-        RecordingData = false;
-        EndRecordingDate = DateTime.Now;
-
-        //Write data in files
-        WriteDataToFile(StandardGridDataFilepath,0);
-        WriteDataToFile(CustomGridDataFilepath,1);
+        IsActive = false;   
 
     }
 
@@ -391,12 +457,12 @@ public class GazeTrackingDataManager : MonoBehaviour
         float x = GazeCoords.x;
         float y = GazeCoords.y;
       
-        float cellDim = 2.0f / NoPanelGazeSegments;
+        float cellDim = 2.0f / NumSegments;
         
         int row = -1;
         int column = -1;
         //Naive double loop per segment or binary search. Depends on number of segments
-        for (int i = 0; i < NoPanelGazeSegments; i++)
+        for (int i = 0; i < NumSegments; i++)
         {
             if (-1 + i * cellDim <= x && x < -1 + (i + 1) * cellDim)
             {
@@ -404,11 +470,11 @@ public class GazeTrackingDataManager : MonoBehaviour
             }
         }
 
-        for (int j = 0; j < NoPanelGazeSegments; j++)
+        for (int j = 0; j < NumSegments; j++)
         {
             if (-1 + j * cellDim <= y && y < -1 + (j + 1) * cellDim)
             {
-                row = NoPanelGazeSegments -1 -j;
+                row = NumSegments -1 -j;
             }
         }
 
@@ -435,21 +501,20 @@ public class GazeTrackingDataManager : MonoBehaviour
     private void WriteDataToFile(string Filepath , int GridID)
     {
 
-        Debug.Log("Saving gaze data to file");
-
-        if (GridID == 0) { 
+        if (GridID == 0) {
+            Debug.Log("Saving standard grid data to file");
             //Per trial info
             JsonGazeData trialData = new JsonGazeData();
             trialData.UserID = QueryManager.GetUserID();
             trialData.Maze = QueryManager.GetMazeID();
             trialData.StartDate = StartRecordingDate.ToString();
             trialData.EndDate = EndRecordingDate.ToString();
-            trialData.SegmentID= new JsonGazeSegmentData[NoPanelGazeSegments* NoPanelGazeSegments]; 
+            trialData.SegmentID= new JsonGazeSegmentData[NumSegments* NumSegments]; 
 
             //Per segment info
-            for (int i = 0; i < NoPanelGazeSegments; i++)
+            for (int i = 0; i < NumSegments; i++)
             {
-                for (int j = 0; j < NoPanelGazeSegments; j++)
+                for (int j = 0; j < NumSegments; j++)
                 {
 
                     GazeSegment CurrentSegment = PanelSegments[i, j];
@@ -471,11 +536,9 @@ public class GazeTrackingDataManager : MonoBehaviour
                         SegmentInfo.GazeVisits[k]= visitdata;
                     
                     }
-                    trialData.SegmentID[i*(NoPanelGazeSegments)+ j] = SegmentInfo;
+                    trialData.SegmentID[i*(NumSegments)+ j] = SegmentInfo;
                 }
             }
-
-      
 
             //write to file 
             string json = JsonUtility.ToJson(trialData, true);
@@ -495,6 +558,8 @@ public class GazeTrackingDataManager : MonoBehaviour
         }
         else if (GridID == 1)
         {
+            Debug.Log("Saving custom grid data to file");
+
             // I strongly dislike this
             //Per trial info
             JsonGazeData customTrialData = new JsonGazeData();
@@ -554,7 +619,7 @@ public class GazeTrackingDataManager : MonoBehaviour
     private void ResetJSONFile(string Filepath, string JsonObjName)
     {
 
-        Debug.Log("JSON gaze data file has been reset");
+        Debug.Log("JSON gaze data file has been reset : " + JsonObjName);
         string InitText = "{ \r\n \"" + JsonObjName + "\":[  \r\n $ \r\n ] \r\n }";
 
         File.WriteAllText(Filepath, InitText);

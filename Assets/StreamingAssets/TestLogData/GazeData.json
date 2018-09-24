@@ -123,6 +123,87 @@
     ],
     "CustomSegmentID": []
 }, 
+{
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "9/24/2018 3:39:14 PM",
+    "EndDate": "9/24/2018 3:39:39 PM",
+    "SegmentID": [
+        {
+            "x": 0,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 1,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "x": 0,
+            "y": 2,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "x": 1,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "x": 1,
+            "y": 1,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "x": 1,
+            "y": 2,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "x": 2,
+            "y": 0,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "x": 2,
+            "y": 1,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "x": 2,
+            "y": 2,
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        }
+    ],
+    "CustomSegmentID": []
+}, 
 $ 
  ] 
  }

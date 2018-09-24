@@ -23,7 +23,7 @@ public class StreamController : MonoBehaviour
     [SerializeField] public ControlType _selectedControlType = ControlType.Head;
     [SerializeField] public bool VirtualEnvironment = false;
 
-    public VirtualRobot VirtualRobotController;
+    //public VirtualRobot VirtualRobotController;
 
     [Header("Cameras and Projection")]
     [SerializeField] private bool FeedbackFromCamera = true;
@@ -111,8 +111,8 @@ public class StreamController : MonoBehaviour
 
        // rosbridge = new ROSBridgeWebSocketConnection(robotFile.RosBridgeUri, robotFile.RosBridgePort, robotName);
     
-       VirtualRobotController.InitialiseRobot(RobotInterface.Instance._rosBridge, robotFile, robotName);
-        VirtualRobotController.OverridePositionAndOrientation(VirtualRobotController.gameObject.transform.position, VirtualRobotController.gameObject.transform.rotation);
+       //VirtualRobotController.InitialiseRobot(RobotInterface.Instance._rosBridge, robotFile, robotName);
+       // VirtualRobotController.OverridePositionAndOrientation(VirtualRobotController.gameObject.transform.position, VirtualRobotController.gameObject.transform.rotation);
     }
 
     public void Update()
@@ -302,7 +302,7 @@ public class StreamController : MonoBehaviour
 
         //what about older projects?
         _queryManager.EnableManager();
-        
+        GazeTrackingDataManager.Instance.EnableManager();
      
         //TODO: When online connection is put in, uncomment this
         //_isLooping = true;

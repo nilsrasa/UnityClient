@@ -93,7 +93,7 @@ public class QuestionManager : MonoBehaviour {
   
    
     //Reference variables
-    private GazeTrackingDataManager GazeDataManager;
+    
     private GameObject PopUpMessagePanel;
     private GameObject QueryPanel;
     private Text QueryText;
@@ -136,7 +136,7 @@ public class QuestionManager : MonoBehaviour {
         PopUpMessagePanel = transform.GetChild(0).gameObject;
         QueryPanel = transform.GetChild(1).gameObject;
         source = gameObject.GetComponent<AudioSource>();
-        GazeDataManager = gameObject.GetComponent<GazeTrackingDataManager>();
+      
 
         //If children gos were retrieved succesfully 
         if (PopUpMessagePanel && QueryPanel)
@@ -211,19 +211,12 @@ public class QuestionManager : MonoBehaviour {
                     cqIndex = QueryListCounters[CurrentQListIndex]; Debug.Log("Question index  " + cqIndex);// which question index of that previous set
                     CurrentQueryText = QueriesList[CurrentQListIndex].QueryList[cqIndex]; Debug.Log("Question : " + CurrentQueryText); // the actual text of the question
 
-                    RSList[CurrentQListIndex][cqIndex].PopUpStartTime = CurrentTimeString(); 
+                    RSList[CurrentQListIndex][cqIndex].PopUpStartTime = CurrentTimeString();
 
                     //Instead of checking which type of locomotion is on  just disable both for now
+                    PauseManagers(false);
 
-                    if (StreamController.Instance._selectedControlType == StreamController.ControlType.Eyes)
-                    {
-                        EyeControlPanel.SetExternallyDisabled(true);
-                    }
-                    else if (StreamController.Instance._selectedControlType == StreamController.ControlType.Joystick)
-                    {
-                        RobotInterface.Instance.EnableRobotCommands(false);
-                    }
-                    
+
                     ShowPopUp();
                     DisplayingPopUp = true;
                 }
@@ -294,14 +287,17 @@ public class QuestionManager : MonoBehaviour {
                 CloseQuery();
                 IncrementQuestion();
                 //reset the user's control 
-                if (StreamController.Instance._selectedControlType == StreamController.ControlType.Eyes)
-                {
-                    EyeControlPanel.SetExternallyDisabled(false);
-                }
-                else if (StreamController.Instance._selectedControlType == StreamController.ControlType.Joystick)
-                {
-                    RobotInterface.Instance.EnableRobotCommands(true) ;
-                }
+                //if (StreamController.Instance._selectedControlType == StreamController.ControlType.Eyes)
+                //{
+                //    EyeControlPanel.SetExternallyDisabled(false);
+                //}
+                //else if (StreamController.Instance._selectedControlType == StreamController.ControlType.Joystick)
+                //{
+                //    RobotInterface.Instance.EnableRobotCommands(true) ;
+                //}
+
+                PauseManagers(true);
+
 
                 PostAnswerMode = true;
             }
@@ -373,12 +369,6 @@ public class QuestionManager : MonoBehaviour {
         Debug.Log("QueryManager enabled");
         IsActive = true;
 
-        if (GazeTrackingDataManager.Instance)
-        {
-            
-            GazeTrackingDataManager.Instance.StartRecordingData();
-        }
-
     }
 
     private void ShowPopUp()
@@ -393,7 +383,7 @@ public class QuestionManager : MonoBehaviour {
     {
         //For now no animations or anything else
         PopUpMessagePanel.SetActive(false);
-      ;
+      
     }
 
     private void ShowQuery()
@@ -439,16 +429,12 @@ public class QuestionManager : MonoBehaviour {
         {
 
             ExperimentEndDate = DateTime.Now;
-            GazeDataManager.EndRecording = true;
             IsActive = false;
             Debug.Log("QueryManager Deactivated");
             WriteDataToFile();
 
-            //DISABLE GAZE RECORDING
-            if (GazeTrackingDataManager.Instance)
-            {
-                GazeTrackingDataManager.Instance.EndRecording = true;
-            }
+            //finalize operations for external systems 
+            DisableExternalSystems();
 
         }
     }
@@ -595,5 +581,50 @@ public class QuestionManager : MonoBehaviour {
         return MazeID;
     }
 
-    
+    //CHANGE THIS NAME AND ADD VIRTUAL CONTROLLER
+    public void PauseManagers(bool enable)
+    {
+        //pause/disable managers
+        if (!enable)
+        {
+            EyeControlPanel.SetExternallyDisabled(true);
+            GazeTrackingDataManager.Instance.RecordingData(false);
+
+            if (StreamController.Instance.VirtualEnvironment)
+            {
+                VirtualUnityController.Instance.Disconnect();
+            }
+            else
+            {
+                RobotInterface.Instance.EnableRobotCommands(false);
+            }
+           
+           
+        }
+        else
+        {
+            EyeControlPanel.SetExternallyDisabled(false);
+            GazeTrackingDataManager.Instance.RecordingData(true);
+
+            if (StreamController.Instance.VirtualEnvironment)
+            {
+                VirtualUnityController.Instance.Connect();
+            }
+            else
+            {
+                RobotInterface.Instance.EnableRobotCommands(true);
+            }
+        }
+
+
+    }
+
+    public void DisableExternalSystems()
+    {
+        if (GazeTrackingDataManager.Instance)
+        {
+            GazeTrackingDataManager.Instance.EndRecording = true;
+        }
+    }
+
 }

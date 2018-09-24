@@ -77,22 +77,22 @@ public class VRController : MonoBehaviour
                 break;
 
             case StreamController.ControlType.Eyes:
-                List<Vector3> eyeDirections = new List<Vector3>();
-                FoveInterfaceBase.EyeRays rays = _foveInterface.GetGazeRays();
-                EFVR_Eye eyeClosed = FoveInterface.CheckEyesClosed();
-                if (eyeClosed != EFVR_Eye.Both && eyeClosed != EFVR_Eye.Left)
-                    eyeDirections.Add(rays.left.direction);
-                if (eyeClosed != EFVR_Eye.Both && eyeClosed != EFVR_Eye.Right)
-                    eyeDirections.Add(rays.right.direction);
-                Vector3 direction = Vector3.zero;
+                //List<Vector3> eyeDirections = new List<Vector3>();
+                //FoveInterfaceBase.EyeRays rays = _foveInterface.GetGazeRays();
+                //EFVR_Eye eyeClosed = FoveInterface.CheckEyesClosed();
+                //if (eyeClosed != EFVR_Eye.Both && eyeClosed != EFVR_Eye.Left)
+                //    eyeDirections.Add(rays.left.direction);
+                //if (eyeClosed != EFVR_Eye.Both && eyeClosed != EFVR_Eye.Right)
+                //    eyeDirections.Add(rays.right.direction);
+                //Vector3 direction = Vector3.zero;
 
-                foreach (Vector3 eyeDirection in eyeDirections)
-                {
-                    direction += eyeDirection;
-                }
-                direction = direction / eyeDirections.Count;
+                //foreach (Vector3 eyeDirection in eyeDirections)
+                //{
+                //    direction += eyeDirection;
+                //}
+                //direction = direction / eyeDirections.Count;
 
-                ray = new Ray(Head.transform.position, direction * 1000);
+                //ray = new Ray(Head.transform.position, direction * 1000);
                 break;
 
             case StreamController.ControlType.Joystick:
@@ -101,11 +101,10 @@ public class VRController : MonoBehaviour
                  //   Joystick input
                 Vector2 JoyInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
-
                 //if the virtual environment is on, send the command to the VirtualUnityController    
                 if (StreamController.Instance.VirtualEnvironment)
                 {
-                    if (VirtualUnityController.Instance.IsConnected)
+                    if (VirtualUnityController.Instance.IsActive)
                     {
                         VirtualUnityController.Instance.JoystickCommand(JoyInput);
                     }
@@ -117,14 +116,32 @@ public class VRController : MonoBehaviour
                     {
                         RobotInterface.Instance.DirectCommandRobot(JoyInput);
                     }
-                    //after we send command we want to return
-                    return;
-                    }
+                   
+                }
             
                break;
             }
            
         }
+
+        //--Eye direction calculation for all occasions occasions
+        List<Vector3> eyeDirections = new List<Vector3>();
+        FoveInterfaceBase.EyeRays rays = _foveInterface.GetGazeRays();
+        EFVR_Eye eyeClosed = FoveInterface.CheckEyesClosed();
+        if (eyeClosed != EFVR_Eye.Both && eyeClosed != EFVR_Eye.Left)
+            eyeDirections.Add(rays.left.direction);
+        if (eyeClosed != EFVR_Eye.Both && eyeClosed != EFVR_Eye.Right)
+            eyeDirections.Add(rays.right.direction);
+        Vector3 direction = Vector3.zero;
+
+        foreach (Vector3 eyeDirection in eyeDirections)
+        {
+            direction += eyeDirection;
+        }
+        direction = direction / eyeDirections.Count;
+
+        ray = new Ray(Head.transform.position, direction * 1000);
+        //---------------------------------------------------------
 
         //Positioning of the cursor
         _cursorCanvas.position = Head.position + ray.direction * _cursorDistance;
@@ -139,11 +156,6 @@ public class VRController : MonoBehaviour
                 ResetHoveredObject();
                 return;
             }
-            //else
-            //{
-            //    Debug.Log(gazeObject.tag);
-
-            //}
           
             //Not sure why this is not null when you gaze at gameobjects which do not have the robotControltrackpad on them but apparently, every gazeobject sends commands\
 
@@ -151,16 +163,17 @@ public class VRController : MonoBehaviour
             RobotControlTrackPad robotControl = gazeObject.GetComponent<RobotControlTrackPad>();
             if (robotControl != null && gazeObject.CompareTag("EyeControlPanel"))
             {
-                //Control result is provided on hit
+                //Control result is provided on hit. This is updated for both cases of input
                 controlResult = robotControl.GetControlResult(hit.point);
                 
-                //If the robotcontrols are activated
-                if (robotControl.IsActivated & !robotControl.IsExternallyDisabled())
+                //If the robotcontrols are activated and the eye tracking is used for motion then send the command to the appropriate controller
+                if (robotControl.IsActivated & !robotControl.IsExternallyDisabled() && 
+                    _selectedControlType==StreamController.ControlType.Eyes )
                 {
                     if (StreamController.Instance.VirtualEnvironment)
                     {
                         Debug.Log("Sending gaze command to robot");
-                        if (VirtualUnityController.Instance.IsConnected)
+                        if (VirtualUnityController.Instance.IsActive)
                         {
                             VirtualUnityController.Instance.GazeCommand(controlResult);
                         }

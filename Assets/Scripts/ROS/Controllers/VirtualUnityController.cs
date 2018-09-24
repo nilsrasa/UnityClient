@@ -18,7 +18,7 @@ public class VirtualUnityController : MonoBehaviour {
     [SerializeField] private float MaxAngularVelocity = 0.8f;
     [SerializeField] private float BackwardsVelocity = 0.3f;
 
-    [HideInInspector] public bool IsConnected = false;
+    [HideInInspector] public bool IsActive = false;
     private Rigidbody VirtualBot;
 
     //these should be in robotcontrolpad maybe , not here as filters. They are part of the UI.
@@ -100,42 +100,41 @@ public class VirtualUnityController : MonoBehaviour {
 
     public void JoystickCommand(Vector2 input)
     {
-       
-        Vector2 movement = new Vector2(input.y, input.x);
-
-        if (!movement.Equals(new Vector2(0, 0)) && !InitialShake)
+        if (IsActive)
         {
-            CameraShaker.Instance.ShakeOnce(1f, 1f, 0.2f, 0.2f);
-            InitialShake = true;
-        }
+     
+            Vector2 movement = new Vector2(input.y, input.x);
+
+            if (!movement.Equals(new Vector2(0, 0)) && !InitialShake)
+            {
+                CameraShaker.Instance.ShakeOnce(1f, 1f, 0.2f, 0.2f);
+                InitialShake = true;
+            }
 
 
-        if (movement.Equals(new Vector2(0, 0)))
-        {
-            InitialShake = false;
-        }
+            if (movement.Equals(new Vector2(0, 0)))
+            {
+                InitialShake = false;
+            }
     
-        // Debug.Log(movement.x);
-        if (movement.x > MaxLinearVelocity) movement.x = MaxLinearVelocity;
-        else if (movement.x < 0) movement.x = -BackwardsVelocity;
+            // Debug.Log(movement.x);
+            if (movement.x > MaxLinearVelocity) movement.x = MaxLinearVelocity;
+            else if (movement.x < 0) movement.x = -BackwardsVelocity;
 
-        if (Mathf.Abs(movement.y) > MaxAngularVelocity)
-        {
-            if (movement.y < 0) movement.y = -MaxAngularVelocity;
-            else movement.y = MaxAngularVelocity;
-        }
+            if (Mathf.Abs(movement.y) > MaxAngularVelocity)
+            {
+                if (movement.y < 0) movement.y = -MaxAngularVelocity;
+                else movement.y = MaxAngularVelocity;
+            }
        
-        Vector3 velocity = this.gameObject.transform.right * movement.x;
+            Vector3 velocity = this.gameObject.transform.right * movement.x;
         
-        VirtualBot.AddForce(velocity, ForceMode.VelocityChange);
-        this.gameObject.transform.Rotate(this.gameObject.transform.up, Mathf.Rad2Deg * Time.deltaTime * movement.y, Space.World);
+            VirtualBot.AddForce(velocity, ForceMode.VelocityChange);
+            this.gameObject.transform.Rotate(this.gameObject.transform.up, Mathf.Rad2Deg * Time.deltaTime * movement.y, Space.World);
+
+        }
     }
 
-    void BalanceRobot(Vector2 input)
-    {
-       
-
-    }
 
 
     void OnCollisionEnter(Collision collision)
@@ -177,22 +176,32 @@ public class VirtualUnityController : MonoBehaviour {
 
     public void GazeCommand(Vector2 input)
     {
-        //map correctly x axis to angular and y axis to linear from the input of the gazepad.
-        // no need to reverse 
-        Vector2 command = new Vector2(input.y, input.x);
+        if (IsActive)
+        {
 
-        if (!InsideDeadZone(command.x, command.y))
-        {
-            //normalize speed and send data
-           // Debug.Log(FilterLinearVelocity(command.x));
-            VirtualBot.velocity = this.gameObject.transform.right * FilterLinearVelocity(command.x);
-            //VirtualBot.angularVelocity = this.gameObject.transform.up; // * FilterAngularVelocity(command.y);
-            this.gameObject.transform.Rotate(this.gameObject.transform.up, Mathf.Rad2Deg *Time.deltaTime*FilterAngularVelocity(command.y), Space.World);
+
+            //map correctly x axis to angular and y axis to linear from the input of the gazepad.
+            // no need to reverse 
+            Vector2 command = new Vector2(input.y, input.x);
+
+            if (!InsideDeadZone(command.x, command.y))
+            {
+                //normalize speed and send data
+                // Debug.Log(FilterLinearVelocity(command.x));
+                VirtualBot.velocity = this.gameObject.transform.right * FilterLinearVelocity(command.x);
+                //VirtualBot.angularVelocity = this.gameObject.transform.up; // * FilterAngularVelocity(command.y);
+                this.gameObject.transform.Rotate(this.gameObject.transform.up,
+                    Mathf.Rad2Deg * Time.deltaTime * FilterAngularVelocity(command.y), Space.World);
+            }
+            else
+            {
+                StopRobot();
+            }
         }
-        else
-        {
-          StopRobot();
-        }
+        //else
+        //{
+        //    StopRobot();
+        //}
     }
 
     private float FilterLinearVelocity(float vel)
@@ -250,12 +259,12 @@ public class VirtualUnityController : MonoBehaviour {
     //allow the commands to control the virtual robot
     public void Connect()
     {
-        IsConnected = true;
+        IsActive = true;
     }
     //remove control over virtual robot
     public void Disconnect()
     {
-        IsConnected = false;
+        IsActive = false;
     }
 
     //returns true if we are in the bounding box of the dead zone

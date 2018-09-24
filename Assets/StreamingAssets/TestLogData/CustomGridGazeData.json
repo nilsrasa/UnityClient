@@ -105,6 +105,90 @@
         }
     ]
 }, 
+{
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "9/24/2018 3:39:14 PM",
+    "EndDate": "9/24/2018 3:39:39 PM",
+    "SegmentID": [],
+    "CustomSegmentID": [
+        {
+            "tag": "HighLeftRotHighVel",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighLeftRotMidVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 29.20003890991211,
+            "TotalVisitPercentage": "25.00%",
+            "GazeVisits": [
+                {
+                    "Time": "15:39:32",
+                    "VisitDuration": 29.20003890991211
+                }
+            ]
+        },
+        {
+            "tag": "RotateLeftOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotHighVel",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotMidVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 28.60003662109375,
+            "TotalVisitPercentage": "25.00%",
+            "GazeVisits": [
+                {
+                    "Time": "15:39:25",
+                    "VisitDuration": 28.60003662109375
+                }
+            ]
+        },
+        {
+            "tag": "RotateRightOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "Forward",
+            "TotalSegmentVisits": 2,
+            "AverageVisitDuration": 93.79971313476563,
+            "TotalVisitPercentage": "50.00%",
+            "GazeVisits": [
+                {
+                    "Time": "15:39:24",
+                    "VisitDuration": 70.80006408691406
+                },
+                {
+                    "Time": "15:39:31",
+                    "VisitDuration": 116.79936218261719
+                }
+            ]
+        },
+        {
+            "tag": "DeadZone",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        }
+    ]
+}, 
 $ 
  ] 
  }
