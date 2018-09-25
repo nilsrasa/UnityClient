@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using Fove.Managed;
 using UnityEngine;
 
@@ -172,9 +173,10 @@ public class VRController : MonoBehaviour
                 {
                     if (StreamController.Instance.VirtualEnvironment)
                     {
-                        Debug.Log("Sending gaze command to robot");
+                        
                         if (VirtualUnityController.Instance.IsActive)
                         {
+                            Debug.Log("Sending gaze command to robot");
                             VirtualUnityController.Instance.GazeCommand(controlResult);
                         }
                         else{Debug.Log("VirtualUnityController is not connected"); }
@@ -208,6 +210,13 @@ public class VRController : MonoBehaviour
         }
         else
             ResetHoveredObject();
+    }
+
+    IEnumerator DelayCommand()
+    {
+        print(Time.time);
+        yield return new WaitForSecondsRealtime(0.5f);
+        print(Time.time);
     }
 
     private void ResetHoveredObject()

@@ -42,10 +42,12 @@ public class VirtualUnityController : MonoBehaviour {
     private float val = 0.0f;
     private float rotateSpeed = 0.01f;
 
+    private List<Vector2> cmdList;
 
     void Awake()
     {
         Instance = this;
+        cmdList = new List<Vector2>();
     }
 
     // Use this for initialization
@@ -176,16 +178,22 @@ public class VirtualUnityController : MonoBehaviour {
 
     public void GazeCommand(Vector2 input)
     {
+        cur_input = input;
+        Invoke("test",2f);
+        
+    }
+
+    public void EvaluateCommand(Vector2 input)
+    {
         if (IsActive)
         {
-
-
             //map correctly x axis to angular and y axis to linear from the input of the gazepad.
             // no need to reverse 
             Vector2 command = new Vector2(input.y, input.x);
-
+            //StartCoroutine(DelayCommand());
             if (!InsideDeadZone(command.x, command.y))
             {
+               // DelayCommand(command);
                 //normalize speed and send data
                 // Debug.Log(FilterLinearVelocity(command.x));
                 VirtualBot.velocity = this.gameObject.transform.right * FilterLinearVelocity(command.x);
@@ -198,10 +206,16 @@ public class VirtualUnityController : MonoBehaviour {
                 StopRobot();
             }
         }
-        //else
-        //{
-        //    StopRobot();
-        //}
+       
+
+    }
+
+    IEnumerator DelayCommand(Vector2 input)
+    {
+        print(Time.time);
+        yield return new WaitForSeconds(1.0f);
+      //  test(input);
+        print(Time.time);
     }
 
     private float FilterLinearVelocity(float vel)
