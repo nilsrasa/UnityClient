@@ -76,8 +76,9 @@ public class VRController : MonoBehaviour
                     return;
                 }
                 break;
-
+                //BOTH CASES BELOW WERE MOVED FURTHER DOWN, SO THAT THEY HAVE THE SAME LOGIC APPLIED
             case StreamController.ControlType.Eyes:
+                
                 //List<Vector3> eyeDirections = new List<Vector3>();
                 //FoveInterfaceBase.EyeRays rays = _foveInterface.GetGazeRays();
                 //EFVR_Eye eyeClosed = FoveInterface.CheckEyesClosed();
@@ -99,26 +100,27 @@ public class VRController : MonoBehaviour
             case StreamController.ControlType.Joystick:
             {
 
-                 //   Joystick input
-                Vector2 JoyInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+                // //   Joystick input
+                //Vector2 JoyInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
-                //if the virtual environment is on, send the command to the VirtualUnityController    
-                if (StreamController.Instance.VirtualEnvironment)
-                {
-                    if (VirtualUnityController.Instance.IsActive)
-                    {
-                        VirtualUnityController.Instance.JoystickCommand(JoyInput);
-                    }
-                }
-                // Othewise send it to the robotinterface
-                else
-                {
-                    if (RobotInterface.Instance.IsConnected)
-                    {
-                        RobotInterface.Instance.DirectCommandRobot(JoyInput);
-                    }
+                ////if the virtual environment is on, send the command to the VirtualUnityController    
+                //if (StreamController.Instance.VirtualEnvironment)
+                //{
+                //    if (VirtualUnityController.Instance.IsActive)
+                //    {
+                          
+                //        VirtualUnityController.Instance.JoystickCommand(JoyInput);
+                //    }
+                //}
+                //// Othewise send it to the robotinterface
+                //else
+                //{
+                //    if (RobotInterface.Instance.IsConnected)
+                //    {
+                //        RobotInterface.Instance.DirectCommandRobot(JoyInput);
+                //    }
                    
-                }
+                //}
             
                break;
             }
@@ -157,9 +159,7 @@ public class VRController : MonoBehaviour
                 ResetHoveredObject();
                 return;
             }
-          
-            //Not sure why this is not null when you gaze at gameobjects which do not have the robotControltrackpad on them but apparently, every gazeobject sends commands\
-
+        
             // For this reason we also check if the tag of the gazeobject is the correct one 
             RobotControlTrackPad robotControl = gazeObject.GetComponent<RobotControlTrackPad>();
             if (robotControl != null && gazeObject.CompareTag("EyeControlPanel"))
@@ -194,7 +194,33 @@ public class VRController : MonoBehaviour
                     }
                     //Instead of robotinterface here 
                 }
-                
+                //Joystick Input
+                else if (robotControl.IsActivated & !robotControl.IsExternallyDisabled() &&
+                         _selectedControlType == StreamController.ControlType.Joystick)
+                {
+                    //   Joystick input
+                    Vector2 JoyInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+                    //if the virtual environment is on, send the command to the VirtualUnityController    
+                    if (StreamController.Instance.VirtualEnvironment)
+                    {
+                        if (VirtualUnityController.Instance.IsActive)
+                        {
+
+                            VirtualUnityController.Instance.JoystickCommand(JoyInput);
+                        }
+                    }
+                    // Othewise send it to the robotinterface
+                    else
+                    {
+                        if (RobotInterface.Instance.IsConnected)
+                        {
+                            RobotInterface.Instance.DirectCommandRobot(JoyInput);
+                        }
+
+                    }
+                }
+
             }
             else
             {

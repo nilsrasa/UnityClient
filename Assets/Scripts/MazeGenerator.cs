@@ -14,17 +14,20 @@ public class MazeGenerator : MonoBehaviour
     [Header("General init settings")]
     [Tooltip("Roomsize in units/meters")]
     public Vector2 RoomSize;
-    [Tooltip("The prefab which will be used to generate the obstacles")]
+    [Tooltip("The prefab that will be used to generate the obstacles of the maze")]
     public GameObject ObstaclePrefab;
 
     //---------------------------------------------------------------------------------------------------------
     [Header("Maze creation options")]
     [Tooltip("When active, forces the created obstacles to have only rotations that are multiples of 90 degrees.")]
     public bool SnapAngles = false;
-    [Tooltip("When active, forces the created obstacles to have only rotations that are multiples of 90 degrees.")]
-    public bool SetLocations = false;
-    [Tooltip("Creates obstacles between the positions that the user clicked")]
+    [Tooltip("When clicked, creates obstacles on the locations that the user clicked")]
     public bool CreateObstacles = false;
+    [Space(10)]
+    [Tooltip("When activated, the next three clicks will set the starting position, orientation and final position of the robot. I suggest doing this after you are done with the maze geometry")]
+    public bool SetLocations = false;
+    [Space(10)]
+    [Header("Reverting actions")]
     [Tooltip("Clears the temporary drawing positions of the user. Meant to be used before obstacles have been generated")]
     public bool ClearClickedPositions = false;
     [Tooltip("Clears the temporary drawing positions, as well as all the created obstacles so far. Does not affect saved prefabs")]
@@ -33,7 +36,7 @@ public class MazeGenerator : MonoBehaviour
     //---------------------------------------------------------------------------------------------------------
 
     [Header("Save options")]
-    [Tooltip("The name of the maze prefab that will be generated")]
+    [Tooltip("The name of the maze prefab that will be generated.If a prefab with the same name exists, it will be overwritten.")]
     public string MazeName;
     [Tooltip("Filepath where the prefab will be saved")]
     public string SaveLocation = "Prefabs/VirtualSkylab/VirtualMazes";
@@ -119,7 +122,7 @@ public class MazeGenerator : MonoBehaviour
 
         //Button commands -- Could be done through UI for more efficiency but this is fine for now
 	    {
-	        if (CreateObstacles)
+	        if (CreateObstacles || Input.GetKeyDown(KeyCode.Space))
 	        {
 	            CreateMaze();
 	            CreateObstacles = false;
@@ -217,7 +220,7 @@ public class MazeGenerator : MonoBehaviour
                 NewObstacle.transform.localScale = new Vector3(1,1,ObstacleSize); 
                 NewObstacle.transform.Rotate(Vector3.up,angle);
                 MazeComponents.Add(NewObstacle);
-                NewObstacle.transform.parent = ObstacleParent.transform;
+                //NewObstacle.transform.parent = ObstacleParent.transform;
 
 
             }
@@ -258,6 +261,9 @@ public class MazeGenerator : MonoBehaviour
         foreach (GameObject component in MazeComponents)
         {
             component.transform.parent = NewMaze.transform;
+            Rigidbody rig = component.AddComponent<Rigidbody>();
+            rig.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+         //   rig.constraints = RigidbodyConstraints.FreezeRotationZ;
         }
 
         //Current global transforms will be assigned to the saved maze
@@ -266,6 +272,8 @@ public class MazeGenerator : MonoBehaviour
         comp.StartLocation = MazeStartLocation;
         comp.StartFacingDirection = StartFacingDirection;
         comp.FinishLocation = MazeEndLocation;
+
+
 
         string savepath = SaveLocation + "/" + MazeName + ".prefab";
 

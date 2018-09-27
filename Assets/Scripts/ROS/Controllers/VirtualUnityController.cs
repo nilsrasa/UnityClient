@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using EZCameraShake;
 using UnityEngine;
 
@@ -12,6 +13,8 @@ using UnityEngine;
 public class VirtualUnityController : MonoBehaviour {
 
     public static VirtualUnityController Instance { get; private set; }
+
+    [SerializeField] private float CommandDelay = 0.5f;
 
     [SerializeField] private float MaxLinearVelocity = 0.4f;
     [SerializeField] private float MinLinearVelocity = 0.05f;
@@ -41,13 +44,18 @@ public class VirtualUnityController : MonoBehaviour {
     bool balancing = false;
     private float val = 0.0f;
     private float rotateSpeed = 0.01f;
-
+    private bool JoystickStopped;
+    private bool cmdStarted,delayEvaluated;
     private List<Vector2> cmdList;
+
+    private AudioSource source;
 
     void Awake()
     {
+        source = gameObject.GetComponent<AudioSource>();
         Instance = this;
         cmdList = new List<Vector2>();
+        cmdStarted = delayEvaluated = JoystickStopped = false;
     }
 
     // Use this for initialization
@@ -60,6 +68,9 @@ public class VirtualUnityController : MonoBehaviour {
         TargetRotHigh = 359.0f;
         InitRot =  0.0f;
         InitialShake = false;
+        
+
+        StartCoroutine("EvaluateCommand");
     }
 	
 	// Update is called once per frame
@@ -70,7 +81,14 @@ public class VirtualUnityController : MonoBehaviour {
 	    float CurrentAngle = gameObject.transform.eulerAngles.x;
 	    //Debug.Log(CurrentAngle);
 
-        if (CurrentAngle > 2.0f && CurrentAngle < 10.0f && !balancing)
+        //if the list is populated from not being populated before let the script know
+	    if (cmdList.Count > 0 && !cmdStarted && !delayEvaluated)
+	    {
+	        cmdStarted = true;
+	    }
+        
+
+	    if (CurrentAngle > 2.0f && CurrentAngle < 10.0f && !balancing)
 	    {
 	        balancing = true;
 	        val = 0.0f;
@@ -107,32 +125,35 @@ public class VirtualUnityController : MonoBehaviour {
      
             Vector2 movement = new Vector2(input.y, input.x);
 
-            if (!movement.Equals(new Vector2(0, 0)) && !InitialShake)
-            {
-                CameraShaker.Instance.ShakeOnce(1f, 1f, 0.2f, 0.2f);
-                InitialShake = true;
-            }
+           
 
-
-            if (movement.Equals(new Vector2(0, 0)))
-            {
+            //correct
+            if (movement.Equals(new Vector2(0, 0)) && !JoystickStopped){
+                cmdList.Add(Vector2.zero);
+                JoystickStopped = true;
                 InitialShake = false;
+               // source.Stop();
             }
-    
-            // Debug.Log(movement.x);
-            if (movement.x > MaxLinearVelocity) movement.x = MaxLinearVelocity;
-            else if (movement.x < 0) movement.x = -BackwardsVelocity;
 
-            if (Mathf.Abs(movement.y) > MaxAngularVelocity)
+            if (!movement.Equals(new Vector2(0, 0)))
             {
-                if (movement.y < 0) movement.y = -MaxAngularVelocity;
-                else movement.y = MaxAngularVelocity;
+                JoystickStopped = false;
+                if (!InitialShake)
+                {
+                   // CameraShaker.Instance.ShakeOnce(1f, 1f, 0.2f, 0.2f);
+                    InitialShake = true;
+                }
+                cmdList.Add(new Vector2(FilterJoystickLinearVelocity(movement.x),FilterJoystickAngularVelocity(movement.y)));
             }
-       
-            Vector3 velocity = this.gameObject.transform.right * movement.x;
-        
-            VirtualBot.AddForce(velocity, ForceMode.VelocityChange);
-            this.gameObject.transform.Rotate(this.gameObject.transform.up, Mathf.Rad2Deg * Time.deltaTime * movement.y, Space.World);
+
+
+
+            //if (!movement.Equals(new Vector2(0, 0)) && !InitialShake)
+            //{
+               
+            //}
+
+
 
         }
     }
@@ -178,13 +199,7 @@ public class VirtualUnityController : MonoBehaviour {
 
     public void GazeCommand(Vector2 input)
     {
-        cur_input = input;
-        Invoke("test",2f);
-        
-    }
 
-    public void EvaluateCommand(Vector2 input)
-    {
         if (IsActive)
         {
             //map correctly x axis to angular and y axis to linear from the input of the gazepad.
@@ -193,30 +208,57 @@ public class VirtualUnityController : MonoBehaviour {
             //StartCoroutine(DelayCommand());
             if (!InsideDeadZone(command.x, command.y))
             {
-               // DelayCommand(command);
+                cmdList.Add(new Vector2(FilterLinearVelocity(command.x), FilterAngularVelocity(command.y)));
                 //normalize speed and send data
-                // Debug.Log(FilterLinearVelocity(command.x));
-                VirtualBot.velocity = this.gameObject.transform.right * FilterLinearVelocity(command.x);
-                //VirtualBot.angularVelocity = this.gameObject.transform.up; // * FilterAngularVelocity(command.y);
-                this.gameObject.transform.Rotate(this.gameObject.transform.up,
-                    Mathf.Rad2Deg * Time.deltaTime * FilterAngularVelocity(command.y), Space.World);
             }
             else
             {
-                StopRobot();
+                cmdList.Add(new Vector2(0,0));
             }
         }
-       
-
     }
 
-    IEnumerator DelayCommand(Vector2 input)
+
+    //TODO This can probably be optimized without using boolean flags but with issuing event. 
+    //No time to fix it further though
+    // We have a functional feature
+    IEnumerator EvaluateCommand()
     {
-        print(Time.time);
-        yield return new WaitForSeconds(1.0f);
-      //  test(input);
-        print(Time.time);
+        //while there are commands in the list
+        while (true)
+        {
+            //when the list has at least one element, delay executing commands for a brief time
+            if (cmdStarted && !delayEvaluated)
+            {
+                yield return new WaitForSeconds(CommandDelay);
+                delayEvaluated = true;
+                CameraShaker.Instance.ShakeOnce(1f, 1f, 0.2f, 0.2f);
+                //Play continous sound here
+                source.Play();
+                //shake here
+            }
+            //start evaluating now after the initial delay
+            if (delayEvaluated) { 
+
+                Vector2 command = cmdList[0];
+                cmdList.RemoveAt(0);
+                //if the command list emptied
+                if (cmdList.Count == 0)
+                {
+                    cmdStarted = false;
+                    delayEvaluated = false;
+                    source.Stop();
+                }
+                VirtualBot.velocity = this.gameObject.transform.right * command.x;
+               
+                this.gameObject.transform.Rotate(this.gameObject.transform.up,
+                    Mathf.Rad2Deg * Time.deltaTime * command.y, Space.World);
+            }
+
+            yield return null; 
+        }
     }
+
 
     private float FilterLinearVelocity(float vel)
     {
@@ -255,6 +297,27 @@ public class VirtualUnityController : MonoBehaviour {
         }
 
         //TODO normalize here a bit more?
+        return vel;
+    }
+
+    private float FilterJoystickLinearVelocity(float vel)
+    {
+        if (vel > MaxLinearVelocity)
+            return  MaxLinearVelocity;
+        else if (vel < 0)
+            return -BackwardsVelocity;
+
+        else return vel;
+    }
+
+    private float FilterJoystickAngularVelocity(float vel)
+    {
+        if (Mathf.Abs(vel) > MaxAngularVelocity)
+        {
+            if (vel < 0) return -MaxAngularVelocity;
+            else return MaxAngularVelocity;
+        }
+
         return vel;
     }
 

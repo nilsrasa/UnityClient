@@ -5552,6 +5552,576 @@
         }
     ]
 }, 
+{
+    "StartDate": "9/27/2018 4:09:15 PM",
+    "EndDate": "9/27/2018 4:11:46 PM",
+    "UserID": 1,
+    "Maze": 1,
+    "Responses": [
+        {
+            "QuestionType": "Q",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "C",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "Z",
+            "RSS": [
+                {
+                    "PopUpStartTime": "16:11:43",
+                    "QuestionStartTime": "16:11:45",
+                    "QuestionEndTime": "16:11:46",
+                    "StartDrivingTime": "16:11:46",
+                    "PRS": 1.7646580934524537,
+                    "QRS": 1.15631902217865,
+                    "DRS": 0.0
+                }
+            ]
+        }
+    ]
+}, 
+{
+    "StartDate": "9/27/2018 4:28:16 PM",
+    "EndDate": "9/27/2018 4:29:17 PM",
+    "UserID": 1,
+    "Maze": 1,
+    "Responses": [
+        {
+            "QuestionType": "Q",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "C",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "Z",
+            "RSS": [
+                {
+                    "PopUpStartTime": "16:29:7",
+                    "QuestionStartTime": "16:29:14",
+                    "QuestionEndTime": "16:29:17",
+                    "StartDrivingTime": "16:29:17",
+                    "PRS": 6.73182487487793,
+                    "QRS": 3.381556987762451,
+                    "DRS": 0.0
+                }
+            ]
+        }
+    ]
+}, 
+{
+    "StartDate": "9/27/2018 5:02:15 PM",
+    "EndDate": "9/27/2018 5:03:18 PM",
+    "UserID": 1,
+    "Maze": 1,
+    "Responses": [
+        {
+            "QuestionType": "Q",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "C",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "Z",
+            "RSS": [
+                {
+                    "PopUpStartTime": "17:3:12",
+                    "QuestionStartTime": "17:3:14",
+                    "QuestionEndTime": "17:3:18",
+                    "StartDrivingTime": "17:3:18",
+                    "PRS": 1.9825551509857178,
+                    "QRS": 3.413275957107544,
+                    "DRS": 0.0
+                }
+            ]
+        }
+    ]
+}, 
+{
+    "StartDate": "9/27/2018 5:15:03 PM",
+    "EndDate": "9/27/2018 5:20:57 PM",
+    "UserID": 1,
+    "Maze": 1,
+    "Responses": [
+        {
+            "QuestionType": "Q",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "C",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "Z",
+            "RSS": [
+                {
+                    "PopUpStartTime": "17:20:55",
+                    "QuestionStartTime": "17:20:55",
+                    "QuestionEndTime": "17:20:57",
+                    "StartDrivingTime": "17:20:57",
+                    "PRS": 0.5213605165481567,
+                    "QRS": 1.1823153495788575,
+                    "DRS": 0.0
+                }
+            ]
+        }
+    ]
+}, 
+{
+    "StartDate": "9/27/2018 5:21:56 PM",
+    "EndDate": "9/27/2018 5:22:37 PM",
+    "UserID": 1,
+    "Maze": 1,
+    "Responses": [
+        {
+            "QuestionType": "Q",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "C",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "Z",
+            "RSS": [
+                {
+                    "PopUpStartTime": "17:22:33",
+                    "QuestionStartTime": "17:22:34",
+                    "QuestionEndTime": "17:22:37",
+                    "StartDrivingTime": "17:22:37",
+                    "PRS": 0.8167443871498108,
+                    "QRS": 2.283289909362793,
+                    "DRS": 0.0
+                }
+            ]
+        }
+    ]
+}, 
+{
+    "StartDate": "9/27/2018 5:24:45 PM",
+    "EndDate": "9/27/2018 5:25:29 PM",
+    "UserID": 1,
+    "Maze": 1,
+    "Responses": [
+        {
+            "QuestionType": "Q",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "C",
+            "RSS": [
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                },
+                {
+                    "PopUpStartTime": "",
+                    "QuestionStartTime": "",
+                    "QuestionEndTime": "",
+                    "StartDrivingTime": "",
+                    "PRS": 0.0,
+                    "QRS": 0.0,
+                    "DRS": 0.0
+                }
+            ]
+        },
+        {
+            "QuestionType": "Z",
+            "RSS": [
+                {
+                    "PopUpStartTime": "17:25:26",
+                    "QuestionStartTime": "17:25:27",
+                    "QuestionEndTime": "17:25:29",
+                    "StartDrivingTime": "17:25:29",
+                    "PRS": 0.6670368313789368,
+                    "QRS": 1.6495453119277955,
+                    "DRS": 0.0
+                }
+            ]
+        }
+    ]
+}, 
 $
  ] 
  }

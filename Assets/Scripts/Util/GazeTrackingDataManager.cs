@@ -276,16 +276,18 @@ public class GazeTrackingDataManager : MonoBehaviour
             if (StandardGridActive)
 	        {
 	            StTimer += Time.deltaTime;
-
+              
                 //If the user is staring somewhere in the panel
                 if (StTimer > StRecordTimeInterval && GazeCoords != new Vector2(-2, -2))
 	            {
+	               // Debug.Log("Recording standard seg");
                     //get gaze segment according to coordinates
-	                NewGazeSegment = GetGazeSegmentID(GazeCoords);
-                    
+                    NewGazeSegment = GetGazeSegmentID(GazeCoords);
+	               
                     //If the new Gazesegment has changed
                     if (NewGazeSegment != PreviousGazeSegment)
                     {
+                       
                         //Record stare duration data for the previous segment and reset the timer
                         //Recording will only happen if the tester has stared at a section for more than 
                         // the threshold of 1 second
@@ -302,9 +304,10 @@ public class GazeTrackingDataManager : MonoBehaviour
                         //for now simply add the interval to the timer
                         SegmentGazeDurationTimer += StRecordTimeInterval;
                     }
-                }
-                //reset timer
-                StTimer = 0.0f;
+
+	                StTimer = 0.0f;
+	            }
+              
 
 	        }
 
@@ -315,8 +318,10 @@ public class GazeTrackingDataManager : MonoBehaviour
                 //If the user is staring somewhere in the panel
                 if (CustTimer > CustRecordTimeInterval && GazeCoords != new Vector2(-2, -2))
 	            {
-	                //----------------CustomGrid -------------------------
-	                CNewGazeSegment = GetCustomGazeSegmentID(GazeCoords);
+
+                    //----------------CustomGrid -------------------------
+	               // Debug.Log("Recording custom seg");
+                    CNewGazeSegment = GetCustomGazeSegmentID(GazeCoords);
 	                //If the new Gazesegment is different than the previous one
 	                if (CNewGazeSegment != CPreviousGazeSegment)
 	                {
@@ -336,7 +341,8 @@ public class GazeTrackingDataManager : MonoBehaviour
 	                    //for now simply add the interval to the timer
 	                    CSegmentGazeDurationTimer += CustRecordTimeInterval;
 	                }
-                }
+	                CustTimer = 0.0f;
+	            }
 
                
             }
@@ -374,7 +380,7 @@ public class GazeTrackingDataManager : MonoBehaviour
             );
 
         PanelSegments[(int) segment.x, (int) segment.y].AvgVisitDuration += duration;
-
+       // Debug.Log("Recorded standard "+ duration);
     }
 
     private void RecordCustomGazeData(int segment, float duration)
