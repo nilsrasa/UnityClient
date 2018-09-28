@@ -301,8 +301,13 @@ public class StreamController : MonoBehaviour
         }
 
         //what about older projects?
-        _queryManager.EnableManager();
-        GazeTrackingDataManager.Instance.EnableManager();
+        if (_queryManager)
+        {
+            _queryManager.EnableManager();
+        }
+        
+        if (GazeTrackingDataManager.Instance)
+         GazeTrackingDataManager.Instance.EnableManager();
      
         //TODO: When online connection is put in, uncomment this
         //_isLooping = true;

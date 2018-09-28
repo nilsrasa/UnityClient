@@ -7,9 +7,9 @@ using UnityEngine;
 
 /*
  This controller is directly attached to the Unity virtual arlobot without connecting through ROS
- Simple velocity commands received from the VRController.
+ Simple velocity commands and rotation received from the VRController.
      
-     */
+*/
 public class VirtualUnityController : MonoBehaviour {
 
     public static VirtualUnityController Instance { get; private set; }
@@ -34,6 +34,22 @@ public class VirtualUnityController : MonoBehaviour {
     [SerializeField] private float LeftBackZoneLimit = -0.2f;
     [SerializeField] private float UpperBackZoneLimit = -0.8f;
 
+
+    [Header("Audiosources")]
+    public AudioSource DriveSoundSource;
+    public AudioSource ObstacleSoundSourceCont;
+    public AudioSource ObstacleSoundSourceOnce;
+
+    [Space(10)]
+    [Header("Soundclips")]
+    public AudioClip DriveSlow;
+    public AudioClip DriveFast;
+    public AudioClip OnCollisionObstacle;
+    public AudioClip DuringCollisionObstacle;
+    public AudioClip OnCollisionWall;
+    public AudioClip DuringCollisionWall;
+
+
     private Vector2 InitRange;
     private Vector2 NewRange;
     private float TargetRotLow;
@@ -47,13 +63,15 @@ public class VirtualUnityController : MonoBehaviour {
     private bool JoystickStopped;
     private bool cmdStarted,delayEvaluated;
     private List<Vector2> cmdList;
-
-    private AudioSource source;
+    private bool Colliding;
+    private bool DrivingFast;
 
     void Awake()
     {
-        source = gameObject.GetComponent<AudioSource>();
+        //DriveSoundSource = gameObject.GetComponent<AudioSource>();
         Instance = this;
+        Colliding = false;
+        DrivingFast = false;
         cmdList = new List<Vector2>();
         cmdStarted = delayEvaluated = JoystickStopped = false;
     }
@@ -77,7 +95,7 @@ public class VirtualUnityController : MonoBehaviour {
 	void Update ()
 	{
 
-        //UGLY BUT WORKS -> PUT IN FUNCTION FOR OPTIMIZING MAYBE 
+        //Insert the following in a function for clarity and readability
 	    float CurrentAngle = gameObject.transform.eulerAngles.x;
 	    //Debug.Log(CurrentAngle);
 
@@ -115,8 +133,13 @@ public class VirtualUnityController : MonoBehaviour {
 	            balancing = false;
 	        }
         }
+        //--------------------------------- Balancing logic end---------------
 
-    }
+	   
+
+
+
+	}
 
     public void JoystickCommand(Vector2 input)
     {
@@ -132,7 +155,7 @@ public class VirtualUnityController : MonoBehaviour {
                 cmdList.Add(Vector2.zero);
                 JoystickStopped = true;
                 InitialShake = false;
-               // source.Stop();
+               // DriveSoundSource.Stop();
             }
 
             if (!movement.Equals(new Vector2(0, 0)))
@@ -146,15 +169,6 @@ public class VirtualUnityController : MonoBehaviour {
                 cmdList.Add(new Vector2(FilterJoystickLinearVelocity(movement.x),FilterJoystickAngularVelocity(movement.y)));
             }
 
-
-
-            //if (!movement.Equals(new Vector2(0, 0)) && !InitialShake)
-            //{
-               
-            //}
-
-
-
         }
     }
 
@@ -163,29 +177,35 @@ public class VirtualUnityController : MonoBehaviour {
     void OnCollisionEnter(Collision collision)
     {
 
-        if (collision.gameObject.CompareTag("Obstacle"))
+        if (collision.gameObject.CompareTag("Obstacle") )
         {
             CameraShaker.Instance.ShakeOnce(2f, 2f, 0.5f, 0.5f);
             VirtualBot.drag = 10.0f;
+           // ChangePlayOnceClip(0);
+            ChangeObstacleClip(0);
         }
-        
+        else if (collision.gameObject.CompareTag("Wall"))
+        {
+            CameraShaker.Instance.ShakeOnce(2f, 2f, 0.5f, 0.5f);
+            VirtualBot.drag = 10.0f;
+            ChangePlayOnceClip(1);
+            //ChangeObstacleClip(1);
+        }
+
     }
 
-    //void OnCollisionStay(Collision collision)
-    //{
-       
-    //    if (collision.gameObject.CompareTag("Obstacle"))
-    //    {
-    //        VirtualBot.drag = 20.0f;
-    //    }
-    //    else
-    //    {
-    //        VirtualBot.drag = 0.0f;
-    //    }
-      
-    //    //CameraShaker.Instance.ShakeOnce(2f, 2f, 0.5f, 0.5f);
-    //    //Debug.Log("Collided!");
-    //}
+    void OnCollisionStay(Collision collision)
+    {
+
+        if (collision.gameObject.CompareTag("Obstacle") || collision.gameObject.CompareTag("Wall"))
+        {
+            Colliding = true;
+        }
+        
+
+        //CameraShaker.Instance.ShakeOnce(2f, 2f, 0.5f, 0.5f);
+        //Debug.Log("Collided!");
+    }
 
     void OnCollisionExit(Collision collision)
     {
@@ -193,7 +213,17 @@ public class VirtualUnityController : MonoBehaviour {
         {
             CameraShaker.Instance.ShakeOnce(2f, 2f, 0.5f, 0.5f);
             VirtualBot.drag = 0.0f;
+            ObstacleSoundSourceCont.Stop();
+            Colliding = false;
         }
+        else if (collision.gameObject.CompareTag("Wall"))
+        {
+            CameraShaker.Instance.ShakeOnce(2f, 2f, 0.5f, 0.5f);
+            VirtualBot.drag = 10.0f;
+            ObstacleSoundSourceCont.Stop();
+            Colliding = false;
+        }
+
 
     }
 
@@ -210,6 +240,8 @@ public class VirtualUnityController : MonoBehaviour {
             {
                 cmdList.Add(new Vector2(FilterLinearVelocity(command.x), FilterAngularVelocity(command.y)));
                 //normalize speed and send data
+
+                
             }
             else
             {
@@ -219,7 +251,7 @@ public class VirtualUnityController : MonoBehaviour {
     }
 
 
-    //TODO This can probably be optimized without using boolean flags but with issuing event. 
+    //TODO This can probably be optimized without using boolean flags but with issuing events. 
     //No time to fix it further though
     // We have a functional feature
     IEnumerator EvaluateCommand()
@@ -234,7 +266,9 @@ public class VirtualUnityController : MonoBehaviour {
                 delayEvaluated = true;
                 CameraShaker.Instance.ShakeOnce(1f, 1f, 0.2f, 0.2f);
                 //Play continous sound here
-                source.Play();
+               
+                DriveSoundSource.Play();
+                if (Colliding) ObstacleSoundSourceCont.Play();
                 //shake here
             }
             //start evaluating now after the initial delay
@@ -242,13 +276,18 @@ public class VirtualUnityController : MonoBehaviour {
 
                 Vector2 command = cmdList[0];
                 cmdList.RemoveAt(0);
+               
+                ChangeDriveClip(command.x);
                 //if the command list emptied
                 if (cmdList.Count == 0)
                 {
                     cmdStarted = false;
                     delayEvaluated = false;
-                    source.Stop();
+                    DriveSoundSource.Stop();
+                    ObstacleSoundSourceCont.Stop();
                 }
+
+
                 VirtualBot.velocity = this.gameObject.transform.right * command.x;
                
                 this.gameObject.transform.Rotate(this.gameObject.transform.up,
@@ -259,6 +298,69 @@ public class VirtualUnityController : MonoBehaviour {
         }
     }
 
+    private void ChangeDriveClip(float velocity)
+    {
+        //Issue with changing the clip too much or pressing play, needs flags to check if states change
+        if (velocity > 0.2 && !DrivingFast)
+        {
+            DrivingFast = true;
+            DriveSoundSource.clip = DriveFast;
+            DriveSoundSource.Play();
+        }
+        else if (velocity < 0.2 && DrivingFast)
+        {
+            DriveSoundSource.clip = DriveSlow;
+            DrivingFast = false;
+            DriveSoundSource.Play();
+        }
+        
+    }
+
+    private void ChangePlayOnceClip(int obstacletype)
+    {
+        switch (obstacletype)
+        {
+            //Obstacle
+            case (0):
+                ObstacleSoundSourceOnce.PlayOneShot(OnCollisionObstacle);
+               // ObstacleSoundSourceOnce.clip = OnCollisionObstacle;
+                break;
+             //wall
+            case (1):
+                ObstacleSoundSourceOnce.PlayOneShot(OnCollisionWall);
+               // ObstacleSoundSourceOnce.clip = OnCollisionWall;
+                break;
+            case (2):
+                break;
+            default:
+                ObstacleSoundSourceOnce.PlayOneShot(OnCollisionObstacle);
+                break;
+
+        }
+       
+    }
+
+    private void ChangeObstacleClip(int obstacletype)
+    {
+        switch (obstacletype)
+        {
+            //Obstacle
+            case (0):
+                ObstacleSoundSourceCont.clip = DuringCollisionObstacle;
+                break;
+            //wall
+            case (1):
+                ObstacleSoundSourceCont.clip = DuringCollisionWall;
+                break;
+            case (2):
+                break;
+            default:
+                ObstacleSoundSourceCont.clip = DuringCollisionObstacle;
+                break;
+
+        }
+        ObstacleSoundSourceCont.Play();
+    }
 
     private float FilterLinearVelocity(float vel)
     {

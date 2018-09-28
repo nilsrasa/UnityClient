@@ -76,7 +76,8 @@ public class VRController : MonoBehaviour
                     return;
                 }
                 break;
-                //BOTH CASES BELOW WERE MOVED FURTHER DOWN, SO THAT THEY HAVE THE SAME LOGIC APPLIED
+
+            //both of the code for the two input cases was moved further down, since we want gaze data to be recorded for both inputs.
             case StreamController.ControlType.Eyes:
                 
                 //List<Vector3> eyeDirections = new List<Vector3>();
@@ -127,8 +128,10 @@ public class VRController : MonoBehaviour
            
         }
 
-        //--Eye direction calculation for all occasions occasions
+        //--Eye direction calculation for all occasions 
         List<Vector3> eyeDirections = new List<Vector3>();
+
+        
         FoveInterfaceBase.EyeRays rays = _foveInterface.GetGazeRays();
         EFVR_Eye eyeClosed = FoveInterface.CheckEyesClosed();
         if (eyeClosed != EFVR_Eye.Both && eyeClosed != EFVR_Eye.Left)
@@ -176,7 +179,7 @@ public class VRController : MonoBehaviour
                         
                         if (VirtualUnityController.Instance.IsActive)
                         {
-                            Debug.Log("Sending gaze command to robot");
+                           // Debug.Log("Sending gaze command to robot");
                             VirtualUnityController.Instance.GazeCommand(controlResult);
                         }
                         else{Debug.Log("VirtualUnityController is not connected"); }
@@ -194,7 +197,8 @@ public class VRController : MonoBehaviour
                     }
                     //Instead of robotinterface here 
                 }
-                //Joystick Input
+
+                //---Joystick Input---
                 else if (robotControl.IsActivated & !robotControl.IsExternallyDisabled() &&
                          _selectedControlType == StreamController.ControlType.Joystick)
                 {
@@ -250,7 +254,10 @@ public class VRController : MonoBehaviour
         if (_hoveredGazeObject != null)
             _hoveredGazeObject.OnUnhover();
         _hoveredGazeObject = null;
+        if (RobotInterface.Instance)
         RobotInterface.Instance.StopRobot();
+
+        if (VirtualUnityController.Instance)
         VirtualUnityController.Instance.StopRobot();
     }
 

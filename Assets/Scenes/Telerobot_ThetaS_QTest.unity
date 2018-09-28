@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -65061,7 +65061,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _selectedControlType: 2
-  VirtualRobotController: {fileID: 0}
+  VirtualEnvironment: 0
   FeedbackFromCamera: 1
   _cameraStreamUSB: {fileID: 850222836}
   _queryManager: {fileID: 475049853}
@@ -71600,10 +71600,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 614266b0ac3b1364ab20d2284ed9f993, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NoPanelGazeSegments: 4
-  RecordDataTimeInterval: 0.5
-  RecordingData: 0
+  IsActive: 0
+  StandardGridActive: 0
+  CustomGridActive: 0
+  NumSegments: 0
+  StGazeTimeThreshold: 0
+  StRecordTimeInterval: 0
+  CustomSegments: []
+  CustGazeTimeThreshold: 0
+  CustRecordTimeInterval: 0
   EndRecording: 0
+  StandardDataFilepath: 
+  FinalizeStandardSegFile: 0
+  ClearStandardSegFile: 0
+  CustomDataFilepath: 
+  FinalizeCustomSegFile: 0
+  ClearCustomSegFile: 0
 --- !u!43 &1655491259
 Mesh:
   m_ObjectHideFlags: 0
