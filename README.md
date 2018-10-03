@@ -66,11 +66,13 @@ This google drive folder contains the following builds:
 ## Charging Ricoh Theta S camera before use
 
 The camera should be charged before use. When charging, the switch of the camera will be solid red light as shown in the picture.
+
 ![Charge camera](/Screenshots/charge.jpg "Charge camera")
 
 ## Seting up Ricoh Theta S camera
 
-The “DevicePath” is needed to be added to the system registry in order to make Unity work with Theta S blending software.
+The “DevicePath” is needed to be added to the system registry in order to make Unity work with Theta S blending software (Stitching image). It might be the same for other types of virtual camera.
+
 * Press Win + R and type in 'regedit'.
 * Find registry key that is located under '\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{860BB310-5D01-11d0-BD3B-00A0C911CE86}\Instance\' (note it’s SOFTWARE\Classes\Wow6432Node\CLSID... in 64-bit OS for 32-bit app space), where every subkey corresponds to a registered device.
 * Adding new property with the name DevicePath, the value could be random. Note that the value will be destroyed with re-registration of the device filter, and will have to be created once again.
