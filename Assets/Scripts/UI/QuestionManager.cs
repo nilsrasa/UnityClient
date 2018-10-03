@@ -14,11 +14,14 @@ using UnityEngine.Serialization;
  * 
  * QueryManager description:
  * 
- * 
+ * Responsible for displaying popups and questions to the user during a test trial. Response times are saved in a json file for each type of question.
+ * Customizable questions and their associated hotkeys can be found in the inspector.
  */
 
 
 public class QuestionManager : MonoBehaviour {
+
+   
 
     //Wrapper class for the queries provided by the conductor of the test
     [System.Serializable]
@@ -33,11 +36,16 @@ public class QuestionManager : MonoBehaviour {
     [Serializable]
     public class ResponseTimes
     {
+        public string PopUpStartTime;
+        public string QuestionStartTime;
+        public string QuestionEndTime;
+        public string StartDrivingTime;
         public float PRS;
         public float QRS;
+        public float DRS;
         public ResponseTimes()
         {
-            PRS = QRS = 0;
+            PRS = QRS = DRS = 0;
         }
 
     }
@@ -54,7 +62,8 @@ public class QuestionManager : MonoBehaviour {
     [Serializable]
     public class JsonData
     {
-        public string Date;
+        public string StartDate;
+        public string EndDate;
         public int UserID;
         public int Maze;
         public JsonRS[] Responses;
@@ -85,6 +94,7 @@ public class QuestionManager : MonoBehaviour {
   
    
     //Reference variables
+    
     private GameObject PopUpMessagePanel;
     private GameObject QueryPanel;
     private Text QueryText;
@@ -96,6 +106,7 @@ public class QuestionManager : MonoBehaviour {
     private List<List<ResponseTimes>> RSList;
     private int[] QueryListCounters; //keeps track of the current query in each of the lists
     private DateTime ExperimentDate;
+    private DateTime ExperimentEndDate;
     private string DataLogFilePath;
     private Dictionary<KeyCode, int> KeysToIndexMap;
     private Dictionary<KeyCode, int> CurrentActiveKeys;
@@ -111,8 +122,10 @@ public class QuestionManager : MonoBehaviour {
     private bool DisplayingPopUp;
     private bool DisplayingQuery;
     private bool DelayingQuery;
+    private bool PostAnswerMode;
     private float PopUpTimer;
     private float QueryTimer;
+    private float DriveTimer; //Timer to measure how long it took for the user to provide input for driving after a question has been answered
     private float DelayTimer;
     private float QueryDelay;
     
@@ -120,12 +133,13 @@ public class QuestionManager : MonoBehaviour {
     // Init
     void Start()
     {
-        //Save the gameobjects  for fast reference in the loop
+        //Caching gameobjects
         PopUpMessagePanel = transform.GetChild(0).gameObject;
         QueryPanel = transform.GetChild(1).gameObject;
         source = gameObject.GetComponent<AudioSource>();
+      
 
-        //If children gos were retrieved succesfully 
+        //If children GOs were retrieved succesfully 
         if (PopUpMessagePanel && QueryPanel)
         {
             //Retrieve the question text and initialise the text with the first question
@@ -184,25 +198,26 @@ public class QuestionManager : MonoBehaviour {
             {
                 if (Input.GetKeyDown(key))
                 {
-                  //  Debug.Log("Pressed " + key);
-
+                    //if the post answer mode from the previous question was not finished 
+                    // Meaning that we invoked a question before the user started driving after answering a question
+                    //this will increment the counters and reset everything back to normal
+                    if (PostAnswerMode)
+                    {
+                        ResetTimers();
+                        PostAnswerLogic(false);
+                    }
                     //Load appropriate question for the text and save 
                     pressedKey = key; 
                    CurrentQListIndex = KeysToIndexMap[key]; Debug.Log("Questiontype  "+CurrentQListIndex);//which set of questions  
                     cqIndex = QueryListCounters[CurrentQListIndex]; Debug.Log("Question index  " + cqIndex);// which question index of that previous set
                     CurrentQueryText = QueriesList[CurrentQListIndex].QueryList[cqIndex]; Debug.Log("Question : " + CurrentQueryText); // the actual text of the question
 
-                    //Instead of checking which type of locomotion is on  just disable both for now
+                    RSList[CurrentQListIndex][cqIndex].PopUpStartTime = CurrentTimeString();
 
-                    if (StreamController.Instance._selectedControlType == StreamController.ControlType.Eyes)
-                    {
-                        EyeControlPanel.SetExternallyDisabled(true);
-                    }
-                    else if (StreamController.Instance._selectedControlType == StreamController.ControlType.Joystick)
-                    {
-                        RobotInterface.Instance.EnableRobotCommands(false);
-                    }
-                    
+                    //Instead of checking which type of locomotion is on  just disable both for now
+                    PauseManagers(false);
+
+
                     ShowPopUp();
                     DisplayingPopUp = true;
                 }
@@ -250,6 +265,7 @@ public class QuestionManager : MonoBehaviour {
                 if (DelayTimer >= QueryDelay)
                 {
                     ShowQuery();
+                    RSList[CurrentQListIndex][cqIndex].QuestionStartTime = CurrentTimeString();
                     DelayingQuery = false;
                     DisplayingQuery = true;
                     DisplayingPopUp = false;
@@ -265,27 +281,97 @@ public class QuestionManager : MonoBehaviour {
             {
                 //Save QRS
                 RSList[CurrentQListIndex][cqIndex].QRS = QueryTimer;
-                CloseQuery();
+               
+                RSList[CurrentQListIndex][cqIndex].QuestionEndTime = CurrentTimeString();
+                
                 DisplayingQuery = false;
-                ResetTimers();
+                CloseQuery();
+                IncrementQuestion();
 
-                if (StreamController.Instance._selectedControlType == StreamController.ControlType.Eyes)
-                {
-                    EyeControlPanel.SetExternallyDisabled(false);
-                }
-                else if (StreamController.Instance._selectedControlType == StreamController.ControlType.Joystick)
-                {
-                    RobotInterface.Instance.EnableRobotCommands(true) ;
-                }
+                //this was put inside a function in PauseManagers
+                //reset the user's control 
+                //if (StreamController.Instance._selectedControlType == StreamController.ControlType.Eyes)
+                //{
+                //    EyeControlPanel.SetExternallyDisabled(false);
+                //}
+                //else if (StreamController.Instance._selectedControlType == StreamController.ControlType.Joystick)
+                //{
+                //    RobotInterface.Instance.EnableRobotCommands(true) ;
+                //}
+
+                PauseManagers(true);
+
+
+                PostAnswerMode = true;
             }
         }
+        // Post query calculations -- Mode stops once user starts driving again
+        if (PostAnswerMode)
+        {
+            //if the pressed key was not the final questions
+            if (pressedKey != FinalQuestionHotkey)
+            {
+                DriveTimer += Time.deltaTime;
+                
+                //query the interface that controls the robot about user input, to determine when the robot started moving again
+                if (RobotInterface.Instance.IsRobotDriving())
+                {
+                   
+                    PostAnswerLogic(false);
+                }
+            }
+            //if this was the last question there will be no post question driving mode
+            else
+            {
+                PostAnswerLogic(true);
+            }
 
+        }
+
+    }
+
+
+
+    public bool IsActivated()
+    {
+        return IsActive;
+    }
+
+    private void PostAnswerLogic(bool lastQuestion)
+    {
+        if (lastQuestion)
+        {
+            //double check if this works ok
+            RSList[CurrentQListIndex][cqIndex].DRS = 0;
+            RSList[CurrentQListIndex][cqIndex].StartDrivingTime = CurrentTimeString();
+            FinalQuestionOperations();
+           
+        }
+        else
+        {
+            //When we write the driving times the question index has been incremented
+            RSList[CurrentQListIndex][cqIndex].DRS = DriveTimer;
+            RSList[CurrentQListIndex][cqIndex].StartDrivingTime = CurrentTimeString();
+           
+        }
+        PostAnswerMode = false;
+        ResetTimers();
+    }
+
+    //Returns a string with the current time in the format hh:mm:ss
+    public string CurrentTimeString()
+    {
+        
+        string CurrentTime = DateTime.Now.Hour.ToString()+ ":" + DateTime.Now.Minute.ToString()+":" + DateTime.Now.Second.ToString(); 
+
+        return CurrentTime;
     }
 
     public void EnableManager()
     {
         Debug.Log("QueryManager enabled");
         IsActive = true;
+
     }
 
     private void ShowPopUp()
@@ -300,7 +386,7 @@ public class QuestionManager : MonoBehaviour {
     {
         //For now no animations or anything else
         PopUpMessagePanel.SetActive(false);
-      ;
+      
     }
 
     private void ShowQuery()
@@ -314,9 +400,19 @@ public class QuestionManager : MonoBehaviour {
     private void CloseQuery()
     {
 
+
+        //For now no animations or anything else
+        QueryPanel.SetActive(false);
+       
+    }
+
+    private void IncrementQuestion()
+    {
+
         //If there are still questions in the list, then prepare the next question's text
-        if (QueryListCounters[CurrentQListIndex] < RSList[CurrentQListIndex].Count-1)
+        if (QueryListCounters[CurrentQListIndex] < RSList[CurrentQListIndex].Count - 1)
         {
+
             QueryListCounters[CurrentQListIndex]++;
 
         }
@@ -324,36 +420,39 @@ public class QuestionManager : MonoBehaviour {
         else
         {
             CurrentActiveKeys.Remove(pressedKey);
-
-            //If we answered all the final questions then write to file and exit
-            //This key must correspond to one of the questions hotkeys
-            if (pressedKey == FinalQuestionHotkey)
-            {
-                WriteDataToFile();
-               // ResetManager();
-            }
         }
 
+    }
 
-       
-        
-       
-       
-        //For now no animations or anything else
-        QueryPanel.SetActive(false);
-       
+    private void FinalQuestionOperations()
+    {
+        //If we answered all the final questions then write to file and exit
+        //This key must correspond to one of the questions hotkeys
+        if (pressedKey == FinalQuestionHotkey)
+        {
+
+            ExperimentEndDate = DateTime.Now;
+            IsActive = false;
+            Debug.Log("QueryManager Deactivated");
+            WriteDataToFile();
+
+            //finalize operations for external systems 
+            DisableExternalSystems();
+
+        }
     }
 
     private void WriteDataToFile()
     {
 
        
-        Debug.Log("Writing to file");
+        Debug.Log("Writing to data file");
 
         //JSON object creation
         JsonData data = new JsonData();
         data.UserID = TestSubjectID;
-        data.Date = ExperimentDate.ToString(); //Date and time as string
+        data.StartDate = ExperimentDate.ToString(); //StartDate and time as string
+        data.EndDate = ExperimentEndDate.ToString(); //End time of the trial 
         data.Maze = MazeID;
 
         //this is the number of question types we will write to the json file 
@@ -371,6 +470,12 @@ public class QuestionManager : MonoBehaviour {
                 temp.RSS[j] = new ResponseTimes();
                 temp.RSS[j].PRS= RSList[index][j].PRS;
                 temp.RSS[j].QRS = RSList[index][j].QRS;
+                temp.RSS[j].DRS = RSList[index][j].DRS;
+             
+                temp.RSS[j].PopUpStartTime = RSList[index][j].PopUpStartTime;
+                temp.RSS[j].QuestionStartTime = RSList[index][j].QuestionStartTime;
+                temp.RSS[j].QuestionEndTime = RSList[index][j].QuestionEndTime;
+                temp.RSS[j].StartDrivingTime = RSList[index][j].StartDrivingTime;
 
             }
             data.Responses[counter]= temp;
@@ -380,7 +485,6 @@ public class QuestionManager : MonoBehaviour {
        
         string json = JsonUtility.ToJson(data,true);
 
-      
         //Appending in the write position in the file
   
         //Read the existing contents of the file
@@ -398,7 +502,7 @@ public class QuestionManager : MonoBehaviour {
 
     private void ResetTimers()
     {
-        PopUpTimer = QueryTimer = DelayTimer =  0.0f;
+        PopUpTimer = QueryTimer = DelayTimer = DriveTimer =  0.0f;
     }
 
     private void ResetManager()
@@ -407,9 +511,9 @@ public class QuestionManager : MonoBehaviour {
         QueryDelay = 0;
         cqIndex = 0;
         CurrentQListIndex = 0;
-        DisplayingPopUp = DisplayingQuery = DelayingQuery = false;
+        DisplayingPopUp = DisplayingQuery = DelayingQuery = PostAnswerMode = false;
         ResetTimers();
-
+        IsActive = true;
         //Initialize data structures from scratch
         KeysToIndexMap = new Dictionary<KeyCode, int>();
         CurrentActiveKeys = new Dictionary<KeyCode, int>();
@@ -436,7 +540,7 @@ public class QuestionManager : MonoBehaviour {
             }
         }
       
-        //New Date
+        //New StartDate
         ExperimentDate = DateTime.Now;
 
 
@@ -470,4 +574,60 @@ public class QuestionManager : MonoBehaviour {
     }
 
     
+    public int GetUserID()
+    {
+        return TestSubjectID;
+    }
+
+    public int GetMazeID()
+    {
+        return MazeID;
+    }
+
+    //CHANGE THIS NAME AND ADD VIRTUAL CONTROLLER
+    public void PauseManagers(bool enable)
+    {
+        //pause/disable managers
+        if (!enable)
+        {
+            EyeControlPanel.SetExternallyDisabled(true);
+            GazeTrackingDataManager.Instance.RecordingData(false);
+
+            if (StreamController.Instance.VirtualEnvironment)
+            {
+                VirtualUnityController.Instance.Disconnect();
+            }
+            else
+            {
+                RobotInterface.Instance.EnableRobotCommands(false);
+            }
+           
+           
+        }
+        else
+        {
+            EyeControlPanel.SetExternallyDisabled(false);
+            GazeTrackingDataManager.Instance.RecordingData(true);
+
+            if (StreamController.Instance.VirtualEnvironment)
+            {
+                VirtualUnityController.Instance.Connect();
+            }
+            else
+            {
+                RobotInterface.Instance.EnableRobotCommands(true);
+            }
+        }
+
+
+    }
+
+    public void DisableExternalSystems()
+    {
+        if (GazeTrackingDataManager.Instance)
+        {
+            GazeTrackingDataManager.Instance.EndRecording = true;
+        }
+    }
+
 }

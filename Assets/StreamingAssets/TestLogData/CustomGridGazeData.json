@@ -1,0 +1,908 @@
+{ 
+ "CustomGridGazeData":[  
+ {
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "9/21/2018 5:04:46 PM",
+    "EndDate": "9/21/2018 5:05:40 PM",
+    "SegmentID": [],
+    "CustomSegmentID": [
+        {
+            "tag": "HighLeftRotHighVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 1.5,
+            "TotalVisitPercentage": "11.11%",
+            "GazeVisits": [
+                {
+                    "Time": "17:5:6",
+                    "VisitDuration": 1.5
+                }
+            ]
+        },
+        {
+            "tag": "HighLeftRotMidVel",
+            "TotalSegmentVisits": 2,
+            "AverageVisitDuration": 2.0,
+            "TotalVisitPercentage": "22.22%",
+            "GazeVisits": [
+                {
+                    "Time": "17:5:9",
+                    "VisitDuration": 2.5
+                },
+                {
+                    "Time": "17:5:19",
+                    "VisitDuration": 1.5
+                }
+            ]
+        },
+        {
+            "tag": "RotateLeftOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotHighVel",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotMidVel",
+            "TotalSegmentVisits": 2,
+            "AverageVisitDuration": 2.25,
+            "TotalVisitPercentage": "22.22%",
+            "GazeVisits": [
+                {
+                    "Time": "17:5:0",
+                    "VisitDuration": 2.0
+                },
+                {
+                    "Time": "17:5:28",
+                    "VisitDuration": 2.5
+                }
+            ]
+        },
+        {
+            "tag": "RotateRightOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "Forward",
+            "TotalSegmentVisits": 4,
+            "AverageVisitDuration": 4.5,
+            "TotalVisitPercentage": "44.44%",
+            "GazeVisits": [
+                {
+                    "Time": "17:4:57",
+                    "VisitDuration": 3.5
+                },
+                {
+                    "Time": "17:5:4",
+                    "VisitDuration": 2.5
+                },
+                {
+                    "Time": "17:5:16",
+                    "VisitDuration": 6.5
+                },
+                {
+                    "Time": "17:5:25",
+                    "VisitDuration": 5.5
+                }
+            ]
+        },
+        {
+            "tag": "DeadZone",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": NaN,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        }
+    ]
+}, 
+{
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "9/24/2018 3:39:14 PM",
+    "EndDate": "9/24/2018 3:39:39 PM",
+    "SegmentID": [],
+    "CustomSegmentID": [
+        {
+            "tag": "HighLeftRotHighVel",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighLeftRotMidVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 29.20003890991211,
+            "TotalVisitPercentage": "25.00%",
+            "GazeVisits": [
+                {
+                    "Time": "15:39:32",
+                    "VisitDuration": 29.20003890991211
+                }
+            ]
+        },
+        {
+            "tag": "RotateLeftOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotHighVel",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotMidVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 28.60003662109375,
+            "TotalVisitPercentage": "25.00%",
+            "GazeVisits": [
+                {
+                    "Time": "15:39:25",
+                    "VisitDuration": 28.60003662109375
+                }
+            ]
+        },
+        {
+            "tag": "RotateRightOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "Forward",
+            "TotalSegmentVisits": 2,
+            "AverageVisitDuration": 93.79971313476563,
+            "TotalVisitPercentage": "50.00%",
+            "GazeVisits": [
+                {
+                    "Time": "15:39:24",
+                    "VisitDuration": 70.80006408691406
+                },
+                {
+                    "Time": "15:39:31",
+                    "VisitDuration": 116.79936218261719
+                }
+            ]
+        },
+        {
+            "tag": "DeadZone",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        }
+    ]
+}, 
+{
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "9/27/2018 4:09:48 PM",
+    "EndDate": "9/27/2018 4:11:46 PM",
+    "SegmentID": [],
+    "CustomSegmentID": [
+        {
+            "tag": "HighLeftRotHighVel",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighLeftRotMidVel",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "RotateLeftOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotHighVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 52.40012741088867,
+            "TotalVisitPercentage": "12.50%",
+            "GazeVisits": [
+                {
+                    "Time": "16:11:38",
+                    "VisitDuration": 52.40012741088867
+                }
+            ]
+        },
+        {
+            "tag": "HighRightRotMidVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 2.6000003814697267,
+            "TotalVisitPercentage": "12.50%",
+            "GazeVisits": [
+                {
+                    "Time": "16:10:37",
+                    "VisitDuration": 2.6000003814697267
+                }
+            ]
+        },
+        {
+            "tag": "RotateRightOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "Forward",
+            "TotalSegmentVisits": 6,
+            "AverageVisitDuration": 189.5669708251953,
+            "TotalVisitPercentage": "75.00%",
+            "GazeVisits": [
+                {
+                    "Time": "16:10:21",
+                    "VisitDuration": 306.6003112792969
+                },
+                {
+                    "Time": "16:10:36",
+                    "VisitDuration": 173.39849853515626
+                },
+                {
+                    "Time": "16:10:36",
+                    "VisitDuration": 2.200000286102295
+                },
+                {
+                    "Time": "16:10:37",
+                    "VisitDuration": 2.4000003337860109
+                },
+                {
+                    "Time": "16:11:2",
+                    "VisitDuration": 295.3996276855469
+                },
+                {
+                    "Time": "16:11:34",
+                    "VisitDuration": 357.4034118652344
+                }
+            ]
+        },
+        {
+            "tag": "DeadZone",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        }
+    ]
+}, 
+{
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "9/27/2018 4:28:30 PM",
+    "EndDate": "9/27/2018 4:29:17 PM",
+    "SegmentID": [],
+    "CustomSegmentID": [
+        {
+            "tag": "HighLeftRotHighVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 20.000003814697267,
+            "TotalVisitPercentage": "5.88%",
+            "GazeVisits": [
+                {
+                    "Time": "16:28:50",
+                    "VisitDuration": 20.000003814697267
+                }
+            ]
+        },
+        {
+            "tag": "HighLeftRotMidVel",
+            "TotalSegmentVisits": 5,
+            "AverageVisitDuration": 16.000019073486329,
+            "TotalVisitPercentage": "29.41%",
+            "GazeVisits": [
+                {
+                    "Time": "16:28:48",
+                    "VisitDuration": 9.999995231628418
+                },
+                {
+                    "Time": "16:28:54",
+                    "VisitDuration": 47.400108337402347
+                },
+                {
+                    "Time": "16:28:55",
+                    "VisitDuration": 9.799995422363282
+                },
+                {
+                    "Time": "16:28:55",
+                    "VisitDuration": 2.200000286102295
+                },
+                {
+                    "Time": "16:28:56",
+                    "VisitDuration": 10.599994659423829
+                }
+            ]
+        },
+        {
+            "tag": "RotateLeftOnly",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 2.000000238418579,
+            "TotalVisitPercentage": "5.88%",
+            "GazeVisits": [
+                {
+                    "Time": "16:28:55",
+                    "VisitDuration": 2.000000238418579
+                }
+            ]
+        },
+        {
+            "tag": "HighRightRotHighVel",
+            "TotalSegmentVisits": 4,
+            "AverageVisitDuration": 9.949997901916504,
+            "TotalVisitPercentage": "23.53%",
+            "GazeVisits": [
+                {
+                    "Time": "16:28:41",
+                    "VisitDuration": 19.200000762939454
+                },
+                {
+                    "Time": "16:29:1",
+                    "VisitDuration": 5.399999141693115
+                },
+                {
+                    "Time": "16:29:1",
+                    "VisitDuration": 1.4000000953674317
+                },
+                {
+                    "Time": "16:29:3",
+                    "VisitDuration": 13.799991607666016
+                }
+            ]
+        },
+        {
+            "tag": "HighRightRotMidVel",
+            "TotalSegmentVisits": 2,
+            "AverageVisitDuration": 24.900022506713868,
+            "TotalVisitPercentage": "11.76%",
+            "GazeVisits": [
+                {
+                    "Time": "16:28:44",
+                    "VisitDuration": 33.80005645751953
+                },
+                {
+                    "Time": "16:29:0",
+                    "VisitDuration": 15.99998950958252
+                }
+            ]
+        },
+        {
+            "tag": "RotateRightOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "Forward",
+            "TotalSegmentVisits": 4,
+            "AverageVisitDuration": 25.700040817260743,
+            "TotalVisitPercentage": "23.53%",
+            "GazeVisits": [
+                {
+                    "Time": "16:28:39",
+                    "VisitDuration": 29.80004119873047
+                },
+                {
+                    "Time": "16:28:47",
+                    "VisitDuration": 38.600074768066409
+                },
+                {
+                    "Time": "16:28:59",
+                    "VisitDuration": 31.000045776367189
+                },
+                {
+                    "Time": "16:29:1",
+                    "VisitDuration": 3.40000057220459
+                }
+            ]
+        },
+        {
+            "tag": "DeadZone",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        }
+    ]
+}, 
+{
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "9/27/2018 5:02:22 PM",
+    "EndDate": "9/27/2018 5:03:18 PM",
+    "SegmentID": [],
+    "CustomSegmentID": [
+        {
+            "tag": "HighLeftRotHighVel",
+            "TotalSegmentVisits": 2,
+            "AverageVisitDuration": 17.500022888183595,
+            "TotalVisitPercentage": "11.11%",
+            "GazeVisits": [
+                {
+                    "Time": "17:2:52",
+                    "VisitDuration": 4.400000095367432
+                },
+                {
+                    "Time": "17:2:56",
+                    "VisitDuration": 30.60004425048828
+                }
+            ]
+        },
+        {
+            "tag": "HighLeftRotMidVel",
+            "TotalSegmentVisits": 3,
+            "AverageVisitDuration": 21.600046157836915,
+            "TotalVisitPercentage": "16.67%",
+            "GazeVisits": [
+                {
+                    "Time": "17:2:53",
+                    "VisitDuration": 4.000000476837158
+                },
+                {
+                    "Time": "17:2:57",
+                    "VisitDuration": 5.1999993324279789
+                },
+                {
+                    "Time": "17:3:2",
+                    "VisitDuration": 55.60013961791992
+                }
+            ]
+        },
+        {
+            "tag": "RotateLeftOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotHighVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 29.600040435791017,
+            "TotalVisitPercentage": "5.56%",
+            "GazeVisits": [
+                {
+                    "Time": "17:2:47",
+                    "VisitDuration": 29.600040435791017
+                }
+            ]
+        },
+        {
+            "tag": "HighRightRotMidVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 30.200042724609376,
+            "TotalVisitPercentage": "5.56%",
+            "GazeVisits": [
+                {
+                    "Time": "17:2:45",
+                    "VisitDuration": 30.200042724609376
+                }
+            ]
+        },
+        {
+            "tag": "RotateRightOnly",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 30.000041961669923,
+            "TotalVisitPercentage": "5.56%",
+            "GazeVisits": [
+                {
+                    "Time": "17:2:42",
+                    "VisitDuration": 30.000041961669923
+                }
+            ]
+        },
+        {
+            "tag": "Forward",
+            "TotalSegmentVisits": 7,
+            "AverageVisitDuration": 36.371429443359378,
+            "TotalVisitPercentage": "38.89%",
+            "GazeVisits": [
+                {
+                    "Time": "17:2:35",
+                    "VisitDuration": 65.00015258789063
+                },
+                {
+                    "Time": "17:2:38",
+                    "VisitDuration": 30.800045013427736
+                },
+                {
+                    "Time": "17:2:39",
+                    "VisitDuration": 9.599995613098145
+                },
+                {
+                    "Time": "17:2:51",
+                    "VisitDuration": 39.800079345703128
+                },
+                {
+                    "Time": "17:2:53",
+                    "VisitDuration": 14.7999906539917
+                },
+                {
+                    "Time": "17:2:57",
+                    "VisitDuration": 2.4000003337860109
+                },
+                {
+                    "Time": "17:3:10",
+                    "VisitDuration": 92.19973754882813
+                }
+            ]
+        },
+        {
+            "tag": "DeadZone",
+            "TotalSegmentVisits": 3,
+            "AverageVisitDuration": 3.6000001430511476,
+            "TotalVisitPercentage": "16.67%",
+            "GazeVisits": [
+                {
+                    "Time": "17:2:35",
+                    "VisitDuration": 1.8000001907348633
+                },
+                {
+                    "Time": "17:2:38",
+                    "VisitDuration": 4.599999904632568
+                },
+                {
+                    "Time": "17:3:11",
+                    "VisitDuration": 4.400000095367432
+                }
+            ]
+        }
+    ]
+}, 
+{
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "9/27/2018 5:15:04 PM",
+    "EndDate": "9/27/2018 5:20:57 PM",
+    "SegmentID": [],
+    "CustomSegmentID": [
+        {
+            "tag": "HighLeftRotHighVel",
+            "TotalSegmentVisits": 3,
+            "AverageVisitDuration": 12.866669654846192,
+            "TotalVisitPercentage": "17.65%",
+            "GazeVisits": [
+                {
+                    "Time": "17:20:36",
+                    "VisitDuration": 2.6000003814697267
+                },
+                {
+                    "Time": "17:20:37",
+                    "VisitDuration": 12.799992561340332
+                },
+                {
+                    "Time": "17:20:50",
+                    "VisitDuration": 23.200016021728517
+                }
+            ]
+        },
+        {
+            "tag": "HighLeftRotMidVel",
+            "TotalSegmentVisits": 4,
+            "AverageVisitDuration": 16.950010299682618,
+            "TotalVisitPercentage": "23.53%",
+            "GazeVisits": [
+                {
+                    "Time": "17:20:35",
+                    "VisitDuration": 34.40005874633789
+                },
+                {
+                    "Time": "17:20:36",
+                    "VisitDuration": 4.200000286102295
+                },
+                {
+                    "Time": "17:20:48",
+                    "VisitDuration": 15.599989891052246
+                },
+                {
+                    "Time": "17:20:51",
+                    "VisitDuration": 13.599991798400879
+                }
+            ]
+        },
+        {
+            "tag": "RotateLeftOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotHighVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 11.199994087219239,
+            "TotalVisitPercentage": "5.88%",
+            "GazeVisits": [
+                {
+                    "Time": "17:20:40",
+                    "VisitDuration": 11.199994087219239
+                }
+            ]
+        },
+        {
+            "tag": "HighRightRotMidVel",
+            "TotalSegmentVisits": 4,
+            "AverageVisitDuration": 12.44999885559082,
+            "TotalVisitPercentage": "23.53%",
+            "GazeVisits": [
+                {
+                    "Time": "17:20:27",
+                    "VisitDuration": 7.399997234344482
+                },
+                {
+                    "Time": "17:20:29",
+                    "VisitDuration": 14.399991035461426
+                },
+                {
+                    "Time": "17:20:41",
+                    "VisitDuration": 6.199998378753662
+                },
+                {
+                    "Time": "17:20:43",
+                    "VisitDuration": 21.800010681152345
+                }
+            ]
+        },
+        {
+            "tag": "RotateRightOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "Forward",
+            "TotalSegmentVisits": 5,
+            "AverageVisitDuration": 37.76000213623047,
+            "TotalVisitPercentage": "29.41%",
+            "GazeVisits": [
+                {
+                    "Time": "17:20:27",
+                    "VisitDuration": 85.59983825683594
+                },
+                {
+                    "Time": "17:20:28",
+                    "VisitDuration": 4.599999904632568
+                },
+                {
+                    "Time": "17:20:32",
+                    "VisitDuration": 36.000064849853519
+                },
+                {
+                    "Time": "17:20:39",
+                    "VisitDuration": 22.000011444091798
+                },
+                {
+                    "Time": "17:20:46",
+                    "VisitDuration": 40.60008239746094
+                }
+            ]
+        },
+        {
+            "tag": "DeadZone",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        }
+    ]
+}, 
+{
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "9/27/2018 5:21:58 PM",
+    "EndDate": "9/27/2018 5:22:37 PM",
+    "SegmentID": [],
+    "CustomSegmentID": [
+        {
+            "tag": "HighLeftRotHighVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 18.799999237060548,
+            "TotalVisitPercentage": "16.67%",
+            "GazeVisits": [
+                {
+                    "Time": "17:22:21",
+                    "VisitDuration": 18.799999237060548
+                }
+            ]
+        },
+        {
+            "tag": "HighLeftRotMidVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 34.40005874633789,
+            "TotalVisitPercentage": "16.67%",
+            "GazeVisits": [
+                {
+                    "Time": "17:22:24",
+                    "VisitDuration": 34.40005874633789
+                }
+            ]
+        },
+        {
+            "tag": "RotateLeftOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotHighVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 30.800045013427736,
+            "TotalVisitPercentage": "16.67%",
+            "GazeVisits": [
+                {
+                    "Time": "17:22:12",
+                    "VisitDuration": 30.800045013427736
+                }
+            ]
+        },
+        {
+            "tag": "HighRightRotMidVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 25.800025939941408,
+            "TotalVisitPercentage": "16.67%",
+            "GazeVisits": [
+                {
+                    "Time": "17:22:15",
+                    "VisitDuration": 25.800025939941408
+                }
+            ]
+        },
+        {
+            "tag": "RotateRightOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "Forward",
+            "TotalSegmentVisits": 2,
+            "AverageVisitDuration": 56.400142669677737,
+            "TotalVisitPercentage": "33.33%",
+            "GazeVisits": [
+                {
+                    "Time": "17:22:10",
+                    "VisitDuration": 59.40015411376953
+                },
+                {
+                    "Time": "17:22:20",
+                    "VisitDuration": 53.40013122558594
+                }
+            ]
+        },
+        {
+            "tag": "DeadZone",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        }
+    ]
+}, 
+{
+    "UserID": 1,
+    "Maze": 1,
+    "StartDate": "9/27/2018 5:24:46 PM",
+    "EndDate": "9/27/2018 5:25:29 PM",
+    "SegmentID": [],
+    "CustomSegmentID": [
+        {
+            "tag": "HighLeftRotHighVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 2.000000238418579,
+            "TotalVisitPercentage": "14.29%",
+            "GazeVisits": [
+                {
+                    "Time": "17:25:10",
+                    "VisitDuration": 2.000000238418579
+                }
+            ]
+        },
+        {
+            "tag": "HighLeftRotMidVel",
+            "TotalSegmentVisits": 2,
+            "AverageVisitDuration": 1.6000001430511475,
+            "TotalVisitPercentage": "28.57%",
+            "GazeVisits": [
+                {
+                    "Time": "17:25:7",
+                    "VisitDuration": 2.000000238418579
+                },
+                {
+                    "Time": "17:25:13",
+                    "VisitDuration": 1.2000000476837159
+                }
+            ]
+        },
+        {
+            "tag": "RotateLeftOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "HighRightRotHighVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 2.000000238418579,
+            "TotalVisitPercentage": "14.29%",
+            "GazeVisits": [
+                {
+                    "Time": "17:25:0",
+                    "VisitDuration": 2.000000238418579
+                }
+            ]
+        },
+        {
+            "tag": "HighRightRotMidVel",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 3.8000006675720217,
+            "TotalVisitPercentage": "14.29%",
+            "GazeVisits": [
+                {
+                    "Time": "17:25:4",
+                    "VisitDuration": 3.8000006675720217
+                }
+            ]
+        },
+        {
+            "tag": "RotateRightOnly",
+            "TotalSegmentVisits": 0,
+            "AverageVisitDuration": 0.0,
+            "TotalVisitPercentage": ".00%",
+            "GazeVisits": []
+        },
+        {
+            "tag": "Forward",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 4.400000095367432,
+            "TotalVisitPercentage": "14.29%",
+            "GazeVisits": [
+                {
+                    "Time": "17:24:58",
+                    "VisitDuration": 4.400000095367432
+                }
+            ]
+        },
+        {
+            "tag": "DeadZone",
+            "TotalSegmentVisits": 1,
+            "AverageVisitDuration": 2.4000003337860109,
+            "TotalVisitPercentage": "14.29%",
+            "GazeVisits": [
+                {
+                    "Time": "17:25:16",
+                    "VisitDuration": 2.4000003337860109
+                }
+            ]
+        }
+    ]
+}, 
+$ 
+ ] 
+ }

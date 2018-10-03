@@ -28,6 +28,7 @@ public class RobotInterface : MonoBehaviour
     //not quite nice, I have broken the enables/disables in multiple scripts 
     private bool AllowRobotCommands = true;
     public bool IsConnected { get; private set; }
+    private bool IsDriving;
     public AnimationCurve SpeedCurve;
 
     [SerializeField] private int _motorMaxSpeed = 255;
@@ -39,6 +40,7 @@ public class RobotInterface : MonoBehaviour
     [SerializeField] private float MaximumAngularVelocity= 0.8f;
     [SerializeField] private float BackwardsVelocity = 0.1f;
 
+    //these should be in robotcontrolpad maybe , not here as filters. They are part of the UI.
     [SerializeField] private float MaxVelocityHorizon = 0;
     [SerializeField] public float UpperDeadZoneLimit = -0.5f;
     [SerializeField] public float LowerDeadZoneLimit = -0.7f;
@@ -47,7 +49,9 @@ public class RobotInterface : MonoBehaviour
 
     [SerializeField] private float LeftBackZoneLimit = -0.2f;
     [SerializeField] private float UpperBackZoneLimit = -0.8f;
+    [SerializeField] private string RobotConfigurationFile = "Telerobot_ThetaS.json";
 
+    private string RobotName;
     private float _timer = 0;
     private Vector2 InitRange;
     private Vector2 NewRange;
@@ -55,7 +59,8 @@ public class RobotInterface : MonoBehaviour
     private bool _left, _right, _forward, _reverse;
     private bool _isStopped;
     private ROSLocomotionDirect _rosLocomotionDirect;
-    private ROSBridgeWebSocketConnection _rosBridge;
+    [HideInInspector]
+    public ROSBridgeWebSocketConnection _rosBridge;
     private Telerobot_ThetaFile _telerobotConfigFile;
 
    
@@ -63,17 +68,18 @@ public class RobotInterface : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        _telerobotConfigPath = Application.streamingAssetsPath + "/Config/Telerobot_ThetaS.json";
+        //The connection details of the robot to drive, retrieved from a json file in the config path.
+        _telerobotConfigPath = Application.streamingAssetsPath + "/Config/" + RobotConfigurationFile;
     }
 
     void Start()
     {
         string robotFileJson = File.ReadAllText(_telerobotConfigPath);
         _telerobotConfigFile = JsonUtility.FromJson<Telerobot_ThetaFile>(robotFileJson);
-
+        IsDriving = false;
         InitRange = new Vector2(UpperDeadZoneLimit , MaxVelocityHorizon);
         NewRange = new Vector2(0,MaximumLinearVelocity);
-       // Debug.log(_telerobotConfigFile);
+      
     }
 
     //changed this from OnApplicationQuit
@@ -98,10 +104,8 @@ public class RobotInterface : MonoBehaviour
        // Debug.Log("Sending command to robot");
        // Debug.Log("ControlOutput is :" + controlOutput.x +"  " +  controlOutput.y);
 
-       // Debug.Log("Sending command to robot");
+        IsDriving = true;
         Vector2 movement = new Vector2(controlOutput.y, -controlOutput.x);
-
-
 
       //  Debug.Log("Intial Linear speed was :" + movement.x + "Initial Angular speed was : " + movement.y);
         //if you are not at the dead zone 
@@ -111,8 +115,6 @@ public class RobotInterface : MonoBehaviour
             movement = new Vector2(FilterLinearVelocity(movement.x), FilterAngularVelocity(movement.y));
            // Debug.Log("Normalized Linear speed was :" + movement.x + "Normalized Initial Angular speed was : " +  movement.y);
 
-
-           
             _rosLocomotionDirect.PublishData(movement.x, movement.y);
             _isStopped = false;
             
@@ -127,13 +129,14 @@ public class RobotInterface : MonoBehaviour
 
     }
 
-    //Commands with joystick
+    //Commands with joystick -- This should not be called every frame for 0 input maybe
     public void DirectCommandRobot(Vector2 JoystickInput)
     {
         //Horizontal = rotation = y , Vertical = LinearMove = x
         Vector2 movement = new Vector2(JoystickInput.y, -JoystickInput.x);
 
-        
+        IsDriving = movement != Vector2.zero;
+     
         if (movement.x > MaximumLinearVelocity) movement.x = MaximumLinearVelocity;
         else if (movement.x < 0) movement.x = -BackwardsVelocity;
 
@@ -156,11 +159,17 @@ public class RobotInterface : MonoBehaviour
 
     public void StopRobot()
     {
+        
+        IsDriving = false;
         if (!IsConnected || _isStopped) return;
         _rosLocomotionDirect.PublishData(0, 0);
         _isStopped = true;
     }
 
+    public bool IsRobotDriving()
+    {
+        return IsDriving;
+    }
     public void SendCommand(Vector2 controlOutput)
     {
         
@@ -213,8 +222,10 @@ public class RobotInterface : MonoBehaviour
         if (!_telerobotConfigFile.RosBridgeUri.StartsWith("ws://"))
             _telerobotConfigFile.RosBridgeUri = "ws://" + _telerobotConfigFile.RosBridgeUri;
 
-        _rosBridge = new ROSBridgeWebSocketConnection(_telerobotConfigFile.RosBridgeUri, _telerobotConfigFile.RosBridgePort, "Telerobot_ThetaS");
+        //"Telerobot_ThetaS"
+        _rosBridge = new ROSBridgeWebSocketConnection(_telerobotConfigFile.RosBridgeUri, _telerobotConfigFile.RosBridgePort, "VirtualRobot_Arlobot");
         _rosLocomotionDirect = new ROSLocomotionDirect(ROSAgent.AgentJob.Publisher, _rosBridge, "/cmd_vel");
+        
         _rosBridge.Connect(((s, b) => { Debug.Log(s + " - " + b); }));
         IsConnected = true;
     }
@@ -252,12 +263,6 @@ public class RobotInterface : MonoBehaviour
         {
             return 0;
         }
-        //else if (InitValue < UpperBackZoneLimit && InitValue > -1)
-        //{
-        //    Debug.Log("BackwardsZone  " );
-        //    return -BackwardsVelocity;
-        //}
-
 
         return 0;
     }

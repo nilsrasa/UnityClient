@@ -14,12 +14,17 @@ Unity version 2017.x
 For tutorials and documentation on installing and running Unity see [Unity Manual](https://docs.unity3d.com/Manual/UnityBasics.html)
 
 ## Project contents
-The Unity projects contain two projects regarding ROS controlled robots, one being a client for a remote presence robots, one being a client and/or simulator.
+The Unity projects contain two types of projects regarding ROS controlled robots, one being a client for a remote presence robots, one being a client and/or simulator.
 Unity is scene based, which means each project is placed in a separate scene.
 * **MazeMapModel:** Client and simulator using mazemap for generating floor plan of robot's environment
 * **Telerobot_ThetaS_Normal:** Direct control of robot through VR interface using Theta S 360 camera for navigation. (Requires camera)
 * **Telerobot_ThetaS_Limited:** Same as above but with a limited interface for use with only eyes. (Either on a screen or with a VR HMD)
-
+* **Telerobot_ThetaS_QTest:** Similar to the two scenes above but with a few more features. Offers direct control of the connected robot through a VR interface. Uses Theta S 360 camera for video feedback as well as audio.
+							  Two different input method options, gaze or joystick. Custom question manager that test conductors may choose to invoke, in order to gather data during user testing.	
+* **Telerobot_ThetaS_VirtualEnvironment (under development):**  Similar concept as the scene above but for driving a virtual Unity robot inside a purely virtual environment. Attempts to simulate the scenarios from the 
+																previous scene (driving interactions, different maze obstacles, sound feedback etc) but for the virtual simulation. Contains similar options for input as well as some additional features (see section below).
+																
+																
 ### Guang Tao experiments July 2018
 
 The goal was to test the differences between two different input methods by the user, direct gazecontrol and joystick.
@@ -33,8 +38,58 @@ The simulation assumes that setup for to the physical robot and the 360 camera h
 The test conductor may change the input method for the test through a drop down menu, located in the CockpitStructure gameobject and on the Stream Controller script component attached to it.
 The name of the menu in the inspector is  called "selected control type".
 
-The QueryManager gameobject (and script) contains all the settings for the pop up question interface , which the test conductor may change according to their needs.
+The QueryManager gameobject (and script) contains all the settings for the pop up question interface , which the test conductor may change according to their needs. The hotkeys for questions and popups can be found here.
 It also contains settings for parameterising the user trial (Test user ID , maze ID etc) which will be serialised to a JSON file once the experiment is done.
+
+### QTest update notes and VirtualEnvironment features - October 2018
+
+----Both of the following scenes are meant to be executed from the Unity editor instead of build executables, in order to have quick access to the many parameters of a trial, which at the moment can only be altered 
+from the inspector e.g Input method choice. -----
+
+
+----Telerobot_ThetaS_QTest scene updates from July and additional notes : 
+
+--The CockpitStructure that contains the input method choice, has an additional boolean button underneath the input menu called VirtualEnvironment. This distinguishes between running 
+the experiment in the pure Unity virtual environment or attempt to connect to an actual robot (which is the intended use of this scene). Make sure that the box is NOT CHECKED to ensure correct  functionality for this scene. 
+
+-- The JSON file name that collects the user data from the question manager is hardcoded in the script Question Manager, and it is UserTestData.json. Both this scene and the virtual environment scene write in this file. Make 
+sure to copy it and change its name when switching between scenes to run a new cycle of experiments, otherwise the data will be mixed.
+
+-- The gaze data collector that was created for the virtual environment scene (and will be explained below) is located in the QUERYMANAGER gameobject but at the moment is disabled for this scene (and was not used in the July experiments). If you wish to enable it
+make sure to fill out the public editor fields appropriately before running the tests (check the settings in VirtualEnvironment scene).
+
+-- The logic of the control panel and the gaze has been updated. The gaze indicator is always available now regardless of the input method chosen. The user can now send commands to the robot either via gaze or the joystick only when they 
+the control panel is active (outline of the panel is green). In the previous version the joystick input would send input to the robot regardless of the control panel's status. This way gaze data can be retrieved for both methods.
+
+----Telerobot_ThetaS_VirtualEnvironment: 
+
+The goal of this scene is to create a purely virtual simulation of driving a remote robot and see the impact of training in this environment, in the user's driving ability. This scene is still under development
+and most features are not fully polished. This scene does not require connection to any ROS interface or a 360 camera. 
+
+--Make sure that the VirtualEnvironment button in the CockpitStructure gameobject is enabled at all times for this scene. 
+
+--The virtual robot has a new controller called VirtualUnityController, that tries to imitate the exact functionality of the RobotInterface controller that is used in the QTest scene. It does not connect to any ROS interface.
+All commands are local to Unity and simply change the velocity of the rigibody of the robot gameobject. This is called VirtualPadbot and is located in the VirtualSkylab gameobject. This controller script has all the available
+options that have to do with driving the padbot (e.g max velocity), the sounds that will be played when driving, simulated delay time etc.
+
+--The virtual environment that was created for this scene is an exact replica of the DesignLab of the DTU Skylab. The room size was defined from the exact measurements of the real room (see real notes for sizes). The current textures that are used were 
+taken experimentally as pictures of the lab and applied to the walls and the ceiling. The goal is to achieve a realistic replica with natural lighting and textures. Ultimately, we want to have the level of detail of the room as 
+a parameter that the test conductor can choose. One version will contain a dull box copy of the room with no textures while the other will offer a highly detailed version like discussed above.  
+
+--There are three unity cameras that are attached to virtual robot and sample the environment from different angles. The feed of the main front camera is displayed in the control panel (similar to displaying the feed from the 360 camera).
+
+--The input method choice for driving, is chosen in exactly the same way as the QTest scene. The questionManager is also exactly the same.
+
+---- Some new features for this scene that will be used for future tests can be found below. These are working prototypes that might need to be polished or altered.
+
+-- GazeDataManager : Tracks the eye gaze indicator and saves the data in json files. Offers two types of segmentation grids that define different gaze areas on the control panel. See the script with the same name for more details.
+						The settings for this manager can be found in the QUERYMANAGER gameobject where the question manager is.
+						
+-- Virtual maze settings: In order to run trials with different mazes, the test conductor must create and save different maze prefabs in the VirtualMazeGenerator scene. After all the desired prefabs are ready, drag and drop all
+of them in the Mazes list, that can be found in the Settings gameobject of the scene and in the VirtualMazeManager script. This step needs only to happen once if all maze prefabs have been created already , otherwise new maze prefabs
+need to be added to the list in the same way. To choose which maze will be used in the virtual room for this trial, simply change the maze index in the same script. It is advised to do this before the actual trial starts (play mode).
+ 
+
 
 ## Builds
 A list of available builds can be found [here](https://drive.google.com/drive/folders/1ta0PJkqub2rFYe6Vo0hOmulnSYLumLxf?usp=sharing).
@@ -42,6 +97,7 @@ This google drive folder contains the following builds:
 
  - **MazemapRobotInterface:** Mazemap interface where you can give robot movement commands through waypoints and use VR telepresence robots. Possibilities of using virtual robots as well as physical robots.
  - **VRTelerobot_Head/_Gaze:** Remotely control a Telepresence robot through a different interface with either head or gaze control. (Requires [FOVE VR](https://www.getfove.com/))
+  - **VRTelerobot/_Gaze/VirtualController:** Remotely control a virtual Unity robot in a virtual environment through gaze control. (Requires [FOVE VR](https://www.getfove.com/))
 
 ### User manual for builds:
 
@@ -54,7 +110,7 @@ This google drive folder contains the following builds:
 - Setup config file in `Data folder/StreamingAssets/Config/Telerobot_ThetaS.json` (The data folder is created when building and is named `#buildname#_Data`)
 - Make sure FOVE VR HMD is connected and set up.
 - Run build
-- Press 'C' on the keyboard to center head
+- Press 'C' on the keyboard to center head. In more recent scenes (e.g Telerobot_ThetaS_QTest) the hotkey for centering is 'h' due to the question manager reserving the hotkeys.
 
 #### MazemapRobotInterface
 - Setup config file in `Data folder/StreamingAssets/Config/` (See [Config File Section](#robot-config))
@@ -62,6 +118,7 @@ This google drive folder contains the following builds:
 - Open Robot List and connect to the robot. 
 - Select robot from dropdown list.
 - Click on the model to set waypoints and use commands to move robot.
+
 
 ## Charging Ricoh Theta S camera before use
 
@@ -78,6 +135,7 @@ The “DevicePath” is needed to be added to the system registry in order to ma
 * Adding new property with the name DevicePath, the value could be random. Note that the value will be destroyed with re-registration of the device filter, and will have to be created once again.
 
 ![Add registry key](/Screenshots/registry.PNG "Add registry key")
+
 
 ## Development
 

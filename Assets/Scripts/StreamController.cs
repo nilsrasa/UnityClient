@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
+using ROSBridgeLib;
 using UnityEngine;
 
 //Controls the player experience and camera input
@@ -18,8 +21,13 @@ public class StreamController : MonoBehaviour
     public static StreamController Instance { get; private set; }
 
     [SerializeField] public ControlType _selectedControlType = ControlType.Head;
+    [SerializeField] public bool VirtualEnvironment = false;
 
-    [Header("Cameras and Projection")] [SerializeField] private ThetaWebcamStream _cameraStreamUSB;
+    //public VirtualRobot VirtualRobotController;
+
+    [Header("Cameras and Projection")]
+    [SerializeField] private bool FeedbackFromCamera = true;
+    [SerializeField] private ThetaWebcamStream _cameraStreamUSB;
     [SerializeField] private QuestionManager _queryManager ;
     [SerializeField] private MeshRenderer _icosphere;
     [SerializeField] private MeshRenderer _icosphereDissolve;
@@ -55,8 +63,11 @@ public class StreamController : MonoBehaviour
         Deaccelerating
     }
 
+
+    private ROSBridgeWebSocketConnection rosbridge;
     private bool _isLooping;
     private bool _isConnected;
+   
     private bool _useFOVE;
     private float _currentChairSpeed;
     private float _accelTimer;
@@ -80,6 +91,29 @@ public class StreamController : MonoBehaviour
         //Viewport.Instance.SetFollowTarget(VRController.Instance.Head);
     }
 
+    private void SetupVirtualRobot()
+    {
+
+        string _configPath = Application.streamingAssetsPath + "/Config/Robots/";
+        string[] paths = Directory.GetFiles(_configPath, "VirtualRobot_Arlobot.json");
+        string path = paths[0];
+        
+
+        string robotName = Path.GetFileNameWithoutExtension(path);
+        Debug.Log(robotName);
+        string robotFileJson = File.ReadAllText(path);
+            RobotConfigFile robotFile = JsonUtility.FromJson<RobotConfigFile>(robotFileJson);
+
+
+            if (!robotFile.RosBridgeUri.StartsWith("ws://"))
+                robotFile.RosBridgeUri = "ws://" + robotFile.RosBridgeUri;
+
+
+       // rosbridge = new ROSBridgeWebSocketConnection(robotFile.RosBridgeUri, robotFile.RosBridgePort, robotName);
+    
+       //VirtualRobotController.InitialiseRobot(RobotInterface.Instance._rosBridge, robotFile, robotName);
+       // VirtualRobotController.OverridePositionAndOrientation(VirtualRobotController.gameObject.transform.position, VirtualRobotController.gameObject.transform.rotation);
+    }
 
     public void Update()
     {
@@ -87,8 +121,10 @@ public class StreamController : MonoBehaviour
         if (!_isConnected)
         {
             if (Input.GetKeyDown(KeyCode.A)){
-
+               
                 ConnectToRobot();
+                //SetupVirtualRobot();
+
             }
         }
 
@@ -248,11 +284,30 @@ public class StreamController : MonoBehaviour
     /// </summary>
     public void ConnectToRobot()
     {
-        _cameraStreamUSB.StartStream();
+        if (FeedbackFromCamera)
+            _cameraStreamUSB.StartStream();
+        else { }
+
         _currentChairState = ChairState.Accelerating;
         StartCoroutine(AscendChair());
-        RobotInterface.Instance.Connect();
-        _queryManager.EnableManager();
+
+        //connect to the appropriate controller
+        if (VirtualEnvironment)
+        {
+            VirtualUnityController.Instance.Connect();
+        }
+        else { 
+             RobotInterface.Instance.Connect();
+        }
+
+        //what about older projects?
+        if (_queryManager)
+        {
+            _queryManager.EnableManager();
+        }
+        
+        if (GazeTrackingDataManager.Instance)
+         GazeTrackingDataManager.Instance.EnableManager();
      
         //TODO: When online connection is put in, uncomment this
         //_isLooping = true;
