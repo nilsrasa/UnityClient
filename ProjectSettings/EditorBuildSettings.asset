@@ -6,5 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/MazeMap.unity
-    guid: 98c071a6a6d195747b7ff8e63f3ddc34
+    path: Assets/Scenes/Telerobot_ThetaS_QTest.unity
+    guid: bbd904c096a9e894c86756e10ee885ab
+  m_configObjects: {}

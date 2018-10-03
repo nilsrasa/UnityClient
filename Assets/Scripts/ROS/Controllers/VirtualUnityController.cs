@@ -6,10 +6,12 @@ using UnityEngine;
 
 
 /*
- This controller is directly attached to the Unity virtual arlobot without connecting through ROS
- Simple velocity commands and rotation received from the VRController.
+ *This controller is directly attached to the Unity virtual arlobot without connecting through ROS interface or 360 camera.
+ *Simple velocity commands and rotation received from the VRController depending on the input.
+ * Any change that you want to do for driving, logic for when the padbot collides with somethings, sound effects etc do it here.
+ * This was copied from the RobotInterface script and modified to fit the needs.
      
-*/
+ */
 public class VirtualUnityController : MonoBehaviour {
 
     public static VirtualUnityController Instance { get; private set; }
@@ -173,7 +175,7 @@ public class VirtualUnityController : MonoBehaviour {
     }
 
 
-
+    //collisions with objects alternate between sound clips and also shake the screen and slow the object.
     void OnCollisionEnter(Collision collision)
     {
 

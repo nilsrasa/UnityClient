@@ -10,7 +10,7 @@ using UnityEngine;
  * 
  * GazeTrackingDataManager description:
  * Responsible for saving the eye tracking data during an experiment
- * Closely connected with QuestionManager and VRController
+ * Closely connected with QuestionManager and VRController scripts
  */
 
 public class GazeTrackingDataManager : MonoBehaviour
@@ -144,8 +144,7 @@ public class GazeTrackingDataManager : MonoBehaviour
     [SerializeField] private float CustRecordTimeInterval;
     [Space(10)]
 
-    //Recording options
-    //private bool StRecordingData;
+    //This was initially public but there is no need to. The recording will stop automatically after the final question from the question manager is called
     public bool EndRecording;
 
     //Save file paths
@@ -165,7 +164,7 @@ public class GazeTrackingDataManager : MonoBehaviour
     [Tooltip("Resets the JSON file to an initial preset format.")]
     [SerializeField] private bool ClearCustomSegFile = false;
    
-  
+    // private variables
     private QuestionManager QueryManager;
     private float StTimer;
     private float CustTimer;
@@ -178,8 +177,8 @@ public class GazeTrackingDataManager : MonoBehaviour
     private DateTime EndRecordingDate;
     private float SegmentGazeDurationTimer;
     private long TotalGazeIterations;
-    //Custom grid info 
 
+    //Custom grid info 
     private int CNewGazeSegment;
     private int CPreviousGazeSegment;
     private DateTime CStartRecordingDate;
@@ -192,7 +191,7 @@ public class GazeTrackingDataManager : MonoBehaviour
     {
         Instance = this;
 
-        //make this path public maybe and add another file for the other  grid
+        
         StandardDataFilepath = Application.streamingAssetsPath + "/" + StandardDataFilepath;
         CustomDataFilepath = Application.streamingAssetsPath + "/" + CustomDataFilepath;
         EndRecording = false;
@@ -223,14 +222,15 @@ public class GazeTrackingDataManager : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
+        //this caching is redundant since querymanager is a global singleton. But maybe it is faster to use this.
         QueryManager = gameObject.GetComponent<QuestionManager>();
     }
 	
 	// Update is called once per frame
 	void Update () {
 
-        //--------- The following act as buttons that will call a function when activated. This does not add unnecessary UI in our scene but keeps everything 
-        //in the inspector
+        //--------- The following act as buttons that will call a function when activated. This does not add unnecessary UI in our scene and keeps everything 
+        //in the inspector. This is not optimal performance of course and is just a fast solution. Unity events should be considered.
         
         
 	    if (EndRecording)
@@ -374,6 +374,7 @@ public class GazeTrackingDataManager : MonoBehaviour
     private void RecordData(Vector2 segment,float duration)
     {
         //Debug.Log("Data recorded: Segment [" + segment + " ] - Duration of stare :" + duration );
+
         //Add to the appropriate segment a new entry on the visit list, as well as increase the time spent on the segment.
         PanelSegments[(int)segment.x, (int)segment.y].SegmentVisits.Add(
             new GazeVisitInformation(++PanelSegments[(int)segment.x, (int)segment.y].TotalNumberOfVisits,CurrentTimeString(),duration)
@@ -383,6 +384,7 @@ public class GazeTrackingDataManager : MonoBehaviour
        // Debug.Log("Recorded standard "+ duration);
     }
 
+    //similar as above but for the custom grid
     private void RecordCustomGazeData(int segment, float duration)
     {
        
@@ -399,6 +401,7 @@ public class GazeTrackingDataManager : MonoBehaviour
         return CurrentTime;
     }
 
+    //Ending operations when the recorded has stopped
     private void FinalizeStats()
     {
         EndRecordingDate = DateTime.Now;

@@ -24,16 +24,16 @@ public class MazeObstacle : MonoBehaviour
 	void Update () {
 
         //Shoot 4 rays with 90 degrees around the object if it is the one selected
-	    if (Selection.activeGameObject == this.gameObject)
-	    {
-           
-	        RaycastHit hit;
-	        //Top
-	        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, RaycastRange))
-	        {
-	            RedRay = hit.distance;
+        if (Selection.activeGameObject == this.gameObject)
+        {
+
+            RaycastHit hit;
+            //Top
+            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, RaycastRange))
+            {
+                RedRay = hit.distance;
                 Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red);
-                
+
             }
             else
             {
@@ -47,48 +47,48 @@ public class MazeObstacle : MonoBehaviour
             {
                 BlueRay = hit.distance;
                 Debug.DrawRay(transform.position, transform.TransformDirection(-Vector3.forward) * hit.distance, Color.blue);
-       
+
             }
             else
             {
 
                 BlueRay = 0.0f;
                 Debug.DrawRay(transform.position, transform.TransformDirection(-Vector3.forward) * RaycastRange, Color.blue);
-              
+
             }
 
             //Left
             if (Physics.Raycast(transform.position + transform.TransformDirection(-Vector3.right) * 0.05f, transform.TransformDirection(-Vector3.right), out hit, RaycastRange))
-	        {
-	          
-	            YellowObstacle = hit.distance;
-	            Debug.DrawRay(transform.position + transform.TransformDirection(-Vector3.right) * 0.05f, transform.TransformDirection(-Vector3.right) * hit.distance, Color.yellow);
-	         
-	        }
-	        else
-	        {
+            {
 
-	            YellowObstacle = 0.0f;
-	            Debug.DrawRay(transform.position + transform.TransformDirection(-Vector3.right) * 0.05f, transform.TransformDirection(-Vector3.right) * RaycastRange, Color.yellow);
-	            
-	        }
+                YellowObstacle = hit.distance;
+                Debug.DrawRay(transform.position + transform.TransformDirection(-Vector3.right) * 0.05f, transform.TransformDirection(-Vector3.right) * hit.distance, Color.yellow);
+
+            }
+            else
+            {
+
+                YellowObstacle = 0.0f;
+                Debug.DrawRay(transform.position + transform.TransformDirection(-Vector3.right) * 0.05f, transform.TransformDirection(-Vector3.right) * RaycastRange, Color.yellow);
+
+            }
 
             //Right
 
-            if (Physics.Raycast(transform.position + transform.TransformDirection(Vector3.right)* 0.05f, transform.TransformDirection(Vector3.right), out hit, RaycastRange))
-	        {
-                
-	            GreenRay = hit.distance;
-                Debug.DrawRay(transform.position + transform.TransformDirection(Vector3.right) * 0.05f, transform.TransformDirection(Vector3.right) * hit.distance, Color.green);
-	           
-	        }
-	        else
-	        {
+            if (Physics.Raycast(transform.position + transform.TransformDirection(Vector3.right) * 0.05f, transform.TransformDirection(Vector3.right), out hit, RaycastRange))
+            {
 
-	            GreenRay = 0.0f;
-	            Debug.DrawRay(transform.position + transform.TransformDirection(Vector3.right) * 0.05f, transform.TransformDirection(Vector3.right) * RaycastRange, Color.green);
-	            
-	        }
+                GreenRay = hit.distance;
+                Debug.DrawRay(transform.position + transform.TransformDirection(Vector3.right) * 0.05f, transform.TransformDirection(Vector3.right) * hit.distance, Color.green);
+
+            }
+            else
+            {
+
+                GreenRay = 0.0f;
+                Debug.DrawRay(transform.position + transform.TransformDirection(Vector3.right) * 0.05f, transform.TransformDirection(Vector3.right) * RaycastRange, Color.green);
+
+            }
         }
 
 

@@ -14,7 +14,8 @@ using UnityEngine.Serialization;
  * 
  * QueryManager description:
  * 
- * 
+ * Responsible for displaying popups and questions to the user during a test trial. Response times are saved in a json file for each type of question.
+ * Customizable questions and their associated hotkeys can be found in the inspector.
  */
 
 
@@ -132,13 +133,13 @@ public class QuestionManager : MonoBehaviour {
     // Init
     void Start()
     {
-        //Save the gameobjects  for fast reference in the loop
+        //Caching gameobjects
         PopUpMessagePanel = transform.GetChild(0).gameObject;
         QueryPanel = transform.GetChild(1).gameObject;
         source = gameObject.GetComponent<AudioSource>();
       
 
-        //If children gos were retrieved succesfully 
+        //If children GOs were retrieved succesfully 
         if (PopUpMessagePanel && QueryPanel)
         {
             //Retrieve the question text and initialise the text with the first question
@@ -286,6 +287,8 @@ public class QuestionManager : MonoBehaviour {
                 DisplayingQuery = false;
                 CloseQuery();
                 IncrementQuestion();
+
+                //this was put inside a function in PauseManagers
                 //reset the user's control 
                 //if (StreamController.Instance._selectedControlType == StreamController.ControlType.Eyes)
                 //{
