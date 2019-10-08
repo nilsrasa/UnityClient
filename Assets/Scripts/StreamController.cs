@@ -63,6 +63,11 @@ public class StreamController : MonoBehaviour
         Deaccelerating
     }
 
+    private enum CockpitState {
+        Loading,
+        Ready
+    }
+
 
     private ROSBridgeWebSocketConnection rosbridge;
     private bool _isLooping;
@@ -72,6 +77,7 @@ public class StreamController : MonoBehaviour
     private float _currentChairSpeed;
     private float _accelTimer;
     private ChairState _currentChairState = ChairState.Stopped;
+    private CockpitState _currentCockpitState = CockpitState.Ready;
 
     void Awake()
     {
@@ -120,8 +126,9 @@ public class StreamController : MonoBehaviour
         //manual connect to robot and ascend chair instead of gaze track the button
         if (!_isConnected)
         {
-            if (Input.GetKeyDown(KeyCode.A)){
-               
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                Debug.Log("Test");
                 ConnectToRobot();
                 //SetupVirtualRobot();
 
@@ -130,6 +137,30 @@ public class StreamController : MonoBehaviour
 
         
        
+    }
+
+    /// <summary>
+    /// Runs connecting animation until connection is established.
+    /// Then moves the chair into the cockpit.
+    /// </summary>
+    private IEnumerator LoadCockpit() {
+        while (_currentCockpitState != CockpitState.Ready) {
+            
+            if (_isConnected) {
+                //TODO: fade anim so it's not as abrupt
+                _currentCockpitState = CockpitState.Ready;
+                ActiveChair.Translate(_chairEndPosition.position);
+                foreach (Light light in _shaftLights)
+                    light.enabled = false;
+                StartCoroutine(StartUpSequence());
+            }
+            else {
+                //TODO: connecting anim
+                Debug.Log("Connecting...");
+            }
+
+            yield return new WaitForEndOfFrame();
+        }
     }
 
     /// <summary>
@@ -288,16 +319,21 @@ public class StreamController : MonoBehaviour
             _cameraStreamUSB.StartStream();
         else { }
 
-        _currentChairState = ChairState.Accelerating;
-        StartCoroutine(AscendChair());
+        //_currentChairState = ChairState.Accelerating;
+        //StartCoroutine(AscendChair());
+        //TODO: delete anything related to the ascending chair anim
+        _currentCockpitState = CockpitState.Loading;
+        StartCoroutine(LoadCockpit());
 
         //connect to the appropriate controller
         if (VirtualEnvironment)
         {
+            Debug.Log("connecting to the appropriate controller");
             VirtualUnityController.Instance.Connect();
         }
-        else { 
-             RobotInterface.Instance.Connect();
+        else {
+            Debug.Log("NOT connecting to the appropriate controller");
+            RobotInterface.Instance.Connect();
         }
 
         //what about older projects?
